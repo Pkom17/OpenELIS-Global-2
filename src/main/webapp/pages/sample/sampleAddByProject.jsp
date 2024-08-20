@@ -83,6 +83,7 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 	saveNotUnderInvestigationMessage = "<spring:message code='patient.project.conflicts.saveNotUnderInvestigation'/>";
 	testInvalid = "<spring:message code='error.2ndEntry.test.invalid'/>";
 	blankTextField = "<spring:message code='blank.text.field'/>";
+	electronicOrderAvailbaleMessage = "<spring:message code='electronic.order.available'/>";
 
 	var canEditPatientSubjectNos =<%=canEditPatientSubjectNos%>;
 	var canEditAccessionNo =<%=canEditAccessionNo%>	;
@@ -2347,8 +2348,8 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 				<td class="required">+</td>
 				<td><spring:message code="sample.entry.project.subjectNumber" /></td>
 				<td><form:input path="subjectNumber" cssClass="text"
-						id="vl.subjectNumber" maxlength="7"
-						onchange="vl.checkSubjectNumber(true);searchForEOrder(this);" />
+						id="vl.subjectNumber" maxlength="9"
+						onchange="vl.checkSubjectNumber(true);searchForEOrder(this,electronicOrderAvailbaleMessage);" />
 					<div id="vl.subjectIDMessage" class="blank"></div></td>
 			</tr>
 			<tr>
@@ -2357,7 +2358,7 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 				<td><form:input path="siteSubjectNumber"
 						id="vl.siteSubjectNumber" cssClass="text"
 						onkeyup="addPatientCodeSlashes(this, event);"
-						onchange="vl.checkSiteSubjectNumber(true);validateSiteSubjectNumber(this);searchForEOrder(this);" maxlength="18"/>
+						onchange="vl.checkSiteSubjectNumber(true);validateSiteSubjectNumber(this);searchForEOrder(this,electronicOrderAvailbaleMessage);" maxlength="19"/>
 						<div id="vl.siteSubjectNumberMessage" class="blank"></div></td>
 			</tr>
 			<tr>

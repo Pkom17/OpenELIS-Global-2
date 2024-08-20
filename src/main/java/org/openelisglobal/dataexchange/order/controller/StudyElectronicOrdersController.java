@@ -190,7 +190,7 @@ public class StudyElectronicOrdersController extends BaseController {
 					QaEvent event = qaEventService.get(qaEventId);
 					String rejectionReasonText = getMessageForKey(
 							ObjectUtils.isNotEmpty(event) ? event.getNameKey() : "");
-					rejectionReasonText += " " + (ObjectUtils.isNotEmpty(qaNote) ? "/ "+qaNote : "");
+					rejectionReasonText += " " + (ObjectUtils.isNotEmpty(qaNote) ? "/ " + qaNote : "");
 					// add task rejection reason
 					CodeableConcept rejectionReasonCodeableConcept = new CodeableConcept();
 					Coding rejectionCoding = new Coding();

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+	  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+	<changeSet author="CIV developer Group" id="24073001">
+		<preConditions onFail="MARK_RAN">
+			<tableExists tableName="system_module_url"
+				schemaName="clinlims" />
+			<sqlCheck expectedResult="1">
+				SELECT COUNT(*) FROM
+				clinlims.system_module WHERE name = 'StudyElectronicOrderView'
+			</sqlCheck>
+		</preConditions>
+		<insert tableName="system_module_url" schemaName="clinlims">
+			<column name="id" valueSequenceNext="system_module_url_seq" />
+			<column name="url_path" value="/rejectElectronicOrders" />
+			<column name="system_module_id"
+				valueComputed="(SELECT id FROM clinlims.system_module WHERE name = 'StudyElectronicOrderView')" />
+		</insert>
+		<insert tableName="system_module_url" schemaName="clinlims">
+			<column name="id" valueSequenceNext="system_module_url_seq" />
+			<column name="url_path" value="/cancelElectronicOrders" />
+			<column name="system_module_id"
+				valueComputed="(SELECT id FROM clinlims.system_module WHERE name = 'StudyElectronicOrderView')" />
+		</insert>
+		<insert tableName="system_module_url" schemaName="clinlims">
+			<column name="id" valueSequenceNext="system_module_url_seq" />
+			<column name="url_path" value="/rest_eorder/external_id" />
+			<column name="system_module_id"
+				valueComputed="(SELECT id FROM clinlims.system_module WHERE name = 'StudyElectronicOrderView')" />
+		</insert>
+	</changeSet>
+	
+</databaseChangeLog>

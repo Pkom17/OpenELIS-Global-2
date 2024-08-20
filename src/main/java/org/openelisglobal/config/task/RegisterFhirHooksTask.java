@@ -38,7 +38,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
-@Component
+//@Component
 public class RegisterFhirHooksTask {
 
     @Value("${org.openelisglobal.fhir.subscriber}")

@@ -30,5 +30,7 @@
 	<include relativeToChangelogFile="true" file="add_electronic_rejection.xml"/>
 	<include relativeToChangelogFile="true" file="update_document.xml"/>
 	<include relativeToChangelogFile="true" file="add_in_progress_status_eorder.xml"/>
+	<include relativeToChangelogFile="true" file="add_study_electronic_roles.xml"/>
+	
 
 </databaseChangeLog>

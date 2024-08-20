@@ -191,7 +191,7 @@ public class ExportStudyProjectByDate extends CSVSampleExportReport implements I
             return new ARVInitialColumnBuilder(dateRange, projectStr, dateType);
         } else if (projectTag.equals("ARVS")) {
             return new ARVFollowupColumnBuilder(dateRange, projectStr,dateType);
-        } else if (projectTag.equalsIgnoreCase("DBS")) {
+        } else if (projectTag.equalsIgnoreCase("DBS") || projectTag.equalsIgnoreCase("EID")) {
             return new StudyEIDColumnBuilder(dateRange, projectStr, dateType);
         } else if (projectTag.equalsIgnoreCase("VLS")) {
             return new StudyVLColumnBuilder(dateRange, projectStr, dateType);

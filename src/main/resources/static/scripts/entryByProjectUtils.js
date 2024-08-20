@@ -138,7 +138,7 @@ function /*void*/ synchronizeCheckBoxes(){
 }
 
 	function validateSiteSubjectNumber(field){
-		 const siteSubjectNumber = /^([0-9A-Za-z]{5}\/[0-9A-Za-z]{2})\/[\d]{2}\/[\d]{5}[Ee]?$/g;
+		 const siteSubjectNumber = /^([0-9A-Za-z]{5}\/[0-9A-Za-z]{2})\/[\d]{2}\/[\d]{5}(?:[Ee]\d?)?$/g;
 		 if(field.value){
 			  if(siteSubjectNumber.test(field.value)){
 				  field.classList.remove("error");
@@ -1368,7 +1368,7 @@ function HivStatusLoader() {
 	}	
 }
 
-function searchForEOrder(patientField){
+function searchForEOrder(patientField,message){
 	var eorderExternalIdField = document.getElementById('externalOrderNumber');
 	if(eorderExternalIdField){
 		if(eorderExternalIdField.value){
@@ -1395,7 +1395,7 @@ function searchForEOrder(patientField){
     		if(externalId){
     			dirty = false;
     			window.onbeforeunload = null;
-    			alert('<spring:message code="electronic.order.available"/>'); 
+    			alert(message); 
    			    var newUrl = new URL(window.location.href);
    			    newUrl.searchParams.set('ID', externalId);
    			    window.location.href = newUrl.toString();
