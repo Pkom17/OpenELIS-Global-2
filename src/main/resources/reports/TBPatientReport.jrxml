@@ -2,9 +2,9 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PatientReport" pageWidth="612" pageHeight="792" whenNoDataType="AllSectionsNoDetail" columnWidth="552" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20" resourceBundle="languages/message" whenResourceMissingType="Empty" uuid="d612f334-d625-401a-9542-6d1fca793e90">
 	<property name="ireport.scriptlethandling" value="0"/>
 	<property name="ireport.encoding" value="UTF-8"/>
-	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.zoom" value="3.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="351"/>
+	<property name="ireport.y" value="0"/>
 	<import value="net.sf.jasperreports.engine.*"/>
 	<import value="java.util.*"/>
 	<import value="net.sf.jasperreports.engine.data.*"/>
@@ -88,6 +88,7 @@
 	<field name="tbFollowupPeriodLine1" class="java.lang.String"/>
 	<field name="tbFollowupPeriodLine2" class="java.lang.String"/>
 	<field name="prescriber" class="java.lang.String"/>
+	<field name="phoneContact" class="java.lang.String"/>
 	<group name="person" isStartNewPage="true" isResetPageNumber="true" footerPosition="ForceAtBottom">
 		<groupExpression><![CDATA[$F{subjectNumber}]]></groupExpression>
 		<groupFooter>
@@ -350,7 +351,7 @@
 						<textFieldExpression><![CDATA[$R{report.prescriber}]]></textFieldExpression>
 					</textField>
 					<textField>
-						<reportElement stretchType="RelativeToBandHeight" x="111" y="28" width="442" height="14" uuid="19157c4d-565e-4e55-9d1e-4ab2c5219749"/>
+						<reportElement stretchType="RelativeToBandHeight" x="111" y="28" width="246" height="14" uuid="19157c4d-565e-4e55-9d1e-4ab2c5219749"/>
 						<box leftPadding="4">
 							<pen lineWidth="0.5"/>
 							<topPen lineWidth="0.5"/>
@@ -484,6 +485,34 @@
 							<font size="8"/>
 						</textElement>
 						<textFieldExpression><![CDATA[$R{label.patient_name}]]></textFieldExpression>
+					</textField>
+					<textField>
+						<reportElement mode="Opaque" x="357" y="28" width="58" height="14" backcolor="#E6E6E6" uuid="e2ffe34d-0c5d-4db1-b357-eb9f872eeb6b"/>
+						<box leftPadding="4">
+							<pen lineWidth="0.5"/>
+							<topPen lineWidth="0.5"/>
+							<leftPen lineWidth="0.5"/>
+							<bottomPen lineWidth="0.5"/>
+							<rightPen lineWidth="0.5"/>
+						</box>
+						<textElement verticalAlignment="Middle" markup="none">
+							<font size="8"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$R{report.telephoneAbv}]]></textFieldExpression>
+					</textField>
+					<textField>
+						<reportElement stretchType="RelativeToBandHeight" x="415" y="28" width="138" height="14" uuid="a05f52f3-44c3-4297-b461-f66846a16660"/>
+						<box leftPadding="4">
+							<pen lineWidth="0.5"/>
+							<topPen lineWidth="0.5"/>
+							<leftPen lineWidth="0.5"/>
+							<bottomPen lineWidth="0.5"/>
+							<rightPen lineWidth="0.5"/>
+						</box>
+						<textElement>
+							<font size="9"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$F{phoneContact}]]></textFieldExpression>
 					</textField>
 				</frame>
 			</band>

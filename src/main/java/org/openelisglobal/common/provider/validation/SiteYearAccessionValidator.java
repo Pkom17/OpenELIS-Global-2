@@ -24,13 +24,13 @@ public class SiteYearAccessionValidator extends BaseSiteYearAccessionValidator i
 
     @Override
     public int getMaxAccessionLength() {
-        return getSiteEndIndex() + 15;
+        return getSiteEndIndex() + 9;
     }
 
     @Override
     public int getMinAccessionLength() {
-//      return getSiteEndIndex() + 7;
-        return getSiteEndIndex() + 15;
+      return getSiteEndIndex() + 9;
+ //       return getSiteEndIndex() + 15;
     }
 
     @Override
@@ -74,7 +74,7 @@ public class SiteYearAccessionValidator extends BaseSiteYearAccessionValidator i
         String year = DateUtil.getTwoDigitYear();
         long nextNum = accessionService.getNextNumberIncrement(this.getPrefix() + year, AccessionFormat.SITE_YEAR);
         String incrementAsString;
-        incrementAsString = String.format("%013d", nextNum);
+        incrementAsString = String.format("%07d", nextNum);
         return getPrefix() + year + incrementAsString;
     }
 
@@ -83,7 +83,7 @@ public class SiteYearAccessionValidator extends BaseSiteYearAccessionValidator i
         String year = DateUtil.getTwoDigitYear();
         long nextNum = accessionService.getNextNumberNoIncrement(this.getPrefix() + year, AccessionFormat.ALT_YEAR);
         String incrementAsString;
-        incrementAsString = String.format("%013d", nextNum);
+        incrementAsString = String.format("%07d", nextNum);
         return getPrefix() + year + incrementAsString;
     }
 }

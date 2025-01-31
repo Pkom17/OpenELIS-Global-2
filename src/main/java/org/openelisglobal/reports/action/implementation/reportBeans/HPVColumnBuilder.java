@@ -195,7 +195,7 @@ public class HPVColumnBuilder extends CIStudyColumnBuilder {
 		// all observation history from expressions
 		appendObservationHistoryCrosstab(lowDate, highDate, dateColumn);
 
-		appendResultCrosstab(lowDate, highDate, dateColumn);
+		this.appendResultCrosstab(lowDate, highDate);
 		query.append(",  clinlims.analysis as a \n");
 
 		query.append(" LEFT JOIN  clinlims.result as r on r.analysis_id = a.id \n"

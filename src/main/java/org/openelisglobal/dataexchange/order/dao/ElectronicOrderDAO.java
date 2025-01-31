@@ -55,5 +55,5 @@ public interface ElectronicOrderDAO extends BaseDAO<ElectronicOrder, String> {
             String patientValue, SortOrder order);
     
     public ElectronicOrder getLastEnteredByPatientIdentifier(String patientIdentifier);
-
+    
 }

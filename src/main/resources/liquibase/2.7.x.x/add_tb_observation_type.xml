@@ -23,5 +23,17 @@
 			(nextval('observation_history_type_seq'),'TbFollowupReasonPeriodLine2','Period for a the TB Patient followup 2nd Line',now());
 		</sql>
 	</changeSet>
+	
+	<changeSet author="CIV developer Group" id="24111208"
+		context="ci_TB">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">SELECT count(*) FROM clinlims.observation_history_type WHERE type_name = 'TbLabAccessionNumber'
+			</sqlCheck>
+		</preConditions>
+		<sql>
+			INSERT INTO clinlims.observation_history_type(id, type_name, description,lastupdated) VALUES
+			(nextval('observation_history_type_seq'),'TbLabAccessionNumber','Accession number for TB order',now());
+		</sql>
+	</changeSet>
 
 </databaseChangeLog>

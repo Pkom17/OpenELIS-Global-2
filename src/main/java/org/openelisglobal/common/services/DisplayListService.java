@@ -84,7 +84,7 @@ public class DisplayListService implements LocaleChangeListener {
 		SEVERITY_CONSEQUENCES_LIST, SEVERITY_RECURRENCE_LIST, ACTION_TYPE_LIST, LABORATORY_COMPONENT, SAMPLE_NATURE,
 		ELECTRONIC_ORDER_STATUSES, METHODS, METHODS_INACTIVE, METHOD_BY_NAME, PRACTITIONER_PERSONS, ORDER_PRIORITY,
 		TB_ORDER_REASONS, TB_DIAGNOSTIC_REASONS, TB_FOLLOWUP_REASONS, TB_ANALYSIS_METHODS, TB_SAMPLE_ASPECTS,
-		TB_FOLLOWUP_LINE1, TB_FOLLOWUP_LINE2, ARV_ORG_LIST
+		TB_FOLLOWUP_LINE1, TB_FOLLOWUP_LINE2, ARV_ORG_LIST, TB_ACTIVITY_REPORT
 	}
 
 	private static Map<ListType, List<IdValuePair>> typeToListMap;
@@ -205,6 +205,8 @@ public class DisplayListService implements LocaleChangeListener {
 		typeToListMap.put(ListType.TB_FOLLOWUP_LINE1, createTBFollowupLine1List());
 		typeToListMap.put(ListType.TB_FOLLOWUP_LINE2, createTBFollowupLine2List());
 		typeToListMap.put(ListType.ARV_ORG_LIST, createArvOrgList());
+		typeToListMap.put(ListType.TB_ACTIVITY_REPORT, createTBActivityReportList());
+		
 	}
 
 	public List<IdValuePair> getList(ListType listType) {
@@ -388,6 +390,7 @@ public class DisplayListService implements LocaleChangeListener {
 		typeToListMap.put(ListType.TB_FOLLOWUP_LINE1, createTBFollowupLine1List());
 		typeToListMap.put(ListType.TB_FOLLOWUP_LINE2, createTBFollowupLine2List());
 		typeToListMap.put(ListType.ARV_ORG_LIST, createArvOrgList());
+		typeToListMap.put(ListType.TB_ACTIVITY_REPORT, createTBActivityReportList());
 	}
 
 	public void refreshList(ListType listType) {
@@ -477,6 +480,10 @@ public class DisplayListService implements LocaleChangeListener {
 		}
 		case ARV_ORG_LIST: {
 			typeToListMap.put(ListType.ARV_ORG_LIST, createArvOrgList());
+		}
+		
+		case TB_ACTIVITY_REPORT: {
+			typeToListMap.put(ListType.TB_ACTIVITY_REPORT, createTBActivityReportList());
 		}
 		}
 	}
@@ -870,6 +877,15 @@ public class DisplayListService implements LocaleChangeListener {
 					.add(new IdValuePair("M" + i, MessageUtil.getMessage("dictionary.tb.order.followup") + " M" + i));
 		}
 		return tbFollowupLine2List;
+	}
+	
+	private List<IdValuePair> createTBActivityReportList() {
+		List<IdValuePair> tbActivityReports = new ArrayList<>();
+		tbActivityReports
+					.add(new IdValuePair("MICROSCOPY_REPORT", MessageUtil.getMessage("tb.activity_report.microscopy")));
+		tbActivityReports
+		.add(new IdValuePair("GENEXPERT_MTB_REPORT", MessageUtil.getMessage("tb.activity_report.geneXpertMTB")));
+		return tbActivityReports;
 	}
 
 	private List<IdValuePair> createActionTypeList() {

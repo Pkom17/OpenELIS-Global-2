@@ -366,7 +366,8 @@ public abstract class Accessioner implements IAccessioner {
 			updateData.setSample(sample);
 			updateData.setAccessionNumber(accessionNumber);
 			updateData.setProvider(null);
-			updateData.setSampleItemsTests(null);
+			List<SampleTestCollection> sampleItemTests = new ArrayList<SampleTestCollection>();
+			updateData.setSampleItemsTests(sampleItemTests);
 			PatientManagementInfo patientInfo = new PatientManagementInfo();
 			patientInfo.setPatientPK(patientInDB.getId());
             try {

@@ -85,14 +85,17 @@ public class FhirApiWorkFlowServiceImpl implements FhirApiWorkflowService {
 	@Value("${org.openelisglobal.remote.source.identifier:}#{T(java.util.Collections).emptyList()}")
 	private List<String> remoteStoreIdentifier;
 
-	@Scheduled(initialDelay = 10 * 1000, fixedRate = 2 * 60 * 1000)
+	@Scheduled(initialDelay = 60 * 1000, fixedRate = 5 * 60 * 1000)
+	@Async
 	@Override
 	public void pollForRemoteTasks() {
-		processWorkflow(ResourceType.Task);
+		try {
+			processWorkflow(ResourceType.Task);
+		} catch (Exception e) {
+		}
 	}
 
 	@Override
-	@Async
 	public void processWorkflow(ResourceType resourceType) {
 		for (String remoteStorePath : fhirConfig.getRemoteStorePaths()) {
 			switch (resourceType) {
@@ -467,7 +470,18 @@ public class FhirApiWorkFlowServiceImpl implements FhirApiWorkflowService {
 				}
 			}
 
-			TaskStatus taskStatus = taskOrderAcceptedFlag ? TaskStatus.ACCEPTED : TaskStatus.REJECTED;
+			TaskStatus taskStatus = TaskStatus.REJECTED;
+			if (taskOrderAcceptedFlag) {
+				taskStatus = TaskStatus.ACCEPTED;
+			} else if (taskResult == TaskResult.ORDER_CANCELED) {
+				taskStatus = TaskStatus.CANCELLED;
+			} else if (taskResult == TaskResult.ORDER_IN_PROGRESS) {
+				taskStatus = TaskStatus.INPROGRESS;
+			} else if (taskResult == TaskResult.ORDER_REJECTED) {
+				taskStatus = TaskStatus.REJECTED;
+			} else if (taskResult == TaskResult.ORDER_COMPLETED) {
+				taskStatus = TaskStatus.COMPLETED;
+			}
 			localObjects.task.setStatus(taskStatus);
 			if (remoteStoreUpdateStatus.isPresent() && remoteStoreUpdateStatus.get()) {
 				LogEvent.logDebug(this.getClass().getName(), "beginTaskPath",

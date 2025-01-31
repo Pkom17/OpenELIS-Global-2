@@ -23,6 +23,7 @@ import org.openelisglobal.common.dao.BaseDAO;
 import org.openelisglobal.common.exception.LIMSRuntimeException;
 import org.openelisglobal.sample.valueholder.OrderPriority;
 import org.openelisglobal.sample.valueholder.Sample;
+import org.openelisglobal.test.valueholder.Test;
 
 public interface SampleDAO extends BaseDAO<Sample, String> {
 
@@ -90,4 +91,7 @@ public interface SampleDAO extends BaseDAO<Sample, String> {
             LocalDate upperDate, String projectCode);
 
     List<Sample> getSamplesByPriority(OrderPriority priority) throws LIMSRuntimeException;
+    
+    List<Sample> getSampleByPatientAndTestAndCollectionDate(String patientIdentifier, Test test, Date collectionDate);
+
 }

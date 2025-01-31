@@ -25,64 +25,75 @@ import java.util.List;
 
 import javax.xml.ws.Response;
 
+import org.jfree.util.Log;
 import org.openelisglobal.reports.action.implementation.reportBeans.CSVColumnBuilder;
 
 import net.sf.jasperreports.engine.JRException;
 
 public abstract class CSVSampleExportReport extends CSVExportReport {
 
-    protected String lowDateStr;
-    protected String highDateStr;
-    protected List<Object> reportItems;
-    protected int iReportItem = -1;
+	protected String lowDateStr;
+	protected String highDateStr;
+	protected List<Object> reportItems;
+	protected int iReportItem = -1;
 
-    protected CSVColumnBuilder csvColumnBuilder;
-    protected DateRange dateRange;
+	protected CSVColumnBuilder csvColumnBuilder;
+	protected DateRange dateRange;
 
-    @Override
-    public String getResponseHeaderName() {
-        return "Content-Disposition";
-    }
+	@Override
+	public String getResponseHeaderName() {
+		return "Content-Disposition";
+	}
 
-    @Override
-    public String getResponseHeaderContent() {
-        return "attachment;filename=" + getReportFileName() + ".csv";
-    }
+	@Override
+	public String getResponseHeaderContent() {
+		return "attachment;filename=" + getReportFileName() + ".csv";
+	}
 
-    /**
-     * Do everything necessary for to generate a CSV text file.
-     *
-     * @param reportDefinitionName full path to the definition for the report.
-     * @throws IOException
-     * @throws UnsupportedEncodingException
-     * @throws SQLException
-     * @throws JRException
-     * @throws IllegalStateException
-     * @throws ParseException
-     * @see org.openelisglobal.reports.action.implementation.IReportCreator#runReport(java.lang.String,
-     *      Response)
-     */
-    @Override
-    public byte[] runReport() throws UnsupportedEncodingException, IOException, SQLException, IllegalStateException,
-            JRException, ParseException {
-        if (errorFound) {
-            return super.runReport();
-        }
+	/**
+	 * Do everything necessary for to generate a CSV text file.
+	 *
+	 * @param reportDefinitionName full path to the definition for the report.
+	 * @throws IOException
+	 * @throws UnsupportedEncodingException
+	 * @throws SQLException
+	 * @throws JRException
+	 * @throws IllegalStateException
+	 * @throws ParseException
+	 * @see org.openelisglobal.reports.action.implementation.IReportCreator#runReport(java.lang.String,
+	 *      Response)
+	 */
+	@Override
+	public byte[] runReport() {
+		if (errorFound) {
+			try {
+				return super.runReport();
+			} catch (IllegalStateException | IOException | SQLException | JRException | ParseException e) {
+				Log.error("Error in " + this.getClass().getSimpleName() + " runReport: ", e);
+			}
+		}
 
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream(100000);
-        buffer.write(csvColumnBuilder.getColumnNamesLine().getBytes("utf-8"));
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream(100000);
+		try {
+			buffer.write(csvColumnBuilder.getColumnNamesLine().getBytes("utf-8"));
+			writeResultsToBuffer(buffer);
+			csvColumnBuilder.closeResultSet();
+		} catch (IOException | SQLException e) {
+			Log.error("Error in " + this.getClass().getSimpleName() + " runReport: ", e);
+		}
 
-        writeResultsToBuffer(buffer);
-        csvColumnBuilder.closeResultSet();
+		return buffer.toByteArray();
+	}
 
-        return buffer.toByteArray();
-    }
+	protected void writeResultsToBuffer(ByteArrayOutputStream buffer) {
 
-    protected void writeResultsToBuffer(ByteArrayOutputStream buffer)
-            throws IOException, UnsupportedEncodingException, SQLException, ParseException {
-        while (csvColumnBuilder.next()) {
-            buffer.write(csvColumnBuilder.nextLine().getBytes("utf-8"));
-        }
-    }
+		try {
+			while (csvColumnBuilder.next()) {
+				buffer.write(csvColumnBuilder.nextLine().getBytes("utf-8"));
+			}
+		} catch (SQLException | IOException | ParseException e) {
+			Log.error("Error in " + this.getClass().getSimpleName() + " writeResultsToBuffer: ", e);
+		}
+	}
 
 }

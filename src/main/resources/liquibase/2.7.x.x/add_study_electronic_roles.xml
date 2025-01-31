@@ -34,4 +34,21 @@
 		</insert>
 	</changeSet>
 	
+	<changeSet author="CIV developer Group" id="24083002">
+		<preConditions onFail="MARK_RAN">
+			<tableExists tableName="system_module_url"
+				schemaName="clinlims" />
+			<sqlCheck expectedResult="1">
+				SELECT COUNT(*) FROM
+				clinlims.system_module WHERE name = 'StudyElectronicOrderView'
+			</sqlCheck>
+		</preConditions>
+		<insert tableName="system_module_url" schemaName="clinlims">
+			<column name="id" valueSequenceNext="system_module_url_seq" />
+			<column name="url_path" value="/rest_eorder/refreshEOrders" />
+			<column name="system_module_id"
+				valueComputed="(SELECT id FROM clinlims.system_module WHERE name = 'StudyElectronicOrderView')" />
+		</insert>
+	</changeSet>
+	
 </databaseChangeLog>

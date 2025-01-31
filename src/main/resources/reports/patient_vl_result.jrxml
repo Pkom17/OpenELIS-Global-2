@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.5.final using JasperReports Library version 6.20.5-3efcf2e67f959db3888d79f73dde2dbd7acb4f8e  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="patient_vl_result" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="f7a892cf-e76b-4374-b68a-a2f041d344b1">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="98" splitType="Stretch">
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="102" y="0" width="347" height="20" uuid="dfc17c62-4acb-4e8c-818c-d445097c6f26"/>
+				<textElement textAlignment="Center">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="102" y="19" width="347" height="20" uuid="9e550d70-fd3d-4c1c-9ad9-d79e6c7311b4"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[LABORATOIRE DE BIOLOGIE MOLECULAIRE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="102" y="37" width="347" height="20" uuid="35c9d167-d4d7-4d08-a42c-b139cbe77808"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CENTRE INTEGRE DE RECHERCHES BIOCLINIQUES D'ABIDJAN (CIRBA)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="102" y="58" width="347" height="20" uuid="6e56443c-ce1b-4780-a26a-e3a781838796"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="false"/>
+				</textElement>
+				<text><![CDATA[TEL: 21 24 09 24 / email: cirba@aviso.ci]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="92">
+			<staticText>
+				<reportElement key="staticText-3" x="0" y="37" width="81" height="18" isPrintWhenDetailOverflows="true" uuid="d0476462-9da4-413e-82b5-012dac16519a"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Date Naiss.:]]></text>
+			</staticText>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement key="textField" x="81" y="36" width="83" height="18" forecolor="#000000" backcolor="#FFFFFF" uuid="83cdca86-c10c-4c27-92ef-207d91958b62"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{birth_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement key="textField" x="207" y="34" width="27" height="18" forecolor="#000000" backcolor="#FFFFFF" uuid="48983765-63bc-4c0d-9e72-217daa476a8b"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{age}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement key="staticText-4" x="178" y="34" width="29" height="18" uuid="51eafc5a-daf5-4f4d-8afe-db2636b8c4b0"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Age:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement key="staticText-5" x="327" y="34" width="73" height="13" isPrintWhenDetailOverflows="true" uuid="6d83acff-fbd8-4935-adb0-ed08f379092e">
+					<printWhenExpression><![CDATA[$P{gender}.equalsIgnoreCase("F")]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Grossesse: ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement key="staticText-5" x="451" y="34" width="73" height="13" isPrintWhenDetailOverflows="true" uuid="eba7ecb3-2d09-415f-b11e-8f4e6f03b78a">
+					<printWhenExpression><![CDATA[$P{gender}.equalsIgnoreCase("F")]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Allaitement:]]></text>
+			</staticText>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement key="textField" x="396" y="34" width="47" height="13" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF" uuid="7a8cb891-72e8-4dc6-af24-defe9e75c47b">
+					<printWhenExpression><![CDATA[$P{gender}.equalsIgnoreCase("F")]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($P{vlPregnancy}.isEmpty() || $P{vlPregnancy}.isEmpty())?" ":$P{vlPregnancy}.split("=")[1]]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement key="textField" x="520" y="34" width="47" height="13" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF" uuid="43281355-d2f8-447f-8745-f05a4908eaae">
+					<printWhenExpression><![CDATA[$P{gender}.equalsIgnoreCase("F")]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($P{vlSuckle}.isEmpty() || $P{vlSuckle}.isEmpty())?" ":$P{vlSuckle}.split("=")[1]]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="342" y="57" width="109" height="18" uuid="b6187bc7-d5d3-4e69-a4c0-9e1bed1ad938"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Date de Réalisation :]]></text>
+			</staticText>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement key="textField-5" x="460" y="57" width="70" height="18" forecolor="#000000" backcolor="#FFFFFF" uuid="304fc151-e6c8-4026-a509-d5ba4cbbd311">
+					<printWhenExpression><![CDATA[$P{compleationdate}!= ""]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{compleationdate}.substring(0,10)]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement key="textField" x="260" y="58" width="71" height="18" forecolor="#000000" backcolor="#FFFFFF" uuid="20872fc0-ca2b-4436-b982-6b6c69c352b6">
+					<printWhenExpression><![CDATA[$P{receptiondate}!= ""]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{receptiondate}.substring(0,10)]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement key="staticText-7" x="155" y="60" width="105" height="18" uuid="953e0725-ca8f-4858-ba71-4cba68a3aa7c">
+					<printWhenExpression><![CDATA[$P{receptiondate} != ""]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Date de Réception:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement key="staticText-7" x="0" y="61" width="75" height="18" uuid="a253ac32-715f-4bf3-98dd-f45c81618a7f"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Date de Prél.:]]></text>
+			</staticText>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement key="textField" x="76" y="61" width="71" height="18" forecolor="#000000" backcolor="#FFFFFF" uuid="b93af8ad-0d36-41ee-8859-c7fc671d9963">
+					<printWhenExpression><![CDATA[$P{collectiondate}!= ""]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{collectiondate}.substring(0,10)]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement key="staticText-6" x="468" y="10" width="41" height="18" uuid="6fe5cee3-957a-4c0d-b655-b6d0db82f1e0"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Labno:]]></text>
+			</staticText>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement key="textField" mode="Transparent" x="511" y="10" width="59" height="18" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF" uuid="8f3adc85-08f6-4646-8a77-5d6c6665bf71"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{labNo}]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement key="textField" x="30" y="10" width="210" height="17" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF" uuid="52f9ab7f-c47d-4238-b136-15189d6a810d"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{orgname}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement key="staticText-1" x="0" y="10" width="29" height="18" isPrintWhenDetailOverflows="true" uuid="ed14adae-f36e-4792-b8ed-c7cd912a60b3"/>
+				<textElement>
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Site:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement key="staticText-2" x="245" y="10" width="61" height="18" uuid="fb591f98-f7f1-48d6-8336-91d18731094c"/>
+				<textElement>
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sujetno: ]]></text>
+			</staticText>
+			<textField isBlankWhenNull="false">
+				<reportElement key="textField-3" x="306" y="10" width="154" height="18" isPrintWhenDetailOverflows="true" uuid="03a8c656-344f-4025-9e47-b031893c147b"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{subjectNumber}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement key="staticText-4" x="251" y="34" width="29" height="18" uuid="aba781e3-7d5b-4065-b714-b09809a33276"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sexe: ]]></text>
+			</staticText>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement key="textField" x="280" y="34" width="27" height="18" forecolor="#000000" backcolor="#FFFFFF" uuid="b8e5c283-5834-45ae-aa36-64681ca2c20a"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{age}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="321" splitType="Stretch">
+			<staticText>
+				<reportElement x="7" y="33" width="122" height="15" uuid="da46cd39-d795-4431-b74b-913c9177e165"/>
+				<textElement>
+					<font isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Type d’Examen : ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="129" y="32" width="423" height="15" uuid="10a58983-6c7f-4d19-bf3a-42dd11165904"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[Recherche de l’ARN du virus HIV-1 par amplification génétique (PCR) et par quantification ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="7" y="49" width="122" height="15" uuid="fc9f415f-d83b-4d3d-9a4c-311b2aa1a08d"/>
+				<textElement>
+					<font isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Type de prélèvement :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="130" y="48" width="354" height="15" uuid="63f185c7-9341-4f24-bc97-05d6e043e207"/>
+				<textFieldExpression><![CDATA[$F{sampleTypeName}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="7" y="69" width="122" height="15" uuid="7e40616b-0384-4e50-9246-fd88dad12ed3"/>
+				<textElement>
+					<font isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Automate :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="129" y="68" width="421" height="15" isPrintWhenDetailOverflows="true" uuid="dc34eba8-0cb0-454b-bc37-6150b0103d95"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[COBAS Ampliprep / Cobas Taqman Series / Cobas 6800 Roche Diagnostic / Cobas 4800]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="7" y="88" width="122" height="15" uuid="1c3bf918-f0dc-4b86-a70e-0c4b16c0844d"/>
+				<textElement>
+					<font isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Trousse commerciale:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="129" y="102" width="423" height="13" isPrintWhenDetailOverflows="true" uuid="58fe561c-e1ac-4c92-98cd-e722b9f5f732"/>
+				<textElement>
+					<font size="9" isItalic="false" isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[COBAS 6800/8800 HIV-1 P/N]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="129" y="87" width="423" height="15" isPrintWhenDetailOverflows="true" uuid="057c190c-fb44-41c0-8724-d7cc91ed2e3b"/>
+				<textElement>
+					<font size="9" isItalic="false" isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[COBAS Taqman/Ampliprep  HIV-1 tests,V2.0 Quantitative  (HI2CAP) / C4800 HIV-1 AMP/DET]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="10" y="149" width="157" height="20" uuid="ab3c0045-ebb2-4bc6-bfaa-335b5dd4be42"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="24" y="151" width="100" height="18" uuid="027b202d-6cb9-4a72-bb08-f8c992db5949"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[Virologie]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="357" y="149" width="155" height="20" uuid="b15625cd-7ec4-41ea-8870-5ec4055e8868"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="167" y="169" width="190" height="20" uuid="92b7715b-8b39-4720-ba36-6e04d1c75dde"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="357" y="169" width="155" height="20" uuid="6224f0ce-f5cb-4821-9b45-28b481347315"/>
+			</rectangle>
+			<textField>
+				<reportElement x="382" y="170" width="110" height="18" uuid="b0c8fa73-8a72-43b4-b504-5d0f27ccb165"/>
+				<textElement verticalAlignment="Top">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ampli2lo}==null ? "X" : $F{ampli2lo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="172" y="170" width="179" height="18" uuid="be82bb53-2e45-4487-a2b9-d8e9ae6c251e"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ampli2}==null ? "X" : $F{ampli2}]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement x="167" y="149" width="190" height="20" uuid="aad8254a-0ab2-45dc-b3c6-a2d1b4e15ab7"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="174" y="151" width="179" height="17" uuid="f6c9957a-95e3-40b7-95ec-f9095d4590b5"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[Résultats nombre de copies /mL]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="10" y="169" width="157" height="20" uuid="117b9362-8c4c-4c35-8cd4-28d0a8ce4006"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="8" y="241" width="537" height="80" uuid="39416e89-81fb-4e72-9ffd-bdec212a929a"/>
+				<text><![CDATA[1-Si le titre HIV-1<=1000 copies/mL, suppression virale selon les directives nationales de suivi biologique des patients sous traitement antiretroviral
+
+2-Si le titre HIV-1>1000 copies/mL, le virus est détectable au niveau du sang périphérique et le patient est dit en échec virologique. Refaire un autre prélèvement trois mois après le conseil à l’observance, pour un autre examen de charge virale pour confirmer et infirmer l’échec virologique
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="372" y="151" width="110" height="17" uuid="64306a2b-3f0b-4ac0-866a-4d7dc20b465c"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[Résultats Log /mL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="16" y="219" width="162" height="23" uuid="60c0157b-ccce-4816-9bfc-47afbe7812f7"/>
+				<textElement>
+					<font size="12" isBold="true" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[INTERPRETATIONS:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="12" y="124" width="162" height="23" uuid="16db3f0e-c6d8-4870-960a-9af98cd40dd5"/>
+				<textElement>
+					<font size="12" isBold="true" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[RESULTATS:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="7" y="12" width="293" height="23" uuid="065023bc-6785-40cf-98e1-8ae10e25813a"/>
+				<textElement>
+					<font size="12" isBold="true" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[EXAMEN DE CHARGE VIRALE:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="23" y="171" width="100" height="18" uuid="08719142-82b5-4687-98ca-eec197e4d293"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{vih}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="-6" y="120" width="550" height="1" uuid="f274590d-bce6-4abd-afdc-a3a1f3d25c8d"/>
+			</line>
+			<line>
+				<reportElement x="1" y="4" width="550" height="1" uuid="97d74759-7a31-4159-9af8-37ee1705e941"/>
+			</line>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="122">
+			<staticText>
+				<reportElement x="10" y="94" width="534" height="19" uuid="d5974744-fb15-45bb-a7d3-eb1f7a8239a9"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Valeur charge virale : < LL=virus HIV-1 indétectable dans le sang périphérique]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="12" y="71" width="408" height="19" uuid="29a52701-1c96-4a8e-af1f-b6cf460b6680"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Seuil de détection de la technique W/PSC : 599 copies/mL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="10" y="27" width="408" height="19" uuid="a6050ab7-bd4b-4f6e-b387-9da6cf3d2537"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Seuil de détection de la technique CV/PL : 20 copies /mL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="10" y="49" width="408" height="19" uuid="ab44b7ee-b1c1-4a58-9515-a0998c266aa8"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Seuil de détection de la technique CV/DBS : 400 copies /mL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="16" y="6" width="184" height="25" uuid="6793c9e5-0df3-44b5-b8cb-b20adbf92c87"/>
+				<textElement>
+					<font size="12" isBold="true" isUnderline="true" isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Valeurs de référence:]]></text>
+			</staticText>
+			<line>
+				<reportElement x="2" y="6" width="550" height="1" uuid="32f6f5e0-bfba-4f6e-92f0-c938effe4df0"/>
+			</line>
+		</band>
+	</columnFooter>
+	<pageFooter>
+		<band height="29">
+			<staticText>
+				<reportElement x="511" y="6" width="59" height="21" uuid="dab42148-0ffc-4131-9b87-f24231246d39"/>
+				<text><![CDATA[Page 1/1]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+</jasperReport>

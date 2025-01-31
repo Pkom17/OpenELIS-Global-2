@@ -25,4 +25,8 @@ public interface SampleItemService extends BaseObjectService<SampleItem, String>
     void getDataBySample(SampleItem sampleItem);
 
     String getTypeOfSampleId(SampleItem sampleItem);
+    
+    public String insert(SampleItem sampleItem);
+    
+    public SampleItem update(SampleItem sampleItem);
 }

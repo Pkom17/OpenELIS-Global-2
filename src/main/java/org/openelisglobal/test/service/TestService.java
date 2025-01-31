@@ -1,7 +1,9 @@
 package org.openelisglobal.test.service;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
@@ -132,5 +134,11 @@ public interface TestService extends BaseObjectService<Test, String> {
     void activateTests(List<String> testNames);
 
     void activateTestsAndDeactivateOthers(List<String> asList);
+    
+    List<Map<String,Object>> getTbGXTestCountByResult(Date startDate, Date endDate) throws LIMSRuntimeException;
+    
+    List<Map<String,Object>> getTbGXTestCountByCategory(Date startDate, Date endDate) throws LIMSRuntimeException;
+    
+    List<Map<String,Object>> getTbMicroscopyTestCountByResult(Date startDate, Date endDate) throws LIMSRuntimeException;
 
 }

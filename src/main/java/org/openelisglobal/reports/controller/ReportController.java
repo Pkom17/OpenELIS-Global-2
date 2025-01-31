@@ -103,7 +103,7 @@ public class ReportController extends BaseController {
 
 		LogEvent.logTrace("ReportController", "Log GET ", request.getParameter("report"));
 		String reportName = request.getParameter("report");
-		if (reportName.equalsIgnoreCase("patientVL1")) {
+		if (reportName.equalsIgnoreCase("patientVL1") || reportName.equalsIgnoreCase("EOrderExport")) {
 			form.setProjectCode(getVLProjectCode());
 		} else if (reportName.equalsIgnoreCase("patientEID1")) {
 			form.setProjectCode(getEIDProjectCode());

@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.validator.GenericValidator;
 import org.openelisglobal.analysis.valueholder.Analysis;
 import org.openelisglobal.common.constants.Constants;
@@ -33,6 +34,9 @@ import org.openelisglobal.common.util.ConfigurationProperties.Property;
 import org.openelisglobal.internationalization.MessageUtil;
 import org.openelisglobal.localization.service.LocalizationService;
 import org.openelisglobal.organization.valueholder.Organization;
+import org.openelisglobal.patientidentity.service.PatientIdentityService;
+import org.openelisglobal.patientidentity.valueholder.PatientIdentity;
+import org.openelisglobal.patientidentitytype.util.PatientIdentityTypeMap;
 import org.openelisglobal.reports.action.implementation.reportBeans.ClinicalPatientData;
 import org.openelisglobal.result.service.ResultService;
 import org.openelisglobal.result.valueholder.Result;
@@ -47,7 +51,7 @@ public class TBPatientReport extends PatientReport implements IReportCreator, IR
 
 	private static Set<Integer> analysisStatusIds;
 	protected List<ClinicalPatientData> clinicalReportItems;
-	
+
 	static {
 		analysisStatusIds = new HashSet<>();
 		analysisStatusIds.add(Integer
@@ -103,6 +107,13 @@ public class TBPatientReport extends PatientReport implements IReportCreator, IR
 	@Override
 	protected void createReportItems() {
 		Set<SampleItem> sampleSet = new HashSet<>();
+		PatientIdentityService patientIdentityService = SpringContext.getBean(PatientIdentityService.class);
+		PatientIdentity patIdentity1 = patientIdentityService.getPatitentIdentityForPatientAndType(
+				currentPatient.getId(), PatientIdentityTypeMap.getInstance().getIDForType("TB_PATIENT_CODE"));
+		PatientIdentity patIdentity2 = patientIdentityService.getPatitentIdentityForPatientAndType(
+				currentPatient.getId(), PatientIdentityTypeMap.getInstance().getIDForType("TB_PATIENT_CODE_RR"));
+		String patientCode = ObjectUtils.isNotEmpty(patIdentity1) ? patIdentity1.getIdentityData()
+				: ObjectUtils.isNotEmpty(patIdentity2) ? patIdentity2.getIdentityData() : currentPatient.getExternalId();
 
 		boolean isConfirmationSample = sampleService.isConfirmationSample(currentSample);
 		List<Analysis> analysisList = analysisService
@@ -118,9 +129,14 @@ public class TBPatientReport extends PatientReport implements IReportCreator, IR
 				if (analysis.getTest() != null) {
 					currentAnalysis = analysis;
 					ClinicalPatientData resultsData = buildClinicalPatientData(hasParentResult);
-			        Organization referringOrg = sampleOrganizationService.getDataBySample(currentSample).getOrganization();
-			        currentSiteInfo = referringOrg == null ? "" : referringOrg.getOrganizationName();
-			        resultsData.setSiteInfo(currentSiteInfo);
+					if (ObjectUtils.isEmpty(resultsData.getSubjectNumber().trim())) {
+						resultsData.setSubjectNumber(patientCode);
+					}
+
+					Organization referringOrg = sampleOrganizationService.getDataBySample(currentSample)
+							.getOrganization();
+					currentSiteInfo = referringOrg == null ? "" : referringOrg.getOrganizationName();
+					resultsData.setSiteInfo(currentSiteInfo);
 					if (isConfirmationSample) {
 						String alerts = resultsData.getAlerts();
 						if (!GenericValidator.isBlankOrNull(alerts)) {

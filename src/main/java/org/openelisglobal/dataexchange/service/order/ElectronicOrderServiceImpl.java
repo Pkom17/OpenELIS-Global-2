@@ -142,7 +142,7 @@ public class ElectronicOrderServiceImpl extends BaseObjectServiceImpl<Electronic
 			String nameValue = form.getSearchValue();
 
 			List<ElectronicOrder> eOrders = baseObjectDAO.getAllElectronicOrdersMatchingAnyValue(identifierValues,
-					nameValue, SortOrder.LAST_UPDATED_ASC);
+					nameValue, SortOrder.RECEPTION_DATE);
 
 			return eOrders;
 		case DATE_STATUS:
@@ -159,7 +159,7 @@ public class ElectronicOrderServiceImpl extends BaseObjectServiceImpl<Electronic
 			java.sql.Timestamp endTimestamp = GenericValidator.isBlankOrNull(endDate) ? null
 					: DateUtil.convertStringDateStringTimeToTimestamp(endDate, "23:59:59");
 			return getAllElectronicOrdersByTimestampAndStatus(startTimestamp, endTimestamp, form.getStatusId(),
-					SortOrder.STATUS_ID);
+					SortOrder.RECEPTION_DATE);
 		default:
 			return null;
 		}
@@ -187,7 +187,7 @@ public class ElectronicOrderServiceImpl extends BaseObjectServiceImpl<Electronic
 			String nameValue = form.getSearchValue();
 
 			List<ElectronicOrder> eOrders = baseObjectDAO.getAllElectronicOrdersMatchingAnyValue(identifierValues,
-					nameValue, SortOrder.LAST_UPDATED_ASC);
+					nameValue, SortOrder.RECEPTION_DATE);
 
 			return eOrders;
 		case DATE_STATUS:
@@ -204,7 +204,7 @@ public class ElectronicOrderServiceImpl extends BaseObjectServiceImpl<Electronic
 			java.sql.Timestamp endTimestamp = GenericValidator.isBlankOrNull(endDate) ? null
 					: DateUtil.convertStringDateStringTimeToTimestamp(endDate, "23:59:59");
 			return getAllElectronicOrdersByTimestampAndStatus(startTimestamp, endTimestamp, form.getStatusId(),
-					SortOrder.STATUS_ID);
+					SortOrder.RECEPTION_DATE);
 		default:
 			return null;
 		}

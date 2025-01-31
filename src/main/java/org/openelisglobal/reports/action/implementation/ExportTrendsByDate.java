@@ -143,30 +143,32 @@ public class ExportTrendsByDate extends CSVSampleExportReport implements IReport
 	}
 
 	@Override
-	protected void writeResultsToBuffer(ByteArrayOutputStream buffer)
-			throws IOException, UnsupportedEncodingException, SQLException, ParseException {
+	protected void writeResultsToBuffer(ByteArrayOutputStream buffer) {
+		try {
+			String currentAccessionNumber = null;
+			String[] splitBase = null;
+			while (csvColumnBuilder.next()) {
+				String line = csvColumnBuilder.nextLine();
+				String[] splitLine = line.split(",");
 
-		String currentAccessionNumber = null;
-		String[] splitBase = null;
-		while (csvColumnBuilder.next()) {
-			String line = csvColumnBuilder.nextLine();
-			String[] splitLine = line.split(",");
+				if (splitLine[0].equals(currentAccessionNumber)) {
+					merge(splitBase, splitLine);
+				} else {
+					if (currentAccessionNumber != null && writeAble(splitBase[16].trim())) {
 
-			if (splitLine[0].equals(currentAccessionNumber)) {
-				merge(splitBase, splitLine);
-			} else {
-				if (currentAccessionNumber != null && writeAble(splitBase[16].trim())) {
-
+						writeConsolidatedBaseToBuffer(buffer, splitBase);
+					}
+					splitBase = splitLine;
+					currentAccessionNumber = splitBase[0];
+				}
+			}
+			if (ObjectUtils.isNotEmpty(splitBase)) {
+				if (writeAble(splitBase[16].trim())) {
 					writeConsolidatedBaseToBuffer(buffer, splitBase);
 				}
-				splitBase = splitLine;
-				currentAccessionNumber = splitBase[0];
 			}
-		}
-		if (ObjectUtils.isNotEmpty(splitBase)) {
-			if (writeAble(splitBase[16].trim())) {
-				writeConsolidatedBaseToBuffer(buffer, splitBase);
-			}
+		} catch (IOException | SQLException | ParseException e) {
+			Log.error("Error in " + this.getClass().getSimpleName() + " writeResultsToBuffer: ", e);
 		}
 	}
 

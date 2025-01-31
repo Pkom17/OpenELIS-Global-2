@@ -12,66 +12,22 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.validator.GenericValidator;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.ResourceType;
-import org.hl7.fhir.r4.model.ServiceRequest;
-import org.hl7.fhir.r4.model.Specimen;
-import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.Task.ParameterComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.DateTimeType;
 import org.openelisglobal.common.action.IActionConstants;
 import org.openelisglobal.common.constants.Constants;
-import org.openelisglobal.common.log.LogEvent;
 import org.openelisglobal.common.services.DisplayListService;
 import org.openelisglobal.common.services.DisplayListService.ListType;
-import org.openelisglobal.common.services.IStatusService;
-import org.openelisglobal.common.services.StatusService.ExternalOrderStatus;
-import org.openelisglobal.common.services.StatusService.OrderStatus;
-import org.openelisglobal.common.services.StatusService.SampleStatus;
 import org.openelisglobal.common.util.DateUtil;
 import org.openelisglobal.common.util.IdValuePair;
-import org.openelisglobal.dataexchange.fhir.FhirConfig;
-import org.openelisglobal.dataexchange.fhir.FhirUtil;
-import org.openelisglobal.dataexchange.fhir.service.FhirPersistanceService;
-import org.openelisglobal.dataexchange.fhir.service.FhirTransformService;
-import org.openelisglobal.dataexchange.order.valueholder.ElectronicOrder;
-import org.openelisglobal.dataexchange.service.order.ElectronicOrderService;
-import org.openelisglobal.dictionary.ObservationHistoryList;
 import org.openelisglobal.dictionary.valueholder.Dictionary;
 import org.openelisglobal.internationalization.MessageUtil;
-import org.openelisglobal.organization.service.OrganizationService;
-import org.openelisglobal.organization.util.OrganizationTypeList;
-import org.openelisglobal.organization.valueholder.Organization;
-import org.openelisglobal.panel.service.PanelService;
 import org.openelisglobal.panel.valueholder.Panel;
 import org.openelisglobal.panelitem.service.PanelItemService;
 import org.openelisglobal.panelitem.valueholder.PanelItem;
-import org.openelisglobal.patient.form.PatientEntryByProjectForm;
-import org.openelisglobal.patient.saving.ISampleEntry;
-import org.openelisglobal.patient.saving.ISampleEntryAfterPatientEntry;
-import org.openelisglobal.patient.saving.ISampleSecondEntry;
-import org.openelisglobal.patient.valueholder.ObservationData;
-import org.openelisglobal.provider.service.ProviderService;
-import org.openelisglobal.sample.form.ProjectData;
-import org.openelisglobal.sample.form.SampleEntryByProjectForm;
 import org.openelisglobal.sample.form.SampleTbEntryForm;
 import org.openelisglobal.sample.service.TbSampleService;
-import org.openelisglobal.sample.valueholder.Sample;
-import org.openelisglobal.sampleitem.valueholder.SampleItem;
-import org.openelisglobal.spring.util.SpringContext;
-import org.openelisglobal.statusofsample.valueholder.StatusOfSample;
 import org.openelisglobal.systemuser.service.UserService;
 import org.openelisglobal.test.service.TestService;
 import org.openelisglobal.test.valueholder.Test;
-import org.openelisglobal.typeofsample.valueholder.TypeOfSample;
-import org.owasp.encoder.Encode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -82,14 +38,11 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 @Controller
 public class SampleTbEntryController extends BaseSampleEntryController {
@@ -98,36 +51,14 @@ public class SampleTbEntryController extends BaseSampleEntryController {
 	private String requestFhirUuid;
 
 	@Autowired
-	private ElectronicOrderService electronicOrderService;
-	@Autowired
-	private OrganizationService organizationService;
-	@Autowired
-	private FhirPersistanceService fhirPersistanceService;
-
-	@Autowired
-	private FhirConfig fhirConfig;
-	@Autowired
-	private FhirUtil fhirUtil;
-	@Autowired
 	private UserService userService;
 	@Autowired
 	private TestService testService;
-	@Autowired
-	private PanelService panelService;
 	@Autowired
 	private TbSampleService tbSampleService;
 
 	@Autowired
 	private PanelItemService panelItemService;
-
-	private Task task = null;
-	private Practitioner requesterPerson = null;
-	private Practitioner collector = null;
-	private org.hl7.fhir.r4.model.Organization referringOrganization = null;
-	private Location location = null;
-	private ServiceRequest serviceRequest = null;
-	private Specimen specimen = null;
-	private Patient fhirPatient = null;
 
 	private static final String[] ALLOWED_FIELDS = new String[] {};
 
@@ -139,6 +70,19 @@ public class SampleTbEntryController extends BaseSampleEntryController {
 	@RequestMapping(value = "/MicrobiologyTb", method = RequestMethod.GET)
 	public ModelAndView showSampleEntryByProject(HttpServletRequest request) {
 		SampleTbEntryForm form = new SampleTbEntryForm();
+		
+		String labnoForSearch = request.getParameter("labnoForSearch");
+		if(ObjectUtils.isNotEmpty(labnoForSearch)) {
+			request.setAttribute(IActionConstants.PAGE_SUBTITLE_KEY, MessageUtil.getMessage("update.tb.sample.title"));
+			form = this.getFormData(labnoForSearch);
+			
+			setDisplayLists(form);
+			addFlashMsgsToRequest(request);
+			
+			return findForward(FWD_SUCCESS, form);
+			
+		}
+
 		request.setAttribute(IActionConstants.PAGE_SUBTITLE_KEY, MessageUtil.getMessage("add.tb.sample.title"));
 
 		Date today = Calendar.getInstance().getTime();
@@ -148,7 +92,14 @@ public class SampleTbEntryController extends BaseSampleEntryController {
 		setDisplayLists(form);
 		addFlashMsgsToRequest(request);
 
+		
 		return findForward(FWD_SUCCESS, form);
+	}
+	
+	
+	private SampleTbEntryForm getFormData(String accessionNumber) {
+		return tbSampleService.getTBSampleFormData(accessionNumber);
+		
 	}
 
 	@RequestMapping(value = "/MicrobiologyTb", method = RequestMethod.POST)

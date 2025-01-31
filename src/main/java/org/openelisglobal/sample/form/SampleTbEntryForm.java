@@ -25,6 +25,7 @@ public class SampleTbEntryForm extends BaseForm {
 
 	private Boolean rememberSiteAndRequester;
 	
+    @ValidAccessionNumber()
 	private String labnoForSearch;
 	
 	private String sysUserId;
@@ -36,6 +37,11 @@ public class SampleTbEntryForm extends BaseForm {
     private List<IdValuePair> referralOrganizations;
     
     private List<IdValuePair> genders;
+    
+    
+    private List<TbSampleTest> tbSampleTests;
+    
+    private List<TbSampleTest> newTbSampleTests;
     
     @Pattern(regexp = ValidationHelper.ID_REGEX)
     private String tbOrderReason;
@@ -64,9 +70,6 @@ public class SampleTbEntryForm extends BaseForm {
     
     private List<IdValuePair> tbDiagnosticMethods;
     
-    @Pattern(regexp = ValidationHelper.ID_REGEX)
-    private String tbAspect;
-    
     private List<IdValuePair> tbAspects;
     
     // for display
@@ -77,7 +80,6 @@ public class SampleTbEntryForm extends BaseForm {
 
     @Pattern(regexp = ValidationHelper.PATIENT_ID_REGEX)
     private String guid;
-//    private UUID fhirUuid;
 
     @NotBlank()
     @Pattern(regexp = ValidationHelper.GENDER_REGEX)
@@ -100,18 +102,6 @@ public class SampleTbEntryForm extends BaseForm {
 
     @ValidDate(relative = DateRelation.PAST)
     private String requestDate;
-    
-    @NotEmpty()
-    private List<String> newSelectedTests;
-
-    @NotBlank()
-    private String selectedTbMethod;
-    
-    //for updates
-    private List<String> selectedTestToRemove;
-    
-    //for updates
-    private String selectedMethodToRemove;
 
     @NotBlank()
     @ValidDate(relative = DateRelation.PAST)
@@ -125,6 +115,9 @@ public class SampleTbEntryForm extends BaseForm {
 
     @SafeHtml(level = SafeHtml.SafeListLevel.NONE)
     private String referringSiteCode;
+    
+    @Pattern(regexp = ValidationHelper.ID_REGEX)
+    private String referringSiteId;
 
     @SafeHtml()
     private String referringSiteName;
@@ -150,17 +143,24 @@ public class SampleTbEntryForm extends BaseForm {
     @SafeHtml(level = SafeHtml.SafeListLevel.NONE)
     private String patientAddress;
     
-    @Pattern(regexp = ValidationHelper.PATIENT_ID_REGEX)
+    //@Pattern(regexp = ValidationHelper.PATIENT_ID_REGEX)
     private String tbSubjectNumber;
+    
+    private String tbSubjectNumberRes;
     
     @NotNull()
     private Boolean modified = false;
 
-    @Pattern(regexp = ValidationHelper.ID_REGEX)
+    public String getTbSubjectNumberRes() {
+		return tbSubjectNumberRes;
+	}
+
+	public void setTbSubjectNumberRes(String tbSubjectNumberRes) {
+		this.tbSubjectNumberRes = tbSubjectNumberRes;
+	}
+
+	@Pattern(regexp = ValidationHelper.ID_REGEX)
     private String sampleId;
-    
-    @Pattern(regexp = ValidationHelper.ID_REGEX)
-    private String tbSpecimenNature;
     
     private List<IdValuePair> tbSpecimenNatures;
        
@@ -413,14 +413,6 @@ public class SampleTbEntryForm extends BaseForm {
 		this.tbDiagnosticMethods = tbDiagnosticMethods;
 	}
 
-	public String getTbAspect() {
-		return tbAspect;
-	}
-
-	public void setTbAspect(String tbAspect) {
-		this.tbAspect = tbAspect;
-	}
-
 	public List<IdValuePair> getTbAspects() {
 		return tbAspects;
 	}
@@ -509,14 +501,6 @@ public class SampleTbEntryForm extends BaseForm {
 		this.tbSubjectNumber = tbSubjectNumber;
 	}
 
-	public String getTbSpecimenNature() {
-		return tbSpecimenNature;
-	}
-
-	public void setTbSpecimenNature(String tbSpecimenNature) {
-		this.tbSpecimenNature = tbSpecimenNature;
-	}
-
 	public List<IdValuePair> getTbSpecimenNatures() {
 		return tbSpecimenNatures;
 	}
@@ -565,44 +549,12 @@ public class SampleTbEntryForm extends BaseForm {
 		this.tbFollowupPeriodsLine2 = tbFollowupPeriodsLine2;
 	}
 
-	public List<String> getNewSelectedTests() {
-		return newSelectedTests;
-	}
-
-	public void setNewSelectedTests(List<String> newSelectedTests) {
-		this.newSelectedTests = newSelectedTests;
-	}
-
-	public List<String> getSelectedTestToRemove() {
-		return selectedTestToRemove;
-	}
-
-	public void setSelectedTestToRemove(List<String> selectedTestToRemove) {
-		this.selectedTestToRemove = selectedTestToRemove;
-	}
-
 	public String getSysUserId() {
 		return sysUserId;
 	}
 
 	public void setSysUserId(String sysUserId) {
 		this.sysUserId = sysUserId;
-	}
-
-	public String getSelectedTbMethod() {
-		return selectedTbMethod;
-	}
-
-	public void setSelectedTbMethod(String selectedTbMethod) {
-		this.selectedTbMethod = selectedTbMethod;
-	}
-
-	public String getSelectedMethodToRemove() {
-		return selectedMethodToRemove;
-	}
-
-	public void setSelectedMethodToRemove(String selectedMethodToRemove) {
-		this.selectedMethodToRemove = selectedMethodToRemove;
 	}
 
 	public String getLabnoForSearch() {
@@ -612,5 +564,28 @@ public class SampleTbEntryForm extends BaseForm {
 	public void setLabnoForSearch(String labnoForSearch) {
 		this.labnoForSearch = labnoForSearch;
 	}
-	  
+
+	public String getReferringSiteId() {
+		return referringSiteId;
+	}
+
+	public void setReferringSiteId(String referringSiteId) {
+		this.referringSiteId = referringSiteId;
+	}
+
+	public List<TbSampleTest> getTbSampleTests() {
+		return tbSampleTests;
+	}
+
+	public void setTbSampleTests(List<TbSampleTest> tbSampleTests) {
+		this.tbSampleTests = tbSampleTests;
+	}
+
+	public List<TbSampleTest> getNewTbSampleTests() {
+		return newTbSampleTests;
+	}
+
+	public void setNewTbSampleTests(List<TbSampleTest> newTbSampleTests) {
+		this.newTbSampleTests = newTbSampleTests;
+	}
 }

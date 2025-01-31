@@ -56,5 +56,9 @@ public interface SampleItemDAO extends BaseDAO<SampleItem, String> {
             throws LIMSRuntimeException;
 
     public SampleItem getData(String sampleItemId) throws LIMSRuntimeException;
+    
+    public String insert(SampleItem object);
+
+    public SampleItem update(SampleItem object); 
 
 }

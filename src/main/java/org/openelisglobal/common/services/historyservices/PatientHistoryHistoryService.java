@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.validator.GenericValidator;
 import org.openelisglobal.audittrail.action.workers.AuditTrailItem;
 import org.openelisglobal.audittrail.valueholder.History;
@@ -188,6 +189,9 @@ public class PatientHistoryHistoryService extends AbstractHistoryService {
 
     protected String getObservationValue(ObservationHistory observation) {
         if ("D".equals(observation.getValueType())) {
+        	if(ObjectUtils.isEmpty(observation.getValue())) {
+        		return "";
+        	}
             Dictionary dict = dictionaryService.getDataForId(observation.getValue());
             return dict != null ? dict.getDictEntry() : observation.getValue();
         }

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -29,6 +30,7 @@ import org.hibernate.query.Query;
 import org.openelisglobal.common.daoimpl.BaseDAOImpl;
 import org.openelisglobal.common.exception.LIMSRuntimeException;
 import org.openelisglobal.common.log.LogEvent;
+import org.openelisglobal.common.util.DateUtil;
 import org.openelisglobal.common.util.SystemConfiguration;
 import org.openelisglobal.sampleitem.dao.SampleItemDAO;
 import org.openelisglobal.sampleitem.valueholder.SampleItem;
@@ -232,6 +234,37 @@ public class SampleItemDAOImpl extends BaseDAOImpl<SampleItem, String> implement
         }
 
         return null;
+    }
+    
+    @Transactional
+    @Override
+    public String insert(SampleItem object) {
+        try {
+        	TypeOfSample typeOfSample = entityManager.getReference(TypeOfSample.class, object.getTypeOfSample().getId());
+        	object.setTypeOfSample(typeOfSample);
+            entityManager.persist(object);
+            entityManager.flush();
+            return object.getId();
+        } catch (HibernateException e) {
+            throw new LIMSRuntimeException("Error in " + this.getClass().getSimpleName() + " " + "insert", e);
+        }
+    }
+
+    @Transactional
+    @Override
+    public SampleItem update(SampleItem object) {
+        try {
+        	String sql="UPDATE sample_item set  samp_id = :samp_id, typeosamp_id = :typeosamp_id, lastupdated=:lastupdated where id = :id";
+        	javax.persistence.Query query = entityManager.createNativeQuery(sql);
+        	query.setParameter("samp_id", Integer.parseInt(object.getSample().getId()));
+        	query.setParameter("typeosamp_id", Integer.parseInt(object.getTypeOfSampleId()));
+        	query.setParameter("lastupdated", object.getLastupdated());
+        	query.setParameter("id", Integer.parseInt(object.getId()));
+        	query.executeUpdate();
+            return object;
+        } catch (HibernateException e) {
+            throw new LIMSRuntimeException("Error in " + this.getClass().getSimpleName() + " " + "save", e);
+        }
     }
 
 }

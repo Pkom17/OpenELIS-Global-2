@@ -45,178 +45,182 @@ import org.openelisglobal.spring.util.SpringContext;
  * @since Jan 26, 2011
  */
 public class ExportProjectByDate extends CSVSampleExportReport implements IReportParameterSetter, IReportCreator {
-    protected final ProjectService projectService = SpringContext.getBean(ProjectService.class);
-    private String projectStr;
-    private Project project;
+	protected final ProjectService projectService = SpringContext.getBean(ProjectService.class);
+	private String projectStr;
+	private Project project;
 
-    @Override
-    protected String reportFileName() {
-        return "ExportProjectByDate";
-    }
+	@Override
+	protected String reportFileName() {
+		return "ExportProjectByDate";
+	}
 
-    @Override
-    public void setRequestParameters(ReportForm form) {
-        try {
-            form.setReportName(getReportNameForParameterPage());
-            form.setUseLowerDateRange(Boolean.TRUE);
-            form.setUseUpperDateRange(Boolean.TRUE);
-            form.setUseProjectCode(Boolean.TRUE);
-            form.setProjectCodeList(getProjectList());
-        } catch (RuntimeException e) {
-            Log.error("Error in ExportProjectByDate.setRequestParemeters: ", e);
-        }
-    }
+	@Override
+	public void setRequestParameters(ReportForm form) {
+		try {
+			form.setReportName(getReportNameForParameterPage());
+			form.setUseLowerDateRange(Boolean.TRUE);
+			form.setUseUpperDateRange(Boolean.TRUE);
+			form.setUseProjectCode(Boolean.TRUE);
+			form.setProjectCodeList(getProjectList());
+		} catch (RuntimeException e) {
+			Log.error("Error in ExportProjectByDate.setRequestParemeters: ", e);
+		}
+	}
 
-    protected String getReportNameForParameterPage() {
-        return MessageUtil.getMessage("reports.label.project.export") + " "
-                + MessageUtil.getContextualMessage("sample.collectionDate");
-    }
+	protected String getReportNameForParameterPage() {
+		return MessageUtil.getMessage("reports.label.project.export") + " "
+				+ MessageUtil.getContextualMessage("sample.collectionDate");
+	}
 
-    @Override
-    protected void createReportParameters() {
-        super.createReportParameters();
-        reportParameters.put("studyName", (project == null) ? null : project.getLocalizedName());
-    }
+	@Override
+	protected void createReportParameters() {
+		super.createReportParameters();
+		reportParameters.put("studyName", (project == null) ? null : project.getLocalizedName());
+	}
 
-    @Override
-    public void initializeReport(ReportForm form) {
-        super.initializeReport();
-        errorFound = false;
+	@Override
+	public void initializeReport(ReportForm form) {
+		super.initializeReport();
+		errorFound = false;
 
-        lowDateStr = form.getLowerDateRange();
-        highDateStr = form.getUpperDateRange();
-        projectStr = form.getProjectCode();
-        dateRange = new DateRange(lowDateStr, highDateStr);
+		lowDateStr = form.getLowerDateRange();
+		highDateStr = form.getUpperDateRange();
+		projectStr = form.getProjectCode();
+		dateRange = new DateRange(lowDateStr, highDateStr);
 
-        createReportParameters();
+		createReportParameters();
 
-        errorFound = !validateSubmitParameters();
-        if (errorFound) {
-            return;
-        }
+		errorFound = !validateSubmitParameters();
+		if (errorFound) {
+			return;
+		}
 
-        createReportItems();
-    }
+		createReportItems();
+	}
 
-    /**
-     * check everything
-     */
-    private boolean validateSubmitParameters() {
-        return dateRange.validateHighLowDate("report.error.message.date.received.missing") && validateProject();
-    }
+	/**
+	 * check everything
+	 */
+	private boolean validateSubmitParameters() {
+		return dateRange.validateHighLowDate("report.error.message.date.received.missing") && validateProject();
+	}
 
-    /**
-     * @return true, if location is not blank or "0" is is found in the DB; false
-     *         otherwise
-     */
-    private boolean validateProject() {
-        if (isBlankOrNull(projectStr) || "0".equals(Integer.valueOf(projectStr).toString())) {
-            add1LineErrorMessage("report.error.message.project.missing");
-            return false;
-        }
-        project = projectService.getProjectById(projectStr);
-        if (project == null) {
-            add1LineErrorMessage("report.error.message.project.missing");
-            return false;
-        }
-        return true;
-    }
+	/**
+	 * @return true, if location is not blank or "0" is is found in the DB; false
+	 *         otherwise
+	 */
+	private boolean validateProject() {
+		if (isBlankOrNull(projectStr) || "0".equals(Integer.valueOf(projectStr).toString())) {
+			add1LineErrorMessage("report.error.message.project.missing");
+			return false;
+		}
+		project = projectService.getProjectById(projectStr);
+		if (project == null) {
+			add1LineErrorMessage("report.error.message.project.missing");
+			return false;
+		}
+		return true;
+	}
 
-    /**
-     * creating the list for generation to the report
-     */
-    private void createReportItems() {
-        try {
-            csvColumnBuilder = getColumnBuilder(projectStr);
-            csvColumnBuilder.buildDataSource();
-        } catch (SQLException e) {
-            Log.error("Error in " + this.getClass().getSimpleName() + ".createReportItems: ", e);
-            add1LineErrorMessage("report.error.message.general.error");
-        }
-    }
+	/**
+	 * creating the list for generation to the report
+	 */
+	private void createReportItems() {
+		try {
+			csvColumnBuilder = getColumnBuilder(projectStr);
+			csvColumnBuilder.buildDataSource();
+		} catch (SQLException e) {
+			Log.error("Error in " + this.getClass().getSimpleName() + ".createReportItems: ", e);
+			add1LineErrorMessage("report.error.message.general.error");
+		}
+	}
 
-    @Override
-    protected void writeResultsToBuffer(ByteArrayOutputStream buffer) throws IOException, SQLException, ParseException {
+	@Override
+	protected void writeResultsToBuffer(ByteArrayOutputStream buffer) {
 
-        String currentAccessionNumber = null;
-        String[] splitBase = null;
-        while (csvColumnBuilder.next()) {
-            String line = csvColumnBuilder.nextLine();
-            String[] splitLine = line.split(",");
+		try {
+			String currentAccessionNumber = null;
+			String[] splitBase = null;
+			while (csvColumnBuilder.next()) {
+				String line = csvColumnBuilder.nextLine();
+				String[] splitLine = line.split(",");
 
-            if (splitLine[0].equals(currentAccessionNumber)) {
-                merge(splitBase, splitLine);
-            } else {
-                if (currentAccessionNumber != null) {
-                    writeConsolidatedBaseToBuffer(buffer, splitBase);
-                }
-                splitBase = splitLine;
-                currentAccessionNumber = splitBase[0];
-            }
-        }
+				if (splitLine[0].equals(currentAccessionNumber)) {
+					merge(splitBase, splitLine);
+				} else {
+					if (currentAccessionNumber != null) {
+						writeConsolidatedBaseToBuffer(buffer, splitBase);
+					}
+					splitBase = splitLine;
+					currentAccessionNumber = splitBase[0];
+				}
+			}
 
-        writeConsolidatedBaseToBuffer(buffer, splitBase);
-    }
+			writeConsolidatedBaseToBuffer(buffer, splitBase);
+		} catch (IOException | SQLException | ParseException e) {
+			Log.error("Error in " + this.getClass().getSimpleName() + " writeResultsToBuffer: ", e);
+		}
+	}
 
-    private void merge(String[] base, String[] line) {
-        for (int i = 0; i < base.length; ++i) {
-            if (GenericValidator.isBlankOrNull(base[i])) {
-                base[i] = line[i];
-            }
-        }
-    }
+	private void merge(String[] base, String[] line) {
+		for (int i = 0; i < base.length; ++i) {
+			if (GenericValidator.isBlankOrNull(base[i])) {
+				base[i] = line[i];
+			}
+		}
+	}
 
-    protected void writeConsolidatedBaseToBuffer(ByteArrayOutputStream buffer, String[] splitBase) throws IOException {
+	protected void writeConsolidatedBaseToBuffer(ByteArrayOutputStream buffer, String[] splitBase) throws IOException {
 
-        if (splitBase != null) {
-            int splitBaseNumChars = StringUtil.countChars(splitBase);
-            StringBuilder consolidatedLine = new StringBuilder(splitBaseNumChars + splitBase.length);
-            for (String value : splitBase) {
-                consolidatedLine.append(value);
-                consolidatedLine.append(",");
-            }
+		if (splitBase != null) {
+			int splitBaseNumChars = StringUtil.countChars(splitBase);
+			StringBuilder consolidatedLine = new StringBuilder(splitBaseNumChars + splitBase.length);
+			for (String value : splitBase) {
+				consolidatedLine.append(value);
+				consolidatedLine.append(",");
+			}
 
-            consolidatedLine.deleteCharAt(consolidatedLine.lastIndexOf(","));
-            buffer.write(consolidatedLine.toString().getBytes("utf-8"));
-        }
-    }
+			consolidatedLine.deleteCharAt(consolidatedLine.lastIndexOf(","));
+			buffer.write(consolidatedLine.toString().getBytes("utf-8"));
+		}
+	}
 
-    private CSVColumnBuilder getColumnBuilder(String projectId) {
-        String projectTag = CSVColumnBuilder.translateProjectId(projectId);
-        if (projectTag.equals("ARVB")) {
-            return new ARVInitialColumnBuilder(dateRange, projectStr);
-        } else if (projectTag.equals("ARVS")) {
-            return new ARVFollowupColumnBuilder(dateRange, projectStr);
-        } else if (projectTag.equalsIgnoreCase("DBS")) {
-            return new EIDColumnBuilder(dateRange, projectStr);
-        } else if (projectTag.equalsIgnoreCase("VLS")) {
-            return new VLColumnBuilder(dateRange, projectStr);
-        } else if (projectTag.equalsIgnoreCase("RTN")) {
-            return new RTNColumnBuilder(dateRange, projectStr);
-        } else if (projectTag.equalsIgnoreCase("IND")) {
-            return new RTNColumnBuilder(dateRange, projectStr);
-        }
-        throw new IllegalArgumentException();
-    }
+	private CSVColumnBuilder getColumnBuilder(String projectId) {
+		String projectTag = CSVColumnBuilder.translateProjectId(projectId);
+		if (projectTag.equals("ARVB")) {
+			return new ARVInitialColumnBuilder(dateRange, projectStr);
+		} else if (projectTag.equals("ARVS")) {
+			return new ARVFollowupColumnBuilder(dateRange, projectStr);
+		} else if (projectTag.equalsIgnoreCase("DBS")) {
+			return new EIDColumnBuilder(dateRange, projectStr);
+		} else if (projectTag.equalsIgnoreCase("VLS")) {
+			return new VLColumnBuilder(dateRange, projectStr);
+		} else if (projectTag.equalsIgnoreCase("RTN")) {
+			return new RTNColumnBuilder(dateRange, projectStr);
+		} else if (projectTag.equalsIgnoreCase("IND")) {
+			return new RTNColumnBuilder(dateRange, projectStr);
+		}
+		throw new IllegalArgumentException();
+	}
 
-    /**
-     * @return a list of the correct projects for display
-     */
-    protected List<Project> getProjectList() {
-        List<Project> projects = new ArrayList<>();
-        Project curProject = new Project();
-        curProject.setProjectName("Antiretroviral Study");
-        projects.add(projectService.getProjectByName(curProject, false, false));
-        curProject.setProjectName("Antiretroviral Followup Study");
-        projects.add(projectService.getProjectByName(curProject, false, false));
-        curProject.setProjectName("Routine HIV Testing");
-        projects.add(projectService.getProjectByName(curProject, false, false));
-        curProject.setProjectName("Early Infant Diagnosis for HIV Study");
-        projects.add(projectService.getProjectByName(curProject, false, false));
-        curProject.setProjectName("Viral Load Results");
-        projects.add(projectService.getProjectByName(curProject, false, false));
-        curProject.setProjectName("Indeterminate Results");
-        projects.add(projectService.getProjectByName(curProject, false, false));
-        return projects;
-    }
+	/**
+	 * @return a list of the correct projects for display
+	 */
+	protected List<Project> getProjectList() {
+		List<Project> projects = new ArrayList<>();
+		Project curProject = new Project();
+		curProject.setProjectName("Antiretroviral Study");
+		projects.add(projectService.getProjectByName(curProject, false, false));
+		curProject.setProjectName("Antiretroviral Followup Study");
+		projects.add(projectService.getProjectByName(curProject, false, false));
+		curProject.setProjectName("Routine HIV Testing");
+		projects.add(projectService.getProjectByName(curProject, false, false));
+		curProject.setProjectName("Early Infant Diagnosis for HIV Study");
+		projects.add(projectService.getProjectByName(curProject, false, false));
+		curProject.setProjectName("Viral Load Results");
+		projects.add(projectService.getProjectByName(curProject, false, false));
+		curProject.setProjectName("Indeterminate Results");
+		projects.add(projectService.getProjectByName(curProject, false, false));
+		return projects;
+	}
 }

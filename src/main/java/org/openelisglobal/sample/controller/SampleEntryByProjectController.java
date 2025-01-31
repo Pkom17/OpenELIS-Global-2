@@ -33,6 +33,7 @@ import org.hl7.fhir.r4.model.Specimen;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
+import org.openelisglobal.common.action.IActionConstants;
 import org.openelisglobal.common.log.LogEvent;
 import org.openelisglobal.common.services.DisplayListService;
 import org.openelisglobal.common.services.DisplayListService.ListType;
@@ -352,8 +353,8 @@ public class SampleEntryByProjectController extends BaseSampleEntryController {
 						org.setOrganizationName(display);
 						org.setName(display);
 						org.setShortName(centerCode);
-						org.setIsActive("Y");
-						org.setMlsSentinelLabFlag("N");
+						org.setIsActive(IActionConstants.YES);
+						org.setMlsSentinelLabFlag(IActionConstants.NO);
 						org.setLastupdated(DateUtil.getNowAsTimestamp());
 						organizationService.insert(org);
 						OrganizationType referringClinicSiteType = organizationTypeService
@@ -747,6 +748,7 @@ public class SampleEntryByProjectController extends BaseSampleEntryController {
 					ElectronicOrder eOrder = eOrders.get(eOrders.size() - 1);
 					eOrder.setStatusId(
 							SpringContext.getBean(IStatusService.class).getStatusID(ExternalOrderStatus.InProgress));
+					eOrder.setSyncFlag(0);
 					electronicOrderService.update(eOrder);
 					form.setElectronicOrder(eOrder);
 				}
@@ -842,23 +844,5 @@ public class SampleEntryByProjectController extends BaseSampleEntryController {
 	@Override
 	protected String getPageSubtitleKey() {
 		return null;
-	}
-	
-	private ElectronicOrder getEncounterByPatientCodeAndCollectionDate(String patientCode, Date  collectionDate) {
-		ElectronicOrder matchingOrder = null;
-		
-		//get Patient
-		org.openelisglobal.patient.valueholder.Patient currentPatient = patientService.getByExternalId(patientCode);
-		
-		//get ElectronicOrders
-		electronicOrderService.getElectronicOrdersByExternalId(patientCode);
-		
-		//get ServiceRequest
-		
-		
-		//get Encounter
-		
-		
-		return matchingOrder;
 	}
 }

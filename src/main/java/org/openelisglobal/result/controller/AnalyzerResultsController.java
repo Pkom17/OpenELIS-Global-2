@@ -864,7 +864,8 @@ public class AnalyzerResultsController extends BaseController {
 		List<Note> noteList = new ArrayList<>();
 
 		// we're not setting the sample status because this doesn't change it.
-		sample.setEnteredDate(new Date(new java.util.Date().getTime()));
+		//sample.setEnteredDate(new Date(new java.util.Date().getTime())); -- should not update the entered date, lastUpdated instead
+		sample.setLastupdated(DateUtil.getNowAsTimestamp());
 		sample.setSysUserId(getSysUserId(request));
 
 		Patient patient = sampleHumanService.getPatientForSample(sample);
@@ -945,7 +946,8 @@ public class AnalyzerResultsController extends BaseController {
 		if (SpringContext.getBean(IStatusService.class).getStatusID(OrderStatus.Entered).equals(sample.getStatusId())) {
 			sample.setStatusId(SpringContext.getBean(IStatusService.class).getStatusID(OrderStatus.Started));
 		}
-		sample.setEnteredDate(new Date(new java.util.Date().getTime()));
+		//sample.setEnteredDate(new Date(new java.util.Date().getTime()));
+		sample.setLastupdated(DateUtil.getNowAsTimestamp());
 		sample.setSysUserId(getSysUserId(request));
 
 		Patient patient = sampleHumanService.getPatientForSample(sample);
@@ -982,7 +984,8 @@ public class AnalyzerResultsController extends BaseController {
 		if (SpringContext.getBean(IStatusService.class).getStatusID(OrderStatus.Entered).equals(sample.getStatusId())) {
 			sample.setStatusId(SpringContext.getBean(IStatusService.class).getStatusID(OrderStatus.Started));
 		}
-		sample.setEnteredDate(new Date(new java.util.Date().getTime()));
+		//sample.setEnteredDate(new Date(new java.util.Date().getTime()));
+		sample.setLastupdated(DateUtil.getNowAsTimestamp());
 		sample.setSysUserId(getSysUserId(request));
 
 		SampleItem sampleItem = null;
@@ -1093,7 +1096,8 @@ public class AnalyzerResultsController extends BaseController {
 		sample.setAccessionNumber(groupedAnalyzerResultItems.get(0).getAccessionNumber());
 		sample.setDomain("H");
 		sample.setStatusId(SpringContext.getBean(IStatusService.class).getStatusID(OrderStatus.Started));
-		sample.setEnteredDate(new Date(new java.util.Date().getTime()));
+		//sample.setEnteredDate(new Date(new java.util.Date().getTime()));
+		sample.setLastupdated(DateUtil.getNowAsTimestamp());
 		sample.setReceivedDate(new Date(new java.util.Date().getTime()));
 		sample.setSysUserId(getSysUserId(request));
 

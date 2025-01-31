@@ -128,7 +128,7 @@ function fromDateLessThanToDate(fromDate, toDate) {
 }
 
 
-<!-- Begin
+// Begin
 function checkTime(time)
   {
     var errorMsg = "";
@@ -238,6 +238,8 @@ function initIt() {
     selectOptions[0].defaultSelected = true;  // In case of reset/reload
   }
   selectList.focus();  // Set focus on the selectlist
+  //refresh eorder
+  initiateEOrderSearch();
 }
 
 // Adds a selected item into the picklist by selected value (not by index)

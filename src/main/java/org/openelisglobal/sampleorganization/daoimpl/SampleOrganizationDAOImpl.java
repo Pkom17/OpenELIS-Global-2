@@ -119,4 +119,21 @@ public class SampleOrganizationDAOImpl extends BaseDAOImpl<SampleOrganization, S
         }
         return null;
     }
+    
+    @Transactional
+    @Override
+    public SampleOrganization update(SampleOrganization object) {
+        try {
+        	String sql="UPDATE sample_organization set samp_id = :samp_id, org_id = :org_id, lastupdated=:lastupdated where id = :id";
+        	javax.persistence.Query query = entityManager.createNativeQuery(sql);
+        	query.setParameter("samp_id", Integer.parseInt(object.getSample().getId()));
+        	query.setParameter("org_id", Integer.parseInt(object.getOrganization().getId()));
+        	query.setParameter("lastupdated", object.getLastupdated());
+        	query.setParameter("id", Integer.parseInt(object.getId()));
+        	query.executeUpdate();
+            return object;
+        } catch (HibernateException e) {
+            throw new LIMSRuntimeException("Error in " + this.getClass().getSimpleName() + " " + "save", e);
+        }
+    }
 }

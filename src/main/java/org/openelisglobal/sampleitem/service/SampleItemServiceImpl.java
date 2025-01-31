@@ -45,12 +45,19 @@ public class SampleItemServiceImpl extends BaseObjectServiceImpl<SampleItem, Str
         return baseObjectDAO;
     }
 
+    @Transactional
     @Override
-    public String insert(SampleItem sampleItem) {
+    public String insert(SampleItem sampleItem) {    	
         if (sampleItem.getFhirUuid() == null) {
             sampleItem.setFhirUuid(UUID.randomUUID());
         }
-        return super.insert(sampleItem);
+        return baseObjectDAO.insert(sampleItem);
+    }
+   
+    @Transactional
+    @Override
+    public SampleItem update(SampleItem sampleItem) {
+        return baseObjectDAO.update(sampleItem);
     }
 
     @Override

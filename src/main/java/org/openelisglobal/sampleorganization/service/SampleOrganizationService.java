@@ -10,4 +10,8 @@ public interface SampleOrganizationService extends BaseObjectService<SampleOrgan
     void getDataBySample(SampleOrganization sampleOrg);
 
     SampleOrganization getDataBySample(Sample sample);
+    
+    public String insert(SampleOrganization sampleOrg);
+
+    public SampleOrganization update(SampleOrganization sampleOrg);
 }

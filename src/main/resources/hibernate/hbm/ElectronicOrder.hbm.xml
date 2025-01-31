@@ -18,7 +18,7 @@
 		<version name="lastupdated" column="LASTUPDATED"
 			type="timestamp" access="field" />
 		<property name="orderTimestamp" type="java.sql.Timestamp">
-			<column name="ORDER_TIMESTAMP" length="7" not-null="true" />
+			<column name="ORDER_TIMESTAMP" length="30" not-null="true" />
 		</property>
 		<property name="externalId" type="java.lang.String">
 			<column name="EXTERNAL_ID" length="60" not-null="true" />
@@ -45,14 +45,23 @@
 				<param name="useNamed">true</param>
 			</type>
 		</property>
-		<property name="rejectReasonId" type="java.lang.String">
+		<property name="rejectReasonId" type="java.lang.Integer">
 			<column name="reject_reason_id" length="10" not-null="false" />
 		</property>
 		<property name="qaAuthorizer" type="java.lang.String">
-			<column name="reject_reason" length="200" not-null="false" />
+			<column name="rejection_author" length="200" not-null="false" />
 		</property> 
 		<property name="rejectComment" type="java.lang.String">
 			<column name="reject_comment" length="60" not-null="false" />
 		</property> 
+		<property name="referringFacilityId" type="java.lang.Integer">
+			<column name="organization_id" length="10" not-null="false" />
+		</property>
+		<property name="collectionDate" type="java.sql.Timestamp">
+			<column name="collection_date"  not-null="false" />
+		</property>
+		<property name="syncFlag" type="java.lang.Integer">
+			<column name="sync_flag" not-null="false" />
+		</property>
 	</class>
 </hibernate-mapping>

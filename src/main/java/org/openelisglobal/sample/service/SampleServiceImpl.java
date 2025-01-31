@@ -43,6 +43,7 @@ import org.openelisglobal.spring.util.SpringContext;
 import org.openelisglobal.statusofsample.service.StatusOfSampleService;
 import org.openelisglobal.statusofsample.valueholder.StatusOfSample;
 import org.openelisglobal.test.service.TestService;
+import org.openelisglobal.test.valueholder.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
@@ -102,6 +103,11 @@ public class SampleServiceImpl extends BaseObjectServiceImpl<Sample, String> imp
             sample.setFhirUuid(UUID.randomUUID());
         }
         return super.insert(sample);
+    }
+    
+    @Override
+    public Sample update(Sample sample) {
+        return super.update(sample);
     }
 
     @Override
@@ -597,5 +603,11 @@ public class SampleServiceImpl extends BaseObjectServiceImpl<Sample, String> imp
     public List<Sample> getSamplesByPriority(OrderPriority priority) {
         return sampleDAO.getSamplesByPriority(priority);
     }
+
+	@Override
+	public List<Sample> getSampleByPatientAndTestAndCollectionDate(String patientIdentifier, Test test,
+			Date collectionDate) {
+		return sampleDAO.getSampleByPatientAndTestAndCollectionDate(patientIdentifier, test, collectionDate);
+	}
 
 }

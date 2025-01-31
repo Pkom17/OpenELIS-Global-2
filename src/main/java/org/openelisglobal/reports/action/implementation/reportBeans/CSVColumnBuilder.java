@@ -41,6 +41,7 @@ import org.openelisglobal.common.log.LogEvent;
 import org.openelisglobal.common.services.IStatusService;
 import org.openelisglobal.common.services.StatusService;
 import org.openelisglobal.common.services.StatusService.AnalysisStatus;
+import org.openelisglobal.common.services.StatusService.ExternalOrderStatus;
 import org.openelisglobal.common.services.StatusService.OrderStatus;
 import org.openelisglobal.common.util.DateUtil;
 import org.openelisglobal.common.util.StringUtil;
@@ -135,7 +136,7 @@ abstract public class CSVColumnBuilder {
     protected String validStatusId;
 
     protected static final SimpleDateFormat postgresDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    private static final SimpleDateFormat postgresDateTime = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+    private static final SimpleDateFormat postgresDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     protected ResultSet resultSet;
 
@@ -224,7 +225,7 @@ abstract public class CSVColumnBuilder {
         DICT_RAW, // dictionary localized value, no attempts at trimming to show just code number.
         DATE, // date (i.e. 01/01/2013)
         DATE_TIME, // date with time (i.e. 01/01/2013 12:12:00)
-        NONE, GENDER, DROP_ZERO, TEST_RESULT, GEND_CD4, SAMPLE_STATUS, PROJECT, LOG, // results is a real number, but
+        NONE, GENDER, DROP_ZERO, TEST_RESULT, GEND_CD4, SAMPLE_STATUS, PROJECT, LOG, EORDER_STATUS, // results is a real number, but
                                                                                      // display the log of it.
         AGE_YEARS, AGE_MONTHS, AGE_WEEKS, DEBUG, CUSTOM, // special handling which is encapsulated in an instance of
                                                          // ICSVColumnCustomStrategy
@@ -422,7 +423,7 @@ abstract public class CSVColumnBuilder {
             case SAMPLE_STATUS:
                 OrderStatus orderStatus = SpringContext.getBean(IStatusService.class).getOrderStatusForID(value);
                 if (orderStatus == null) {
-                    return "?";
+                    return "Not defined";
                 }
                 switch (orderStatus) {
                 case Entered:
@@ -434,10 +435,27 @@ abstract public class CSVColumnBuilder {
                 case NonConforming_depricated:
                     return "Non-conforming"; // Non-conforming, Non-conformes
                 }
+            case EORDER_STATUS:
+                ExternalOrderStatus eorderStatus = SpringContext.getBean(IStatusService.class).getExternalOrderStatusForID(value);
+                if (eorderStatus == null) {
+                    return "Not defined";
+                }
+                switch (eorderStatus) {
+                case Entered:
+                    return "Entered"; // entered, entree
+                case InProgress:
+                    return "InProgress"; // commenced, commence
+                case Cancelled:
+                    return "Cancelled"; // Cancelled by lab staff
+                case NonConforming:
+                    return "Rejected"; // Non-conforming, Non-conformes
+                case Completed:
+                    return "Completed"; // Finished
+                }
 			case ANALYSIS_STATUS:
 				AnalysisStatus analysisStatus = StatusService.getInstance().getAnalysisStatusForID(value);
 				if (analysisStatus == null)
-					return "?";
+					return "Not defined";
 				switch (analysisStatus) {
 				case SampleRejected:
 					return "Reject"; // rejété, entr�e

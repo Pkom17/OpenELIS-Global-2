@@ -59,8 +59,6 @@ import org.openelisglobal.resultvalidation.service.ResultValidationService;
 import org.openelisglobal.resultvalidation.util.ResultValidationSaveService;
 import org.openelisglobal.resultvalidation.util.ResultsValidationUtility;
 import org.openelisglobal.role.service.RoleService;
-import org.openelisglobal.sample.form.SampleEntryByProjectForm;
-import org.openelisglobal.sample.service.SampleService;
 import org.openelisglobal.sample.valueholder.Sample;
 import org.openelisglobal.samplehuman.service.SampleHumanService;
 import org.openelisglobal.spring.util.SpringContext;
@@ -404,7 +402,7 @@ public class ResultValidationController extends BaseResultValidationController {
 						analysis.setReleasedDate(new java.sql.Date(Calendar.getInstance().getTimeInMillis()));
 						analysisIdList.add(analysis.getId());
 						analysisUpdateList.add(analysis);
-						updateElectronicOrderStatus(analysis, ExternalOrderStatus.Realized);
+						updateElectronicOrderStatus(analysis, ExternalOrderStatus.Completed);
 					}
 
 					if (analysisItem.getIsRejected()) {
@@ -442,6 +440,7 @@ public class ResultValidationController extends BaseResultValidationController {
 					ElectronicOrder eOrder = eOrders.get(eOrders.size() - 1);
 					eOrder.setStatusId(
 							SpringContext.getBean(IStatusService.class).getStatusID(status));
+					eOrder.setSyncFlag(0);
 					electronicOrderService.update(eOrder);
 				}
 			}

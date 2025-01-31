@@ -67,6 +67,7 @@ public class VLReportData {
     private String sampleQAEventNotes = "";
     private String virologyVlQaEvent = null;
     private String receptionQaEvent = null;
+    private boolean nonSuppressed = false;
 
     private Map<String, String> previousResultMap = new HashMap<>();
 
@@ -357,4 +358,12 @@ public class VLReportData {
 		this.releasedate = releasedate;
 	}
 
+	public boolean isNonSuppressed() {
+		return nonSuppressed;
+	}
+
+	public void setNonSuppressed(boolean nonSuppressed) {
+		this.nonSuppressed = nonSuppressed;
+	}
+	
 }

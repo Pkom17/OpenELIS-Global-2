@@ -29,7 +29,11 @@ public class ElectronicOrderDisplayItem {
     
     private String patientUpid;
 
+    private String creationDateDisplay;
+    
     private String requestDateDisplay;
+    
+    private String receivedDateDisplay;
     
     private String collectionDateDisplay;
 
@@ -57,7 +61,7 @@ public class ElectronicOrderDisplayItem {
 
     private String gender;
     
-    private String qaEventId;
+    private Integer qaEventId;
 
     public String getBirthDate() {
         return birthDate;
@@ -215,12 +219,28 @@ public class ElectronicOrderDisplayItem {
 		this.collectionDateDisplay = collectionDateDisplay;
 	}
 
-	public String getQaEventId() {
+	public String getReceivedDateDisplay() {
+		return receivedDateDisplay;
+	}
+
+	public void setReceivedDateDisplay(String receivedDateDisplay) {
+		this.receivedDateDisplay = receivedDateDisplay;
+	}
+
+	public Integer getQaEventId() {
 		return qaEventId;
 	}
 
-	public void setQaEventId(String qaEventId) {
+	public void setQaEventId(Integer qaEventId) {
 		this.qaEventId = qaEventId;
+	}
+
+	public String getCreationDateDisplay() {
+		return creationDateDisplay;
+	}
+
+	public void setCreationDateDisplay(String creationDateDisplay) {
+		this.creationDateDisplay = creationDateDisplay;
 	}
 	
 }

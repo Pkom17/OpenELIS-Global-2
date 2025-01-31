@@ -135,13 +135,14 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 		this.validators["VL_Id"] = new FieldValidator();
 		this.validators["VL_Id"].setRequiredFields(new Array(
 				"vl.centerCode","vl.receivedDateForDisplay", "vl.interviewDate", "vl.gender",
-				"vl.dateOfBirth", "subjectOrSiteSubject", "vl.labNo","vl.hivStatus"));
+				"vl.dateOfBirth", "subjectOrSiteSubject", "vl.labNo","vl.hivStatus",
+				"vl.vlSuckle","vl.vlPregnancy"));
 
 		this.validators["Recency_Id"] = new FieldValidator();
 		this.validators["Recency_Id"].setRequiredFields(new Array(
 				"rt.centerCode", "rt.receivedDateForDisplay",
 				"rt.interviewDate", "rt.gender", "rt.labno", "rt.asanteTest",
-				"rt.dateOfBirth"));
+				"rt.dateOfBirth","vl.vlSuckle","vl.vlPregnancy"));
 		this.validators["HPV_Id"] = new FieldValidator();
 		this.validators["HPV_Id"].setRequiredFields(new Array("hpv.centerCode", "hpv.interviewDate", "hpv.siteSubjectNumber", "hpv.labNo","hpv.dateOfBirth"));
 
@@ -2409,7 +2410,7 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 				<td class="required">*</td>
 				<td><spring:message code="patient.project.gender" /></td>
 				<td><form:select path="gender" id="vl.gender"
-						onchange="vl.checkGender(true);vl.checkGenderForVlPregnancyOrSuckle()">
+						onchange="vl.checkGender(true);">
 						<form:option value="">&nbsp;</form:option>
 						<form:options items="${form.formLists['GENDERS']}"
 							itemLabel="localizedName" itemValue="id" />
@@ -2839,7 +2840,7 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 				<td class="required">*</td>
 				<td><spring:message code="patient.project.gender" /></td>
 				<td><form:select path="gender" id="rt.gender"
-						onchange="rt.checkGender(true);rt.checkGenderForVlPregnancyOrSuckle()">
+						onchange="rt.checkGender(true);">
 						<form:option value="">&nbsp;</form:option>
 						<form:options items="${form.formLists['GENDERS']}"
 							itemLabel="localizedName" itemValue="id" />
@@ -3377,8 +3378,8 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 		initializeStudySelection();
 		studies.initializeProjectChecker();
 		projectChecker == null || projectChecker.refresh();
-		vl.checkGenderForVlPregnancyOrSuckle();
-		rt.checkGenderForVlPregnancyOrSuckle();
+		//vl.checkGenderForVlPregnancyOrSuckle();
+		//rt.checkGenderForVlPregnancyOrSuckle();
 		jQuery('.centerCodeClass').select2();
 	}
 

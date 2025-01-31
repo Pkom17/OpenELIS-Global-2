@@ -4,6 +4,7 @@
 	import="org.openelisglobal.common.formfields.FormFields,
 	org.openelisglobal.sample.util.AccessionNumberUtil,
 	        org.openelisglobal.common.formfields.FormFields.Field,
+	        org.openelisglobal.common.services.PhoneNumberService,
 	        org.openelisglobal.common.util.ConfigurationProperties,
 	        org.openelisglobal.common.util.IdValuePair,
 	        org.openelisglobal.common.util.ConfigurationProperties.Property,
@@ -29,10 +30,13 @@
 
 <link rel="stylesheet" type="text/css" href="css/jquery.asmselect.css?" />
 <script type="text/javascript" src="select2/js/select2.min.js"></script>
-<link rel="stylesheet" type="text/css" href="select2/css/select2.min.css">
+<link rel="stylesheet" type="text/css"
+	href="select2/css/select2.min.css">
 <script type="text/javascript" src="scripts/jquery_ui/jquery-ui.min.js"></script>
-<link rel="stylesheet" type="text/css" href="scripts/jquery_ui/jquery-ui.min.css"/>
-<link rel="stylesheet" type="text/css" href="scripts/jquery_ui/jquery-ui.theme.min.css"/>
+<link rel="stylesheet" type="text/css"
+	href="scripts/jquery_ui/jquery-ui.min.css" />
+<link rel="stylesheet" type="text/css"
+	href="scripts/jquery_ui/jquery-ui.theme.min.css" />
 
 
 <script type="text/javascript">
@@ -40,7 +44,7 @@ fieldValidator = new FieldValidator();
 fieldValidator.setRequiredFields(
 		new Array('labNo','requestDate','receivedDate','referringSiteCode',
 				'lastNameID','dateOfBirthID','genderID',
-				'tbSpecimenNature','tbOrderReasons','tbDiagnosticMethods'));
+				'tbSpecimenNature_0','tbOrderReasons','tbDiagnosticMethods_0'));
 		
 function /*void*/setSaveButton() {
 	var validToSave = fieldValidator.isAllValid();
@@ -54,6 +58,30 @@ function /*void*/setSaveButton() {
 		} else {
 			hideSection(button, targetId);
 		}
+	}
+	
+	function validatePhoneNumber( phoneElement){
+	    validatePhoneNumberOnServer( phoneElement, processPhoneSuccess);
+	}
+	
+	function  processPhoneSuccess(xhr){
+
+	    var formField = xhr.responseXML.getElementsByTagName("formfield").item(0);
+	    var message = xhr.responseXML.getElementsByTagName("message").item(0);
+	    var success = false;
+
+	    if (message.firstChild.nodeValue == "valid"){
+	        success = true;
+	    }
+	    var labElement = formField.firstChild.nodeValue;
+	    selectFieldErrorDisplay( success, $(labElement));
+	    setSampleFieldValidity( success, labElement);
+
+	    if( !success ){
+	        alert( message.firstChild.nodeValue );
+	    }
+
+	    setSave();
 	}
 
 	function showSection(button, targetId) {
@@ -82,7 +110,7 @@ function /*void*/setSaveButton() {
 		var elm = jQuery("#tbOrderReasons");
 		toggleField(elm[0].selectedIndex === 1, "tbDiagnosticReasonsRow");
 		toggleField(elm[0].selectedIndex === 2, "tbFollowupReasonsRow");
-		toggleField(elm[0].selectedIndex === 2, "tbSubjectNumberRow");
+		//toggleField(elm[0].selectedIndex === 2, "tbSubjectNumberRow");
 		setOrderModified();
 	}
 	
@@ -93,12 +121,93 @@ function /*void*/setSaveButton() {
 		setOrderModified();
 	}
 	
-	function toggleTBSampleAspects() {
-		var elm = jQuery("#tbDiagnosticMethodsRow");
-		var selectedIndices = jQuery("#tbDiagnosticMethodsRow :selected").map((_, e) => e.index).get();
-		toggleField(selectedIndices.includes(2), "tbAspectsRow");
+	function toggleTBSampleAspects(index) {
+		var elm = jQuery("#tbDiagnosticMethodsRow_"+index);
+		var selectedIndices = jQuery("#tbDiagnosticMethodsRow_"+index+" :selected").map((_, e) => e.index).get();
+		toggleField(selectedIndices.includes(2), "tbAspectsRow_"+index);
 		setOrderModified();
 	}
+	
+	function removeSampleItem(index){
+		var blockToRemove = document.getElementById("sampleItemEntryBlock_"+index);
+		blockToRemove.remove();
+		var indexField = document.getElementById('sampleItemCount');
+        var indexValue = indexField.value;
+        const newIndex = parseInt(indexValue) - 1;
+        
+        indexField.value = newIndex;
+        
+        if(newIndex < 2){
+        	document.getElementById("addSamppleItemButton").removeAttribute("disabled");
+		}
+        
+		//add required fields
+		fieldValidator.removeRequiredField('tbSpecimenNature_'+(newIndex+1));
+		fieldValidator.removeRequiredField('tbDiagnosticMethods_'+(newIndex+1));
+		
+	}
+	 
+	    function addSampleItem() {
+
+	        var indexField = document.getElementById('sampleItemCount');
+	        var indexValue = parseInt(indexField.value);
+	        const newIndex = indexValue + 1;
+	    	
+	    	var template = '<div id="sampleItemEntryBlock_%i" class="sampleItemEntryBlock"><hr/> <div id="sampleItemEntryItem_%i" class="sampleItemEntryItem">';
+	    	template+= '<table> <tr> <td colspan="4">%j<br /></td> </tr> <tr> <td> <spring:message code="sample.tb.specimen.nature" htmlEscape="true"/> :';
+			template+= '<span class="requiredlabel">*</span></td><td colspan="2">';
+			template+='<select name="tbSampleTests[%i].tbSpecimenNature" onchange="setOrderModified();" id="tbSpecimenNature_%i" class="tbSpecimenNatureClass_%i" style="min-width: 300px">';
+			template+='<option value="">&nbsp;</option><c:forEach items="${form.tbSpecimenNatures}" var="specimenNature"> ';
+			template+='<option value="${specimenNature.id}">${specimenNature.value}</option></c:forEach></select></td><td></td></tr>';
+			template+='<tr id="tbDiagnosticMethodsRow_%i"><td><spring:message code="sample.tb.diagnostic.methods" htmlEscape="true"/>:';
+			template+='<span class="requiredlabel">*</span></td><td colspan="2">';
+			template+='<select name="tbSampleTests[%i].selectedTbMethod" onchange="toggleTBSampleAspects(%i);showPanelAndTests(this,%i);" id="tbDiagnosticMethods_%i" class="tbDiagnosticMethodsClass_%i" style="min-width: 300px">';
+			template+='<option value="">&nbsp;</option> <c:forEach items="${form.tbDiagnosticMethods}" var="diagnosticMethod">';
+			template+='<option value="${diagnosticMethod.id}">${diagnosticMethod.value}</option> </c:forEach> </select></td><td></td></tr>';
+			template+='<tr id="tbAspectsRow_%i"> <td> <spring:message code="sample.tb.aspects" htmlEscape="true"/> : <span class="requiredlabel">*</span></td><td colspan="2">';
+			template+='<select name="tbSampleTests[%i].tbAspect" onchange="setOrderModified();" id="tbAspects_%i" class="tbAspectsClass_%i" style="min-width: 300px">';
+			template+='<option value="">&nbsp;</option><c:forEach items="${form.tbAspects}" var="tbAspect"><option value="${tbAspect.id}">${tbAspect.value}</option></c:forEach></select></td>';
+			template+='<td></td></tr></table><br />';
+			template+='<div id="testSelections_%i" class="testSelections_%i"><table style="margin-left: 1%; width: 60%;" id="addTables_%i">';
+			template+='<tr><td style="width: 30%; vertical-align: top;"> <span class="caption"> <spring:message code="sample.entry.panels" /> </span></td>';
+			template+='<td style="width: 70%; vertical-align: top; margin-left: 3%;"> <span class="caption"> <spring:message code="sample.entry.available.tests" />';
+			template+='</span></td></tr><tr><td style="width: 30%; vertical-align: top;">';
+			template+='<table style="width: 97%" id="addPanelTableContainer_%i" class="table addPanelTableContainer"> <thead>';
+			template+='<tr> <th style="width: 20%">&nbsp;</th> <th style="width: 80%"><spring:message code="sample.entry.panel.name" /></th></tr></thead>';
+			template+='<tbody id="addPanelTable_%i"></tbody></table></td>';
+			template+='<td style="width: 70%; vertical-align: top; margin-left: 3%;"> <table style="width: 97%" id="addTestTableContainer_%i" class="table addTestTableContainer">';
+			template+='<tr> <th style="width: 5%">&nbsp;</th> <th style="width: 50%"><spring:message code="sample.entry.available.test.names" /></th>';
+			template+='<th style="width: 40%; display: none;" id="sectionHead_%i"> Section</th> <th style="width: 20%">&nbsp;</th> </tr>';
+			template+='<tbody id="addTestTable_%i"></tbody> </table> </td></tr></table></div>';
+			template+='<br/><button type="button" onclick="removeSampleItem(%i);"><spring:message code="sample.entry.sample.remove" /></button><br/><br/></div></div>';
+	    	
+	    	
+	        const container = document.getElementById('sampleItemsContainer');
+	        
+	        let htmlContent = ''; 
+	        htmlContent = template.replace(/%i/g, newIndex);
+	        htmlContent = htmlContent.replace(/%j/g, newIndex+1);
+	        
+	        const tempDiv = document.createElement('div');
+	        tempDiv.innerHTML = htmlContent;
+	        const newBlock = tempDiv.firstChild;
+	        
+	        // Append the new block to the container
+	        container.appendChild(newBlock);
+	        indexField.value = newIndex;
+	  		  jQuery('.tbSpecimenNatureClass_'+newIndex).select2();
+			  jQuery('.tbSpecimenNatureClass_'+newIndex).trigger('change');
+	  		  toggleTBSampleAspects(newIndex);
+	  		jQuery('.tbAspectsClass_'+newIndex).select2({width: 'resolve'});
+			jQuery('.tbDiagnosticMethodsClass_'+newIndex).select2();
+			
+			//add required fields
+			fieldValidator.addRequiredField('tbSpecimenNature_'+newIndex);
+			fieldValidator.addRequiredField('tbDiagnosticMethods_'+newIndex);
+	        if(newIndex >= 2){
+	        	document.getElementById("addSamppleItemButton").setAttribute("disabled","disabled");
+			}
+	    }
 	
 	
 	//
@@ -116,8 +225,8 @@ function /*void*/setSaveButton() {
         setCorrectSave();
     }
 	
-	function validateSubjectNumber(field){
-		 const tbNumberFormat = /^[0-9]{2}-[0-9]{5}$/;
+	function validateTbSubjectNumber(field){
+		 const tbNumberFormat = /^[0-9]{5}\/[0-9]{2}$/;
 		 if(field.value){
 			  if(tbNumberFormat.test(field.value)){
 				  field.classList.remove("error");
@@ -128,6 +237,35 @@ function /*void*/setSaveButton() {
 			  }
 		 }
 	}
+	
+	function validateTbResistantSubjectNumber(field){
+		 const tbNumberFormat = /^[0-9]{4}\/[0-9]{2}\/[0-9]{3}$/;
+		 if(field.value){
+			  if(tbNumberFormat.test(field.value)){
+				  field.classList.remove("error");
+				  setCorrectSave();
+			  }
+			  else{
+				  field.classList.add("error");
+			  }
+		 }
+	}
+	
+    function setupTbSubjectNumberFieldListeners() {
+        const field1 = document.getElementById("tbSubjectNumber");
+        const field2 = document.getElementById("tbSubjectNumber_rr");
+
+        field1.addEventListener("input", function () {
+            if (field1.value.length > 0) {
+                field2.value = "";
+            }
+        });
+        field2.addEventListener("input", function () {
+            if (field2.value.length > 0) {
+                field1.value = "";
+            }
+        });
+    }
 	
 	function handleAgeChange(){
 		var ageYears = jQuery("#ageYears").val();
@@ -147,7 +285,7 @@ function /*void*/setSaveButton() {
 
 			year = date.getFullYear();
 
-			var datePattern = '<%=SystemConfiguration.getInstance().getPatternForDateLocale() %>';
+			var datePattern = '<%=SystemConfiguration.getInstance().getPatternForDateLocale()%>';
 			var splitPattern = datePattern.split("/");
 
 			var DOB = "";
@@ -210,7 +348,7 @@ function /*void*/setSaveButton() {
             $("labNo").value = returnedData;
 
         } else {
-            alert("<%= MessageUtil.getMessage("error.accession.no.next") %>");
+            alert("<%=MessageUtil.getMessage("error.accession.no.next")%>");
             $("labNo").value = "";
         }
 
@@ -283,45 +421,52 @@ function /*void*/setSaveButton() {
 		form.action = action;
 		form.submit();
 	}
+	
+	function searchOrder() {
+	var labno = document.getElementById("searchByLabNo").value;
+		if(labno){
+			labno = labno.trim();
+			if ('URLSearchParams' in window) {
+			    var searchParams = new URLSearchParams(window.location.search);
+			    searchParams.set("labnoForSearch", labno);
+			    window.location.search = searchParams.toString();
+			}
+		}
+	}
 </script>
 
 
 
 <div id="tb_container">
-	<%=MessageUtil.getContextualMessage("referring.order.number")%>:
-	<form:input id="externalOrderNumber" path="externalOrderNumber"
-		onchange="checkOrderReferral();makeDirty();" />
-	<input type="button" name="searchExternalButton"
-		value='<%=MessageUtil.getMessage("label.button.search")%>'
-		onclick="checkOrderReferral();makeDirty();">
-	<%=MessageUtil.getContextualMessage("referring.order.not.found")%>
-	<hr style="width: 100%; height: 1px" />
-	<br />
-	<form:hidden path="modified" id="orderModified"/>
-    <form:hidden path="sampleId" id="sampleId"/>
-    
-    <!--  -->
-    <div id=orderSearchSection>
+	<form:hidden path="modified" id="orderModified" />
+	<form:hidden path="sampleId" id="sampleId" />
+	<input type="hidden"
+		value="${empty form.tbSampleTests ? 0 : form.tbSampleTests.size()-1}"
+		id="sampleItemCount">
+
+	<!--  -->
+	<div id=orderSearchSection>
 		<input type="button" name="showHide" value='-'
 			onclick="showHideSection(this, 'orderSearch');" id="orderSearchId">
-		<%=MessageUtil.getContextualMessage("sample.entry.search.label") %>
-		<table id="orderSearchshowHide" style="display:none">
+		<%=MessageUtil.getContextualMessage("sample.entry.search.label")%>
+		<table id="orderSearchshowHide" style="display: none">
 			<tr>
-				<td style="width: 35%"><%=MessageUtil.getContextualMessage("quick.entry.accession.number")%>:</td>
+				<td style="width: 35%"><spring:message
+						code="quick.entry.accession.number" /> :</td>
 				<td style="width: 65%"><form:input path="labnoForSearch"
 						maxlength='<%=Integer.toString(AccessionNumberUtil.getMaxAccessionLength())%>'
-						onchange="" cssClass="text" id="searchByLabNo" />
-					<input type="button" name="searchButton" class="patientSearch" value="<%= MessageUtil.getMessage("label.patient.search")%>"
-           			id="searchButton" onclick="searchOrder()">
-				</td>
+						onchange="" cssClass="text" id="searchByLabNo" /> <input
+					type="button" name="searchButton" class="patientSearch"
+					value="<%=MessageUtil.getMessage("label.patient.search")%>"
+					id="searchButton" onclick="searchOrder()"></td>
 			</tr>
 		</table>
 	</div>
-    
-    <hr style="width: 100%; height: 1px" />
+
+	<hr style="width: 100%; height: 1px" />
 	<br />
-    
-   
+
+
 	<div id=orderEntrySection>
 		<input type="button" name="showHide" value='-'
 			onclick="showHideSection(this, 'orderDisplay');" id="orderSectionId">
@@ -330,7 +475,7 @@ function /*void*/setSaveButton() {
 		<table id="orderDisplayshowHide">
 			<tr>
 				<td style="width: 35%"><%=MessageUtil.getContextualMessage("quick.entry.accession.number")%>
-					:<span	class="requiredlabel">*</span></td>
+					:<span class="requiredlabel">*</span></td>
 				<td style="width: 65%"><form:input path="labNo"
 						maxlength='<%=Integer.toString(AccessionNumberUtil.getMaxAccessionLength())%>'
 						onchange="checkAccessionNumber(this);" cssClass="text" id="labNo" />
@@ -347,7 +492,7 @@ function /*void*/setSaveButton() {
 				<td><spring:message code="sample.entry.requestDate" />: <span
 					class="requiredlabel">*</span><span style="font-size: xx-small;"><%=DateUtil.getDateUserPrompt()%></span></td>
 				<td><form:input path="requestDate" id="requestDate"
-						cssClass="required"
+						cssClass="required" autocomplete="off"
 						onchange="setOrderModified();checkValidEntryDate(this, 'past')"
 						onkeyup="addDateSlashes(this, event);" maxlength="10" />
 			</tr>
@@ -357,6 +502,7 @@ function /*void*/setSaveButton() {
 					style="font-size: xx-small;"><%=DateUtil.getDateUserPrompt()%>
 				</span></td>
 				<td colspan="2"><form:input path="receivedDate"
+						autocomplete="off"
 						onchange="checkValidEntryDate(this, 'past');setOrderModified();"
 						onkeyup="addDateSlashes(this, event);" maxlength="10"
 						cssClass="text required" id="receivedDate" /></td>
@@ -365,7 +511,8 @@ function /*void*/setSaveButton() {
 				<td><%=MessageUtil.getContextualMessage("sample.tb.reference.unit")%>
 					: <span class="requiredlabel">*</span></td>
 				<td colspan="2"><form:select path="referringSiteCode"
-						id="referringSiteCode" cssClass="centerCodeClass" onchange="setOrderModified();">
+						id="referringSiteCode" cssClass="centerCodeClass"
+						onchange="setOrderModified();">
 						<option value=" "></option>
 						<form:options items="${form.referralOrganizations}"
 							itemLabel="value" itemValue="id" />
@@ -410,9 +557,9 @@ function /*void*/setSaveButton() {
 						onchange="" size="25" /></td>
 			</tr>
 			<tr>
-				<td style=""><spring:message code="person.phone" />:</td>
-				<td><form:input path="patientPhone" cssClass="text" onchange=""
-						id="patientPhone" /></td>
+				<td style=""><spring:message code="person.phone" /> : <%=PhoneNumberService.getPhoneFormat()%>:</td>
+				<td><form:input path="patientPhone" cssClass="text"
+						onchange="validatePhoneNumber(this)" id="patientPhone" /></td>
 				<td style=""><spring:message code="person.streetAddress" />:</td>
 				<td><form:input path="patientAddress" cssClass="text" size="25"
 						onchange="" id="patientAddress" /></td>
@@ -421,21 +568,22 @@ function /*void*/setSaveButton() {
 				<td style=""><spring:message code="patient.birthDate" />&nbsp;<%=DateUtil.getDateUserPrompt()%>:
 					<span class="requiredlabel">*</span></td>
 				<td><form:input path="patientBirthDate"
-						onkeyup="addDateSlashes(this,event);"
+						onkeyup="addDateSlashes(this,event);" autocomplete="off"
 						onchange="checkValidEntryDate(this, 'past');convertToAge(this,'ageYears');"
-						id="dateOfBirthID" cssClass="text" size="20" maxlength="10"/>
+						id="dateOfBirthID" cssClass="text" size="20" maxlength="10" />
 					<div id="patientbirthDateMessage" class="blank"></div></td>
 				<td style=""><spring:message code="patient.age" />:</td>
-				<td><form:input path="patientAge"
-						onchange="handleAgeChange();" id="ageYears" cssClass="text"
-						size="3" maxlength="3" placeholder="years" />
+				<td><form:input path="patientAge" onchange="handleAgeChange();"
+						id="ageYears" cssClass="text" size="3" maxlength="3"
+						placeholder="years" />
 					<div class="blank">
 						<spring:message code="years.label" />
 					</div>
 					<div id="ageYearsMessage" class="blank"></div></td>
 				<td style=""><spring:message code="patient.gender" />: <span
 					class="requiredlabel">*</span></td>
-				<td><form:select path="patientGender" id="genderID" onchange="setOrderModified();">
+				<td><form:select path="patientGender" id="genderID"
+						onchange="setOrderModified();">
 
 						<option value=" "></option>
 						<form:options items="${form.genders}" itemLabel="value"
@@ -457,24 +605,12 @@ function /*void*/setSaveButton() {
 		<span class="requiredlabel">*</span>
 		<div id="sampleDisplayshowHide">
 			<table>
-				<tr>
-					<td><%=MessageUtil.getContextualMessage("sample.tb.specimen.nature")%>
-						: <span class="requiredlabel">*</span></td>
-					<td colspan="2"><form:select path="tbSpecimenNature"
-							id="tbSpecimenNature" cssClass="tbSpecimenNatureClass"
-							style="min-width:200px" onchange="setOrderModified();">
-							<option value="">&nbsp;</option>
-							<form:options items="${form.tbSpecimenNatures}" itemLabel="value"
-								itemValue="id" />
-						</form:select></td>
-					<td></td>
-				</tr>
 				<tr id="tbOrderReasonsRow">
 					<td><%=MessageUtil.getContextualMessage("sample.tb.order.reasons")%>
 						: <span class="requiredlabel">*</span></td>
 					<td colspan="2"><form:select path="tbOrderReason"
 							id="tbOrderReasons" cssClass="tbOrderReasonsClass"
-							style="min-width:200px" onchange="toggleOrderReasons();">
+							style="width:300px" onchange="toggleOrderReasons();">
 							<option value="">&nbsp;</option>
 							<form:options items="${form.tbOrderReasons}" itemLabel="value"
 								itemValue="id" />
@@ -483,10 +619,20 @@ function /*void*/setSaveButton() {
 				</tr>
 				<tr id="tbSubjectNumberRow">
 					<td style=""><spring:message code="patient.subject.tbnumber" />:
-						<span class="requiredlabel">*</span></td>
+					</td>
 					<td><form:input path="tbSubjectNumber" id="tbSubjectNumber"
-							onchange="validateSubjectNumber(this, 'subjectNumber');"
-							cssClass="text" /></td>
+							onchange="validateTbSubjectNumber(this);" cssClass="text"
+							style="width:300px" /></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr id="tbRRSubjectNumberRow">
+					<td style=""><spring:message
+							code="patient.subject.tbnumber_rr" />:</td>
+					<td><form:input path="tbSubjectNumberRes"
+							id="tbSubjectNumber_rr"
+							onchange="validateTbResistantSubjectNumber(this);"
+							cssClass="text" style="width:300px" /></td>
 					<td></td>
 					<td></td>
 				</tr>
@@ -495,7 +641,7 @@ function /*void*/setSaveButton() {
 						: <span class="requiredlabel">*</span></td>
 					<td colspan="2"><form:select path="tbDiagnosticReason"
 							id="tbDiagnosticReasons" cssClass="tbDiagnosticReasonsClass"
-							style="min-width:200px" onchange="setOrderModified();">
+							style="width:300px" onchange="setOrderModified();">
 							<option value="">&nbsp;</option>
 							<form:options items="${form.tbDiagnosticReasons}"
 								itemLabel="value" itemValue="id" />
@@ -513,14 +659,16 @@ function /*void*/setSaveButton() {
 								itemValue="id" />
 						</form:select> <span id="tbFollowupPeriodLine1Row"> <form:select
 								path="tbFollowupPeriodLine1" id="tbFollowupPeriodLine1"
-								cssClass="tbFollowupPeriodLine1Class" style="min-width:100px" onchange="setOrderModified();">
+								cssClass="tbFollowupPeriodLine1Class" style="min-width:100px"
+								onchange="setOrderModified();">
 								<option value="">&nbsp;</option>
 								<form:options items="${form.tbFollowupPeriodsLine1}"
 									itemLabel="value" itemValue="id" />
 							</form:select>
 					</span> <span id="tbFollowupPeriodLine2Row"> <form:select
 								path="tbFollowupPeriodLine2" id="tbFollowupPeriodLine2"
-								cssClass="tbFollowupPeriodLine2Class" style="min-width:100px" onchange="setOrderModified();">
+								cssClass="tbFollowupPeriodLine2Class" style="min-width:100px"
+								onchange="setOrderModified();">
 								<option value="">&nbsp;</option>
 								<form:options items="${form.tbFollowupPeriodsLine2}"
 									itemLabel="value" itemValue="id" />
@@ -528,81 +676,247 @@ function /*void*/setSaveButton() {
 					</span></td>
 					<td></td>
 				</tr>
-				<tr id="tbDiagnosticMethodsRow">
-					<td><%=MessageUtil.getContextualMessage("sample.tb.diagnostic.methods")%>:
-						<span class="requiredlabel">*</span></td>
-					<%-- <td colspan="2"><form:select path="newSelectedTbMethods" --%>
-					<td colspan="2"><form:select path="selectedTbMethod"
-							id="tbDiagnosticMethods" multiple="false"
-							cssClass="tbDiagnosticMethodsClass"
-							onchange="toggleTBSampleAspects();showPanelAndTests(this)" style="min-width:300px">
-							<option value="">&nbsp;</option>
-							<form:options items="${form.tbDiagnosticMethods}"
-								itemLabel="value" itemValue="id" />
-						</form:select></td>
-					<td></td>
-				</tr>
-				<tr id="tbAspectsRow">
-					<td><%=MessageUtil.getContextualMessage("sample.tb.aspects")%>
-						: <span class="requiredlabel">*</span></td>
-					<td colspan="2"><form:select path="tbAspect" id="tbAspects"
-							cssClass="tbAspectsClass" style="min-width:200px" onchange="setOrderModified();">
-							<option value="">&nbsp;</option>
-							<form:options items="${form.tbAspects}" itemLabel="value"
-								itemValue="id" />
-						</form:select></td>
-					<td></td>
-				</tr>
 			</table>
-			<br />
-			<div id="testSelections" class="testSelections">
-				<table style="margin-left: 1%; width: 60%;" id="addTables">
-					<tr>
-						<td style="width: 30%; vertical-align: top;"><span
-							class="caption"> <spring:message
-									code="sample.entry.panels" />
-						</span></td>
-						<td style="width: 70%; vertical-align: top; margin-left: 3%;">
-							<span class="caption"> <spring:message
-									code="sample.entry.available.tests" />
-						</span>
-						</td>
-					</tr>
-					<tr>
-						<td style="width: 30%; vertical-align: top;">
-							<table style="width: 97%" id="addPanelTableContainer"
-								class="table addPanelTableContainer">
-								<thead><tr>
-									<th style="width: 20%">&nbsp;</th>
-									<th style="width: 80%"><spring:message
-											code="sample.entry.panel.name" /></th>
-								</tr>
-								</thead>
-								<tbody id="addPanelTable">
-								
-								</tbody>
+		</div>
+		<div id=sampleItemEntrySection>
 
-							</table>
-						</td>
-						<td style="width: 70%; vertical-align: top; margin-left: 3%;">
-							<table style="width: 97%" id="addTestTableContainer" class="table addTestTableContainer">
-								<tr>
-									<th style="width: 5%">&nbsp;</th>
-									<th style="width: 50%"><spring:message
-											code="sample.entry.available.test.names" /></th>
-									<th style="width: 40%; display: none;" id="sectionHead">
-										Section</th>
-									<th style="width: 20%">&nbsp;</th>
-								</tr>
-								<tbody id="addTestTable"></tbody>
+			<div id="sampleItemsContainer">
+				<c:choose>
+					<c:when test="${empty form.tbSampleTests}">
+						<div id="sampleItemEntryBlock_0" class="sampleItemEntryBlock">
+							<div id="sampleItemEntryItem_0" class="sampleItemEntryItem">
+								<form:hidden path="tbSampleTests[0].selectedTests"
+									id="oldSelectedTests_${status.index}" />
+								<table>
+									<tr>
+										<td colspan="4"><br /></td>
+									</tr>
+									<tr>
+										<td><%=MessageUtil.getContextualMessage("sample.tb.specimen.nature")%>:
+											<span class="requiredlabel">*</span></td>
+										<td colspan="2"><select
+											name="tbSampleTests[0].tbSpecimenNature"
+											onchange="setOrderModified();" id="tbSpecimenNature_0"
+											class="tbSpecimenNatureClass_0" style="min-width: 300px">
+												<option value="">&nbsp;</option>
+												<c:forEach items="${form.tbSpecimenNatures}"
+													var="specimenNature">
+													<option value="${specimenNature.id}">${specimenNature.value}</option>
+												</c:forEach>
+										</select></td>
+										<td></td>
+									</tr>
+									<tr id="tbDiagnosticMethodsRow_0">
+										<td><%=MessageUtil.getContextualMessage("sample.tb.diagnostic.methods")%>:
+											<span class="requiredlabel">*</span></td>
+										<td colspan="2"><select
+											name="tbSampleTests[0].selectedTbMethod"
+											onchange="toggleTBSampleAspects(0);showPanelAndTests(this,0);"
+											id="tbDiagnosticMethods_0" class="tbDiagnosticMethodsClass_0"
+											style="min-width: 300px">
+												<option value="">&nbsp;</option>
+												<c:forEach items="${form.tbDiagnosticMethods}"
+													var="diagnosticMethod">
+													<option value="${diagnosticMethod.id}">${diagnosticMethod.value}</option>
+												</c:forEach>
+										</select></td>
+										<td></td>
+									</tr>
+									<tr id="tbAspectsRow_0">
+										<td><%=MessageUtil.getContextualMessage("sample.tb.aspects")%>
+											: <span class="requiredlabel">*</span></td>
+										<td colspan="2"><select name="tbSampleTests[0].tbAspect"
+											onchange="setOrderModified();" id="tbAspects_0"
+											class="tbAspectsClass_0" style="min-width: 300px">
+												<option value="">&nbsp;</option>
+												<c:forEach items="${form.tbAspects}" var="tbAspect">
+													<option value="${tbAspect.id}">${tbAspect.value}</option>
+												</c:forEach>
+										</select></td>
+										<td></td>
+									</tr>
+								</table>
+								<br />
+								<div id="testSelections_0" class="testSelections_0">
+									<table style="margin-left: 1%; width: 60%;" id="addTables_0">
+										<tr>
+											<td style="width: 30%; vertical-align: top;"><span
+												class="caption"> <spring:message
+														code="sample.entry.panels" />
+											</span></td>
+											<td style="width: 70%; vertical-align: top; margin-left: 3%;">
+												<span class="caption"> <spring:message
+														code="sample.entry.available.tests" />
+											</span>
+											</td>
+										</tr>
+										<tr>
+											<td style="width: 30%; vertical-align: top;">
+												<table style="width: 97%" id="addPanelTableContainer_0"
+													class="table addPanelTableContainer">
+													<thead>
+														<tr>
+															<th style="width: 20%">&nbsp;</th>
+															<th style="width: 80%"><spring:message
+																	code="sample.entry.panel.name" /></th>
+														</tr>
+													</thead>
+													<tbody id="addPanelTable_0">
 
-							</table>
-						</td>
-					</tr>
-				</table>
+													</tbody>
+
+												</table>
+											</td>
+											<td style="width: 70%; vertical-align: top; margin-left: 3%;">
+												<table style="width: 97%" id="addTestTableContainer_0"
+													class="table addTestTableContainer">
+													<tr>
+														<th style="width: 5%">&nbsp;</th>
+														<th style="width: 50%"><spring:message
+																code="sample.entry.available.test.names" /></th>
+														<th style="width: 40%; display: none;" id="sectionHead_0">
+															Section</th>
+														<th style="width: 20%">&nbsp;</th>
+													</tr>
+													<tbody id="addTestTable_0"></tbody>
+												</table>
+											</td>
+										</tr>
+									</table>
+								</div>
+							</div>
+						</div>
+					</c:when>
+					<c:otherwise>
+						<c:forEach var="test" items="${form.tbSampleTests}"
+							varStatus="status">
+							<div id="sampleItemEntryBlock_${status.index}"
+								class="sampleItemEntryBlock">
+								<div id="sampleItemEntryItem_${status.index}"
+									class="sampleItemEntryItem">
+									<form:hidden
+										path="tbSampleTests[${status.index}].selectedTests"
+										id="oldSelectedTests_${status.index}" />
+										<form:hidden
+										path="tbSampleTests[${status.index}].sampleItemId"
+										id="sampleItemId_${status.index}" />
+									<table>
+										<tr>
+											<td colspan="4"><br /></td>
+										</tr>
+										<tr>
+											<td><%=MessageUtil.getContextualMessage("sample.tb.specimen.nature")%>:
+												<span class="requiredlabel">*</span></td>
+											<td colspan="2">
+											<form:select
+													path="tbSampleTests[${status.index}].tbSpecimenNature"
+													id="tbSpecimenNature_${status.index}"
+													cssClass="tbSpecimenNatureClass_${status.index}" style="width:300px"
+													onchange="setOrderModified();">
+													<option value="">&nbsp;</option>
+													<form:options items="${form.tbSpecimenNatures}"
+														itemLabel="value" itemValue="id" />
+											</form:select>
+											</td>
+											<td></td>
+										</tr>
+										<tr id="tbDiagnosticMethodsRow_${status.index}">
+											<td><%=MessageUtil.getContextualMessage("sample.tb.diagnostic.methods")%>:
+												<span class="requiredlabel">*</span></td>
+											<td colspan="2"><form:select
+													path="tbSampleTests[${status.index}].selectedTbMethod"
+													id="tbDiagnosticMethods_${status.index}" multiple="false"
+													cssClass="tbDiagnosticMethodsClass_${status.index}"
+													onchange="toggleTBSampleAspects(${status.index});showPanelAndTests(this,${status.index})"
+													style="min-width:300px">
+													<option value="">&nbsp;</option>
+													<form:options items="${form.tbDiagnosticMethods}"
+														itemLabel="value" itemValue="id" />
+												</form:select>
+											</td>
+											<td></td>
+										</tr>
+										<tr id="tbAspectsRow_${status.index}">
+											<td><%=MessageUtil.getContextualMessage("sample.tb.aspects")%>
+												: <span class="requiredlabel">*</span></td>
+											<td colspan="2"><form:select
+													path="tbSampleTests[${status.index}].tbAspect"
+													id="tbAspects_${status.index}"
+													cssClass="tbAspectsClass_${status.index}"
+													style="min-width:300px" onchange="setOrderModified();">
+													<option value="">&nbsp;</option>
+													<form:options items="${form.tbAspects}" itemLabel="value"
+														itemValue="id" />
+												</form:select></td>
+											<td></td>
+										</tr>
+									</table>
+									<br />
+									<div id="testSelections_${status.index}"
+										class="testSelections_${status.index}">
+										<table style="margin-left: 1%; width: 60%;"
+											id="addTables_${status.index}">
+											<tr>
+												<td style="width: 30%; vertical-align: top;"><span
+													class="caption"> <spring:message
+															code="sample.entry.panels" />
+												</span></td>
+												<td
+													style="width: 70%; vertical-align: top; margin-left: 3%;">
+													<span class="caption"> <spring:message
+															code="sample.entry.available.tests" />
+												</span>
+												</td>
+											</tr>
+											<tr>
+												<td style="width: 30%; vertical-align: top;">
+													<table style="width: 97%"
+														id="addPanelTableContainer_${status.index}"
+														class="table addPanelTableContainer">
+														<thead>
+															<tr>
+																<th style="width: 20%">&nbsp;</th>
+																<th style="width: 80%"><spring:message
+																		code="sample.entry.panel.name" /></th>
+															</tr>
+														</thead>
+														<tbody id="addPanelTable_${status.index}">
+
+														</tbody>
+
+													</table>
+												</td>
+												<td
+													style="width: 70%; vertical-align: top; margin-left: 3%;">
+													<table style="width: 97%"
+														id="addTestTableContainer_${status.index}"
+														class="table addTestTableContainer">
+														<tr>
+															<th style="width: 5%">&nbsp;</th>
+															<th style="width: 50%"><spring:message
+																	code="sample.entry.available.test.names" /></th>
+															<th style="width: 40%; display: none;"
+																id="sectionHead_${status.index}">Section</th>
+															<th style="width: 20%">&nbsp;</th>
+														</tr>
+														<tbody id="addTestTable_${status.index}"></tbody>
+													</table>
+												</td>
+											</tr>
+										</table>
+									</div>
+								</div>
+							</div>
+						</c:forEach>
+					</c:otherwise>
+				</c:choose>
 			</div>
 		</div>
-		<hr style="width: 100%; height: 2px" />
+		<br/><br/>
+		<button id="addSamppleItemButton" type="button" onclick="addSampleItem();" ${form.tbSampleTests.size() == 3 ? "disabled=\"disabled\"" : ""}>
+			<spring:message code="sample.entry.sample.new" />
+		</button>
+		<hr style="width: 100%; height: 5px" />
 	</div>
 </div>
 
@@ -610,17 +924,36 @@ function /*void*/setSaveButton() {
 <script type="text/javascript">
 	function pageOnLoad() {
 		jQuery('.centerCodeClass').select2();
-		jQuery('.tbSpecimenNatureClass').select2();
+		jQuery('.centerCodeClass').val(${form.referringSiteId});
+		jQuery('.centerCodeClass').trigger('change');
+		
+	    <c:forEach var="test" items="${form.tbSampleTests}" varStatus="status">
+		  jQuery('.tbSpecimenNatureClass_${status.index}').select2();
+		  jQuery('.tbSpecimenNatureClass_${status.index}').trigger('change');
+      	  jQuery('.tbSpecimenNatureClass_${status.index}').eq(${status.index}).val('${test.tbSpecimenNature}');
+  		  toggleTBSampleAspects(${status.index});
+  		  
+  		jQuery('.tbAspectsClass_${status.index}').select2({width: 'resolve'});
+		jQuery('.tbDiagnosticMethodsClass_${status.index}').select2();
+		
+		showPanelAndTests($('tbDiagnosticMethods_${status.index}'), ${status.index});
+    	</c:forEach>
+	
 		jQuery('.tbOrderReasonsClass').select2();
 		jQuery('.tbDiagnosticReasonsClass').select2();
 		jQuery('.tbFollowupReasonsClass').select2();
 		jQuery('.tbFollowupPeriodLine1Class').select2();
 		jQuery('.tbFollowupPeriodLine2Class').select2();
-		jQuery('.tbDiagnosticMethodsClass').select2();
-		jQuery('.tbAspectsClass').select2();
+
+ 		jQuery('.tbSpecimenNatureClass_0').select2();
+		jQuery('.tbDiagnosticMethodsClass_0').select2();
+		jQuery('.tbAspectsClass_0').select2({width: 'resolve'});
+		toggleTBSampleAspects(0);
+		
+		
 		toggleOrderReasons();
 		toggleTBFollowupPeriodLine();
-		toggleTBSampleAspects();
+		setupTbSubjectNumberFieldListeners();
 		jQuery("#requestDate").datepicker({
 			dateFormat: 'dd/mm/yy',
 			yearRange: "-1:+00"
@@ -639,14 +972,15 @@ function /*void*/setSaveButton() {
 		     maxDate: new Date(),
 		});
 		
-		showPanelAndTests($('tbDiagnosticMethods'));
+ 		showPanelAndTests($('tbDiagnosticMethods_0'),0);
+		
 		
 		hideSection(document.getElementById('orderSearchId') ,'orderSearch');
 		
 		setSaveButton();
 	}
 	
-	function showPanelAndTests(input){	
+	function showPanelAndTests(input,index){	
 		if(!input){
 			return;
 		}
@@ -656,43 +990,55 @@ function /*void*/setSaveButton() {
 			let panelHtml='';
 			jQuery.get( "MicrobiologyTb/panel_test?method="+selectedMethod, function(data) {
 				if(data){
-					jQuery("#addPanelTable").html('');
-					jQuery("#addTestTable").html('');
+					jQuery("#addPanelTable_"+index).html('');
+					jQuery("#addTestTable_"+index).html('');
 					 for (const [key, value] of Object.entries(data.tests)) { 
 							let d = '<tr>';
-							d+='<td><input type="checkbox" value="'+value.id+'" name="newSelectedTests" id="test_'+value.id+'" class="tb_test" /></td>';
-							d+='<td><label for="test_'+value.id+'">'+value.name+'</label></td>';
+							d+='<td><input type="checkbox" value="'+value.id+'" name="tbSampleTests['+index+'].newSelectedTests['+key+']" id="test_'+index+'_'+value.id+'" class="tb_test" /></td>';
+							d+='<td><label for="test_'+index+'_'+value.id+'">'+value.name+'</label></td>';
 							d+='</tr>';
 							testHtml+=d;
 				         } 
-					 jQuery("#addTestTable").append(testHtml);
+					 jQuery("#addTestTable_"+index).append(testHtml);
 					 
 					 for (const [key, value] of Object.entries(data.panels)) { 
 							let d = '<tr>';
-							d+='<td><input type="checkbox" value="'+value.id+'" name="testSelected" id="panel_'+value.id+'" '+ 
-							'onclick="togglePanelSelected(this,\''+value.test_ids+'\')"/></td>';
-							d+='<td><label for="panel_'+value.id+'">'+value.name+'</label></td>';
+							d+='<td><input type="checkbox" value="'+value.id+'" name="tbSampleTests['+index+'].testSelected" id="panel_'+index+'_'+value.id+'" '+ 
+							'onclick="togglePanelSelected(this,'+index+',\''+value.test_ids+'\')"/></td>';
+							d+='<td><label for="panel_'+index+'_'+value.id+'">'+value.name+'</label></td>';
 							d+='</tr>';
 							panelHtml+=d;
 				         } 
-					 jQuery("#addPanelTable").append(panelHtml);
+					 jQuery("#addPanelTable_"+index).append(panelHtml);
+					 
+					 
+					 //
+					 var oldSelectedTests = jQuery('#oldSelectedTests_'+index).val();
+					 if(oldSelectedTests){
+					 oldSelectedTestsArray = oldSelectedTests.split(",");
+						if(oldSelectedTestsArray){							
+							oldSelectedTestsArray.forEach(function (id) {
+								jQuery('#test_'+index+'_'+ id).prop('checked', true).change();
+						    });
+						}
+					 }
 				}
 				else{
-					jQuery("#addPanelTable").html('');
-					jQuery("#addTestTable").html('');
+					jQuery("#addPanelTable_"+index).html('');
+					jQuery("#addTestTable_"+index).html('');
 				}
 				});
 		}
 		else{
-			jQuery("#addPanelTable").html('');
-			jQuery("#addTestTable").html('');
+			jQuery("#addPanelTable_"+index).html('');
+			jQuery("#addTestTable_"+index).html('');
 		}
 	}
 	
-	function togglePanelSelected(panel,testIds){
+	function togglePanelSelected(panel,index,testIds){
 		var testList = testIds.split(',');
 			for (test of testList){
-				document.getElementById("test_"+test).click();
+				document.getElementById('test_'+index+'_'+test).click();
 		}
 	}
 	

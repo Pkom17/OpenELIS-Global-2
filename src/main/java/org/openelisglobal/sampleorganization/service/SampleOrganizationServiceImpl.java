@@ -1,7 +1,10 @@
 package org.openelisglobal.sampleorganization.service;
 
+import java.util.UUID;
+
 import org.openelisglobal.common.service.BaseObjectServiceImpl;
 import org.openelisglobal.sample.valueholder.Sample;
+import org.openelisglobal.sampleitem.valueholder.SampleItem;
 import org.openelisglobal.sampleorganization.dao.SampleOrganizationDAO;
 import org.openelisglobal.sampleorganization.valueholder.SampleOrganization;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,5 +45,17 @@ public class SampleOrganizationServiceImpl extends BaseObjectServiceImpl<SampleO
     @Transactional(readOnly = true)
     public SampleOrganization getDataBySample(Sample sample) {
         return getBaseObjectDAO().getDataBySample(sample);
+    }
+    
+    @Transactional
+    @Override
+    public String insert(SampleOrganization sampleOrg) {
+        return baseObjectDAO.insert(sampleOrg);
+    }
+   
+    @Transactional
+    @Override
+    public SampleOrganization update(SampleOrganization sampleOrg) {
+        return baseObjectDAO.update(sampleOrg);
     }
 }

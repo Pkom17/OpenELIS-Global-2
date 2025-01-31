@@ -41,6 +41,7 @@ import org.openelisglobal.sample.dao.SampleDAO;
 import org.openelisglobal.sample.valueholder.OrderPriority;
 import org.openelisglobal.sample.valueholder.Sample;
 import org.openelisglobal.sampleproject.valueholder.SampleProject;
+import org.openelisglobal.test.valueholder.Test;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -718,4 +719,40 @@ public class SampleDAOImpl extends BaseDAOImpl<Sample, String> implements Sample
 
         return null;
     }
+
+	@Override
+	public List<Sample> getSampleByPatientAndTestAndCollectionDate(String patientIdentifier, Test test, Date collectionDate) {
+		Date startDate = DateUtil.addDaysToSQLDate(collectionDate, -3);
+		Date endDate = DateUtil.addDaysToSQLDate(collectionDate, +3);
+        
+		String hql = " FROM Sample s "
+				+ " WHERE s.id IN ("
+				+ " SELECT si.sample.id "
+				+ " FROM SampleItem si "
+				+ " WHERE ((cast(si.collectionDate as date) BETWEEN  :startDate AND :endDate) "
+				+ " OR s.collectionDate BETWEEN :startDate AND :endDate )) "
+				+ " AND s.id IN ( "
+				+ " SELECT sh.sampleId "
+				+ " FROM SampleHuman sh, Patient p  "
+				+ " WHERE sh.patientId = p.id AND "
+				+ " (lower(p.nationalId) = lower(:patientIdentifier) "
+				+ " OR lower(p.externalId) = lower(:patientIdentifier))"
+				+ " )"
+				+ " AND s.id IN ("
+				+ "    SELECT a.sampleItem.sample.id "
+				+ "    FROM Analysis a "
+				+ "    WHERE a.test.id = :testId "
+				+ ") AND (s.referringId = '' OR s.referringId is null)";
+        try {
+            Query<Sample> query = entityManager.unwrap(Session.class).createQuery(hql, Sample.class);
+            query.setParameter("startDate",  startDate);
+            query.setParameter("endDate",  endDate);// DateUtil.getCurrentDateAsText("yyyy-MM-dd")
+            query.setParameter("patientIdentifier", patientIdentifier);
+            query.setParameter("testId", Integer.parseInt(test.getId()));
+            return query.list();
+        } catch (HibernateException e) {
+        	LogEvent.logDebug("getSampleByPatientAndTestAndCollectionDate", e);
+        }
+        return new ArrayList<Sample>();
+	}
 }

@@ -316,24 +316,32 @@ jQuery(document).ready( function() {
     	<span class="fa" onclick='sort(5)'><i class="fas fa-sort"></i></span>
     </th>
     <th class='split-content'>
-    	<spring:message code="study.eorder.request.date"/>
+    	<spring:message code="study.eorder.creation.date"/>
     	<span class="fa" onclick='sort(6)'><i class="fas fa-sort"></i></span>
     </th>
     <th class='split-content'>
-    	<spring:message code="study.eorder.collection.date"/>
+    	<spring:message code="study.eorder.received.date"/>
     	<span class="fa" onclick='sort(7)'><i class="fas fa-sort"></i></span>
     </th>
     <th class='split-content'>
-    	<spring:message code="study.eorder.request.status"/>
+    	<spring:message code="study.eorder.request.date"/>
     	<span class="fa" onclick='sort(8)'><i class="fas fa-sort"></i></span>
     </th>
     <th class='split-content'>
-    	<spring:message code="study.eorder.request.test_name"/>
+    	<spring:message code="study.eorder.collection.date"/>
     	<span class="fa" onclick='sort(9)'><i class="fas fa-sort"></i></span>
     </th>
     <th class='split-content'>
-    	<spring:message code="study.eorder.lab_number"/>
+    	<spring:message code="study.eorder.request.status"/>
     	<span class="fa" onclick='sort(10)'><i class="fas fa-sort"></i></span>
+    </th>
+    <th class='split-content'>
+    	<spring:message code="study.eorder.request.test_name"/>
+    	<span class="fa" onclick='sort(11)'><i class="fas fa-sort"></i></span>
+    </th>
+    <th class='split-content'>
+    	<spring:message code="study.eorder.lab_number"/>
+    	<span class="fa" onclick='sort(11)'><i class="fas fa-sort"></i></span>
     </th>
 	<th style="background-color:white;" colspan="3">
 		<spring:message code="study.eorder.action.title"/>
@@ -363,6 +371,12 @@ jQuery(document).ready( function() {
 	    </td>
 	    <td class="dateCol">
 	       <c:out value="${eOrder.birthDate}"/>
+	    </td>
+	    <td class="dateCol">
+	       <c:out value="${eOrder.creationDateDisplay}"/>
+	    </td>
+	    <td class="dateCol">
+	       <c:out value="${eOrder.receivedDateDisplay}"/>
 	    </td>
 		<td class="dateCol">
 	       <c:out value="${eOrder.requestDateDisplay}"/>

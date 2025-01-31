@@ -2072,4 +2072,198 @@
 		</sql>
 	</changeSet>
 	
+	
+	<changeSet author="CIV developer Group" id="24111101"
+		context="ci_TB">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">SELECT count(*) FROM clinlims.localization WHERE french = 'Cobas MTB'
+			</sqlCheck>
+		</preConditions>
+		<sql>
+			INSERT INTO clinlims.localization(id, description, english,french, lastupdated) VALUES
+			(nextval('localization_seq'),'test name','Cobas MTB','Cobas MTB',now()),
+			(nextval('localization_seq'),'test report name','Cobas MTB','Cobas MTB',now()),
+			(nextval('localization_seq'),'test name','Tuberculine','Tuberculine',now()),
+			(nextval('localization_seq'),'test report name','Tuberculine','Tuberculine',now());
+		</sql>
+	</changeSet>
+	
+	<changeSet author="CIV developer Group" id="24111201"	context="ci_TB">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">SELECT count(*) FROM
+				clinlims.dictionary WHERE dict_entry = 'MTB Positif' </sqlCheck>
+		</preConditions>
+		<sql>
+			INSERT INTO
+			clinlims.dictionary(id,is_active,dict_entry,lastupdated,local_abbrev,dictionary_category_id,display_key,sort_order,name_localization_id)
+			VALUES
+			(nextval('dictionary_seq'),'Y','MTB Positif',now(),'MTB Pos',null,
+			'dictionary.tb.result.mtb_positive',80101,null),
+			(nextval('dictionary_seq'),'Y','MTB Négatif',now(),'MTB Neg',null,
+			'dictionary.tb.result.mtb_negative',80102,null),
+			(nextval('dictionary_seq'),'Y','MTB Indéterminé',now(),'MTB Ind',null,
+			'dictionary.tb.result.mtb_indetermminate',80103,null),
+			(nextval('dictionary_seq'),'Y','RIF Positif',now(),'RIF Pos',null,
+			'dictionary.tb.result.rif_pos',80104,null),
+			(nextval('dictionary_seq'),'Y','RIF Négatif',now(),'RIF Neg',null,
+			'dictionary.tb.result.rif_neg',80105,null),
+			(nextval('dictionary_seq'),'Y','RIF Indéterminé',now(),'RIF Ind',null,
+			'dictionary.tb.result.rif_ind',80106,null),
+			(nextval('dictionary_seq'),'Y','INH Positif',now(),'INH Pos',null,
+			'dictionary.tb.result.inh_pos',80107,null),
+			(nextval('dictionary_seq'),'Y','INH Négatif',now(),'INH Neg',null,
+			'dictionary.tb.result.inh_neg',80108,null),
+			(nextval('dictionary_seq'),'Y','INH Indéterminé',now(),'INH Ind',null,
+			'dictionary.tb.result.inh_ind',80109,null);
+		</sql>
+	</changeSet>
+	
+	<changeSet author="CIV developer Group" id="24111202" context="ci_TB">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">SELECT count(*) FROM clinlims.test WHERE description = 'Cobas MTB'
+			</sqlCheck>
+		</preConditions>
+		<sql>
+			INSERT INTO clinlims.test(id, method_id, uom_id, description,loinc, reporting_description,sticker_req_flag, is_active,active_begin, active_end, is_reportable,
+			time_holding, time_wait,time_ta_average, time_ta_warning,time_ta_max, label_qty, lastupdated,label_id, test_trailer_id,test_section_id, scriptlet_id,
+			test_format_id, local_code,sort_order, name, orderable,guid,name_localization_id, reporting_name_localization_id,default_test_result_id, notify_results)
+			VALUES
+			(nextval('test_seq'),null,null,'Cobas MTB','',null,null,'Y',null,null,'N',null,null,null,null,null,null,now(),null,null,
+			(select id from test_section where name = 'TB' limit 1),
+			null,null,'Cobas MTB',1,'Cobas MTB','t','23542933-72fd-476b-9891-bf03c4447b7c',
+			(select id from localization where description = 'test name' and french = 'Cobas MTB' limit 1),
+			(select id from localization where description = 'test report name' and french = 'Cobas MTB' limit 1),null,'f'),
+			(nextval('test_seq'),null,null,'Tuberculine','',null,null,'Y',null,null,'N',null,null,null,null,null,null,now(),null,null,
+			(select id from test_section where name = 'TB' limit 1),
+			null,null,'Tuberculine',1,'Tuberculine','t','7abfaeec-e344-45aa-8967-9ab35b94be24',
+			(select id	from localization where description = 'test name' and french = 'Tuberculine' limit 1),
+			(select id from localization where	description = 'test report name' and french = 'Tuberculine' limit 1),null,'f')
+			;
+			
+		</sql>
+	</changeSet>
+	
+	<changeSet author="CIV developer Group" id="24111203"
+		context="ci_TB">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="1">SELECT count(*) FROM clinlims.type_of_sample WHERE description = 'Sputum' OR description = 'Crachat' limit 1
+			</sqlCheck>
+		</preConditions>
+		<sql>
+			INSERT into clinlims.sampletype_test(id, sample_type_id, test_id,is_panel)
+			VALUES 
+			(nextval('sample_type_test_seq'),(select id from type_of_sample where description = 'Sputum' OR description = 'Crachat' limit 1),
+			(select id from test where description = 'Cobas MTB'),'f'),
+			(nextval('sample_type_test_seq'),(select id from type_of_sample where description = 'Liquide pleural'  limit 1),
+			(select id from test where description = 'Cobas MTB'),'f'),
+			(nextval('sample_type_test_seq'),(select id from type_of_sample where description = 'LCR'  limit 1),
+			(select id from test where description = 'Cobas MTB'),'f'),
+			(nextval('sample_type_test_seq'),(select id from type_of_sample where description = 'Pus ganglionnaires'  limit 1),
+			(select id from test where description = 'Cobas MTB'),'f'),
+			(nextval('sample_type_test_seq'),(select id from type_of_sample where description = 'Liquide d’ascite'  limit 1),
+			(select id from test where description = 'Cobas MTB'),'f'),
+			(nextval('sample_type_test_seq'),(select id from type_of_sample where description = 'Liquide articulaire'  limit 1),
+			(select id from test where description = 'Cobas MTB'),'f'),
+			(nextval('sample_type_test_seq'),(select id from type_of_sample where description = 'Selles'  limit 1),
+			(select id from test where description = 'Cobas MTB'),'f'),
+			(nextval('sample_type_test_seq'),(select id from type_of_sample where description = 'Urines'  limit 1),
+			(select id from test where description = 'Cobas MTB'),'f'),
+			(nextval('sample_type_test_seq'),(select id from type_of_sample where description = 'Liquide d’aspiration gastrique'  limit 1),
+			(select id from test where description = 'Cobas MTB'),'f'),
+			(nextval('sample_type_test_seq'),(select id from type_of_sample where description = 'Liquide d’aspiration broncho-alvéolaire'  limit 1),
+			(select id from test where description = 'Cobas MTB'),'f'),
+			(nextval('sample_type_test_seq'),(select id from type_of_sample where description = 'Sputum' OR description = 'Crachat' limit 1),
+			(select id from test where description = 'Tuberculine'),'f'),
+			(nextval('sample_type_test_seq'),(select id from type_of_sample where description = 'Liquide pleural'  limit 1),
+			(select id from test where description = 'Tuberculine'),'f'),
+			(nextval('sample_type_test_seq'),(select id from type_of_sample where description = 'LCR'  limit 1),
+			(select id from test where description = 'Tuberculine'),'f'),
+			(nextval('sample_type_test_seq'),(select id from type_of_sample where description = 'Pus ganglionnaires'  limit 1),
+			(select id from test where description = 'Tuberculine'),'f'),
+			(nextval('sample_type_test_seq'),(select id from type_of_sample where description = 'Liquide d’ascite'  limit 1),
+			(select id from test where description = 'Tuberculine'),'f'),
+			(nextval('sample_type_test_seq'),(select id from type_of_sample where description = 'Liquide articulaire'  limit 1),
+			(select id from test where description = 'Tuberculine'),'f'),
+			(nextval('sample_type_test_seq'),(select id from type_of_sample where description = 'Selles'  limit 1),
+			(select id from test where description = 'Tuberculine'),'f'),
+			(nextval('sample_type_test_seq'),(select id from type_of_sample where description = 'Urines'  limit 1),
+			(select id from test where description = 'Tuberculine'),'f'),
+			(nextval('sample_type_test_seq'),(select id from type_of_sample where description = 'Liquide d’aspiration gastrique'  limit 1),
+			(select id from test where description = 'Tuberculine'),'f'),
+			(nextval('sample_type_test_seq'),(select id from type_of_sample where description = 'Liquide d’aspiration broncho-alvéolaire'  limit 1),
+			(select id from test where description = 'Tuberculine'),'f');
+		</sql>
+	</changeSet>
+	
+	 <changeSet author="CIV developer Group" id="24111204"	context="ci_TB">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">SELECT count(*) FROM clinlims.result_limits WHERE test_id =
+				(select id from clinlims.test where description = 'Cobas MTB')
+			</sqlCheck>
+		</preConditions>
+		<sql>
+			INSERT INTO clinlims.result_limits(id, test_id,test_result_type_id,min_age, max_age, gender, low_normal,
+			high_normal, low_valid,high_valid, lastupdated, normal_dictionary_id,always_validate)
+			VALUES 
+			(nextval('result_limits_seq'),(select id from test where description = 'Cobas MTB'),
+			2,0,'Infinity',null,'-Infinity','Infinity','-Infinity','Infinity',now(),null,'f'),
+			(nextval('result_limits_seq'),(select id from test where description = 'Tuberculine'),
+			2,0,'Infinity',null,'-Infinity','Infinity','-Infinity','Infinity',now(),null,'f');
+		</sql>
+	</changeSet>
+	
+	<changeSet author="CIV developer Group" id="24111205" context="ci_TB">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">SELECT count(*) FROM
+				clinlims.test_result WHERE test_id =(select id from clinlims.test where description = 'Cobas MTB')
+			</sqlCheck>
+		</preConditions>
+		<sql>
+			INSERT INTO
+			clinlims.test_result(id,test_id,result_group,flags,tst_rslt_type,value,significant_digits,quant_limit,cont_level,lastupdated,scriptlet_id,sort_order,
+			is_quantifiable,is_active,is_normal) VALUES
+			(nextval('test_result_seq'), (select id from test where description = 'Cobas MTB'),null,null,'D',
+			(select id from dictionary where dict_entry = 'MTB Positif' limit 1),null,null,null,now(),null,1,'f','t','f'),
+			(nextval('test_result_seq'), (select id from test where description = 'Cobas MTB'),null,null,'D',
+			(select id from dictionary where dict_entry = 'MTB Négatif' limit 1),null,null,null,now(),null,1,'f','t','f'),
+			(nextval('test_result_seq'), (select id from test where description = 'Cobas MTB'),null,null,'D',
+			(select id from dictionary where dict_entry = 'MTB Indéterminé' limit 1),null,null,null,now(),null,1,'f','t','f'),
+			(nextval('test_result_seq'), (select id from test where description = 'Cobas MTB'),null,null,'D',
+			(select id from dictionary where dict_entry = 'RIF Positif' limit 1),null,null,null,now(),null,1,'f','t','f'),
+			(nextval('test_result_seq'), (select id from test where description = 'Cobas MTB'),null,null,'D',
+			(select id from dictionary where dict_entry = 'RIF Négatif' limit 1),null,null,null,now(),null,1,'f','t','f'),
+			(nextval('test_result_seq'), (select id from test where description = 'Cobas MTB'),null,null,'D',
+			(select id from dictionary where dict_entry = 'RIF Indéterminé' limit 1),null,null,null,now(),null,1,'f','t','f'),
+			(nextval('test_result_seq'), (select id from test where description = 'Cobas MTB'),null,null,'D',
+			(select id from dictionary where dict_entry = 'INH Positif' limit 1),null,null,null,now(),null,1,'f','t','f'),
+			(nextval('test_result_seq'), (select id from test where description = 'Cobas MTB'),null,null,'D',
+			(select id from dictionary where dict_entry = 'INH Négatif' limit 1),null,null,null,now(),null,1,'f','t','f'),
+			(nextval('test_result_seq'), (select id from test where description = 'Cobas MTB'),null,null,'D',
+			(select id from dictionary where dict_entry = 'INH Indéterminé' limit 1),null,null,null,now(),null,1,'f','t','f'),
+			(nextval('test_result_seq'), (select id from test where description = 'Tuberculine'),null,null,'D',
+			(select id from dictionary where dict_entry = 'Positif' limit 1),null,null,null,now(),null,1,'f','t','f'),
+			(nextval('test_result_seq'), (select id from test where description = 'Tuberculine'),null,null,'D',
+			(select id from dictionary where dict_entry = 'Négatif' limit 1),null,null,null,now(),null,1,'f','t','f');
+		</sql>
+	</changeSet>
+	
+		<changeSet author="CIV developer Group" id="24111206"
+		context="ci_TB">
+		<preConditions onFail="MARK_RAN">
+			<tableExists tableName="tb_method_test" />
+			<sqlCheck expectedResult="1">
+				SELECT count(*) FROM dictionary WHERE dict_entry ='Diagnostic moléculaire TB'	LIMIT 1
+			</sqlCheck>
+		</preConditions>
+		<sql>
+			INSERT INTO clinlims.tb_method_test(id,method_id,test_id,is_active) VALUES
+			(nextval('tb_method_test_seq'), (select id from dictionary where
+			dict_entry ='Diagnostic moléculaire TB' limit 1),
+			(select id from test where name = 'Cobas MTB' limit 1),'Y'),
+			(nextval('tb_method_test_seq'), (select id from dictionary where
+			dict_entry ='Diagnostic Immunologique TB' limit 1),
+			(select id from test where name ='Tuberculine' limit 1),'Y');
+		</sql>
+	</changeSet>
+	
 </databaseChangeLog>

@@ -10,6 +10,7 @@ import javax.validation.Valid;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -135,7 +136,12 @@ public class StudyElectronicOrdersController extends BaseController {
 			@ModelAttribute("form") @Valid ElectronicOrderViewForm form, BindingResult result) {
 		try {
 			String externalOrderNumber = request.getParameter("externalOrderId");
-			String qaEventId = request.getParameter("qaEventId");
+			String qaEventIdString = request.getParameter("qaEventId");
+			Integer qaEventId = null;
+			try {
+				qaEventId = Integer.parseInt(qaEventIdString);
+			} catch (Exception e) {
+			}
 			String qaAuthorizer = request.getParameter("qaAuthorizer");
 			String qaNote = request.getParameter("qaNote");
 			String searchType = request.getParameter("searchType");
@@ -154,8 +160,6 @@ public class StudyElectronicOrdersController extends BaseController {
 				if (eOrder != null) {
 
 					IGenericClient localFhirClient = fhirUtil.getLocalFhirClient();
-					// IGenericClient remoteFhirClient =
-					// fhirUtil.getFhirClient(defaultRemoteServer);
 					for (String remotePath : fhirConfig.getRemoteStorePaths()) {
 						Bundle srBundle = (Bundle) localFhirClient.search().forResource(ServiceRequest.class)
 								.where(ServiceRequest.RES_ID.exactly().code(externalOrderNumber))
@@ -183,11 +187,12 @@ public class StudyElectronicOrdersController extends BaseController {
 					eOrder.setRejectReasonId(qaEventId);
 					eOrder.setRejectComment(qaNote);
 					eOrder.setQaAuthorizer(qaAuthorizer);
+					eOrder.setSyncFlag(0);
 					electronicOrderService.update(eOrder);
 					// update Task
 					task = fhirPersistanceService.getTaskBasedOnServiceRequest(externalOrderNumber).orElseThrow();
 					task.setStatus(TaskStatus.REJECTED);
-					QaEvent event = qaEventService.get(qaEventId);
+					QaEvent event = qaEventService.get((qaEventId != null) ? qaEventId.toString() : "");
 					String rejectionReasonText = getMessageForKey(
 							ObjectUtils.isNotEmpty(event) ? event.getNameKey() : "");
 					rejectionReasonText += " " + (ObjectUtils.isNotEmpty(qaNote) ? "/ " + qaNote : "");
@@ -256,6 +261,7 @@ public class StudyElectronicOrdersController extends BaseController {
 					}
 					eOrder.setStatusId(
 							SpringContext.getBean(IStatusService.class).getStatusID(ExternalOrderStatus.Cancelled));
+					eOrder.setSyncFlag(0);
 					electronicOrderService.update(eOrder);
 					// update Task
 					task = fhirPersistanceService.getTaskBasedOnServiceRequest(externalOrderNumber).orElseThrow();
@@ -283,6 +289,7 @@ public class StudyElectronicOrdersController extends BaseController {
 			displayItem.setExternalOrderId(electronicOrder.getExternalId());
 			displayItem.setPriority(electronicOrder.getPriority());
 			displayItem.setQaEventId(electronicOrder.getRejectReasonId());
+			displayItem.setReceivedDateDisplay(DateUtil.formatDateTimeAsText(electronicOrder.getOrderTimestamp()));
 
 			Patient patient = electronicOrder.getPatient();
 			if (patient != null) {
@@ -296,10 +303,10 @@ public class StudyElectronicOrdersController extends BaseController {
 				displayItem.setWarnings(Arrays.asList(errorMsg));
 			}
 			Task task = fhirUtil.getFhirParser().parseResource(Task.class, electronicOrder.getData());
+			displayItem.setCreationDateDisplay(DateUtil.formatDateTimeAsText(task.getAuthoredOn()));
 			for (ParameterComponent parameter : task.getInput()) {
-				if (parameter.getType().getCodingFirstRep().getCode().equals("CI0050005AAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // VL
-																														// demand
-																														// date
+				// VL demand date
+				if (parameter.getType().getCodingFirstRep().getCode().equals("CI0050005AAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
 					if (ObjectUtils.isNotEmpty(parameter.getValue())) {
 						if (parameter.getValue() instanceof DateTimeType) {
 							DateTimeType dateValue = (DateTimeType) parameter.getValue();

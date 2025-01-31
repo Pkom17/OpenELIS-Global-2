@@ -107,7 +107,7 @@
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement>
-					<font size="10" isBold="true"/>
+					<font size="10" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{labNo}]]></textFieldExpression>
 			</textField>
@@ -123,7 +123,7 @@
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement>
-					<font size="8" isBold="true"/>
+					<font size="8" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{orgname}]]></textFieldExpression>
 			</textField>
@@ -145,49 +145,49 @@
 			<textField isBlankWhenNull="false">
 				<reportElement key="textField-3" x="58" y="0" width="162" height="18" isPrintWhenDetailOverflows="true" uuid="05246157-793a-4bd7-a7b4-c6840026b2f5"/>
 				<textElement>
-					<font size="10" isBold="true"/>
+					<font size="10" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{subjectNumber}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement key="staticText-1" x="329" y="53" width="29" height="14" isPrintWhenDetailOverflows="true" uuid="8310b604-f59c-45cf-9b4c-24927ea61d43"/>
 				<textElement>
-					<font size="9" isBold="true"/>
+					<font size="9" isBold="false"/>
 				</textElement>
 				<text><![CDATA[Site:]]></text>
 			</staticText>
 			<staticText>
 				<reportElement key="staticText-2" x="0" y="0" width="58" height="18" uuid="a228506a-2568-4d9d-8f9d-0b152a38e562"/>
 				<textElement>
-					<font size="11" isBold="true"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<text><![CDATA[Sujetno: ]]></text>
 			</staticText>
 			<staticText>
 				<reportElement key="staticText-3" x="2" y="18" width="64" height="21" isPrintWhenDetailOverflows="true" uuid="51818d39-ff64-48be-844d-3bdf5aec0333"/>
 				<textElement>
-					<font size="10" isBold="true"/>
+					<font size="10" isBold="false"/>
 				</textElement>
 				<text><![CDATA[Date Naiss.:]]></text>
 			</staticText>
 			<staticText>
 				<reportElement key="staticText-4" x="150" y="18" width="40" height="19" isPrintWhenDetailOverflows="true" uuid="d6b8f9b7-78b8-4d50-bb50-9af82f76265e"/>
 				<textElement textAlignment="Right">
-					<font isBold="true"/>
+					<font isBold="false"/>
 				</textElement>
 				<text><![CDATA[Age:]]></text>
 			</staticText>
 			<staticText>
 				<reportElement key="staticText-5" x="377" y="1" width="34" height="18" uuid="b0c21a9a-dede-47d7-abc3-28da423ccf9d"/>
 				<textElement>
-					<font isBold="true"/>
+					<font isBold="false"/>
 				</textElement>
 				<text><![CDATA[Sexe:]]></text>
 			</staticText>
 			<staticText>
 				<reportElement key="staticText-6" x="240" y="1" width="41" height="18" uuid="05940b56-0a2f-48ea-9c34-ad74002848eb"/>
 				<textElement textAlignment="Right">
-					<font size="10" isBold="true"/>
+					<font size="10" isBold="false"/>
 				</textElement>
 				<text><![CDATA[Labno:]]></text>
 			</staticText>
@@ -201,12 +201,12 @@
 					<printWhenExpression><![CDATA[$P{showDoctor}]]></printWhenExpression>
 				</reportElement>
 				<textElement>
-					<font size="9" isBold="true"/>
+					<font size="9" isBold="false"/>
 				</textElement>
 				<text><![CDATA[Prescripteur:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement key="staticText-7" x="137" y="37" width="108" height="18" isPrintWhenDetailOverflows="true" uuid="cb0d1eb9-22b4-4997-8e00-e07c8d529d4b">
+				<reportElement key="staticText-7" x="136" y="37" width="108" height="18" isPrintWhenDetailOverflows="true" uuid="cb0d1eb9-22b4-4997-8e00-e07c8d529d4b">
 					<printWhenExpression><![CDATA[$P{receptiondate} != ""]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right"/>
@@ -251,7 +251,7 @@
 					<printWhenExpression><![CDATA[$P{gender}.equalsIgnoreCase("F")]]></printWhenExpression>
 				</reportElement>
 				<textElement>
-					<font size="10" isBold="true"/>
+					<font size="10" isBold="false"/>
 				</textElement>
 				<text><![CDATA[Grossesse: ]]></text>
 			</staticText>
@@ -275,7 +275,7 @@
 					<printWhenExpression><![CDATA[$P{gender}.equalsIgnoreCase("F")]]></printWhenExpression>
 				</reportElement>
 				<textElement>
-					<font size="10" isBold="true"/>
+					<font size="10" isBold="false"/>
 				</textElement>
 				<text><![CDATA[Allaitement:]]></text>
 			</staticText>
@@ -295,7 +295,7 @@
 				<textFieldExpression><![CDATA[($P{vlSuckle}.isEmpty() || $P{vlSuckle}.isEmpty())?" ":$P{vlSuckle}.split("=")[1]]]></textFieldExpression>
 			</textField>
 			<textField pattern="" isBlankWhenNull="true">
-				<reportElement key="textField" x="73" y="38" width="96" height="18" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF" uuid="9871ebf7-f1ba-4132-8712-04a11e8331f0">
+				<reportElement key="textField" x="71" y="38" width="96" height="18" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF" uuid="9871ebf7-f1ba-4132-8712-04a11e8331f0">
 					<printWhenExpression><![CDATA[$P{collectiondate}!= ""]]></printWhenExpression>
 				</reportElement>
 				<box>

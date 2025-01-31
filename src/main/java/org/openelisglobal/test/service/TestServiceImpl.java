@@ -1,5 +1,6 @@
 package org.openelisglobal.test.service;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -739,6 +740,24 @@ public class TestServiceImpl extends BaseObjectServiceImpl<Test, String> impleme
 	@Override
 	public List<Panel> getTbPanelsByMethod(String method) {
 		return getBaseObjectDAO().getTbPanelsByMethod(method);
+	}
+
+	@Override
+	public List<Map<String, Object>> getTbGXTestCountByResult(Date startDate, Date endDate)
+			throws LIMSRuntimeException {
+		return getBaseObjectDAO().getTbGXTestCountByResult(startDate, endDate);
+	}
+
+	@Override
+	public List<Map<String, Object>> getTbGXTestCountByCategory(Date startDate, Date endDate)
+			throws LIMSRuntimeException {
+		return getBaseObjectDAO().getTbGXTestCountByCategory(startDate, endDate);
+	}
+
+	@Override
+	public List<Map<String, Object>> getTbMicroscopyTestCountByResult(Date startDate, Date endDate)
+			throws LIMSRuntimeException {
+		return getBaseObjectDAO().getTbMicroscopyTestCountByResult(startDate, endDate);
 	}
 
 }

@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RealisationTest" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="74442251-124c-4d40-b165-fc0ea3a56004">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="date_debut" class="java.lang.String"/>
+	<parameter name="date_fin" class="java.lang.String"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["../reports/"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="directorName" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="reportTitle" class="java.lang.String"/>
+	<parameter name="siteName" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="leftHeaderImage" class="java.io.InputStream" isForPrompting="false"/>
+	<field name="sectionName" class="java.lang.String"/>
+	<field name="testName" class="java.lang.String"/>
+	<field name="required" class="java.lang.Integer"/>
+	<field name="performed" class="java.lang.Integer"/>
+	<field name="noPerformed" class="java.lang.Integer"/>
+	<variable name="requiredTotal" class="java.lang.Integer" resetType="Group" resetGroup="section" calculation="Sum">
+		<variableExpression><![CDATA[$F{required}]]></variableExpression>
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="performedTotal" class="java.lang.Integer" resetType="Group" resetGroup="section" calculation="Sum">
+		<variableExpression><![CDATA[$F{performed}]]></variableExpression>
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="notPerformedTotal" class="java.lang.Integer" resetType="Group" resetGroup="section" calculation="Sum">
+		<variableExpression><![CDATA[$F{noPerformed}]]></variableExpression>
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="grandRequiredTotal" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{required}]]></variableExpression>
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="grandPerformedTotal" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{performed}]]></variableExpression>
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="grandNotPerformed" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{noPerformed}]]></variableExpression>
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<group name="section">
+		<groupExpression><![CDATA[$F{sectionName}]]></groupExpression>
+		<groupHeader>
+			<band height="27">
+				<rectangle>
+					<reportElement mode="Opaque" x="5" y="5" width="563" height="20" backcolor="#F2F2F2" uuid="035c5af0-a806-4135-a890-90333dd9b6db"/>
+				</rectangle>
+				<textField>
+					<reportElement x="7" y="6" width="561" height="20" uuid="6f72cae9-1f89-4002-a93f-87d1b8852ccc"/>
+					<textElement verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$F{sectionName}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="22">
+				<staticText>
+					<reportElement x="7" y="1" width="100" height="20" uuid="e317b467-56fc-482b-b30c-ddfe9cea8165"/>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Total]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="164" y="2" width="100" height="20" uuid="8cd8fc4b-bc35-4141-b0fc-0aed0f9c2a3b"/>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{requiredTotal}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="275" y="1" width="97" height="20" uuid="177bf8a9-c8fa-4746-9f9f-691805063a31"/>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{performedTotal}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="396" y="1" width="100" height="20" uuid="dcf3d06d-ed05-4d55-ac1f-7ac116737782"/>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{notPerformedTotal}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="166" splitType="Stretch">
+			<textField>
+				<reportElement x="12" y="142" width="61" height="20" uuid="3ebec7d6-3a08-41dd-bab4-31e13cf61c78"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{date_debut}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="103" y="142" width="100" height="20" uuid="944faebb-a5c2-4a02-9862-5b6001f9740a"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{date_fin}]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="3" y="2" width="141" height="140" uuid="89280287-017e-42ee-ad94-32cfa72cb376"/>
+				<imageExpression><![CDATA[$P{leftHeaderImage}]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement mode="Opaque" x="144" y="68" width="331" height="33" backcolor="#FFFFFF" uuid="55c5da1f-e037-4f3e-9d1a-130b87d3b61e"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Rapport sur la realisation des tests]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="519" y="142" width="30" height="20" uuid="eaa8bfe3-69c9-4040-b857-939b1d579636"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[IPCI]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yy">
+				<reportElement x="444" y="4" width="109" height="20" uuid="28fc7455-907b-4fb6-8f50-2beee59b22d0"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="76" y="142" width="25" height="20" uuid="3a3f78a3-ea2d-4380-8bb1-46e84741cae6"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[-]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="349" y="4" width="90" height="20" uuid="b4ef3648-70f4-42ac-ac13-998be6232cf6"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<text><![CDATA[Date du rapport :]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement mode="Transparent" x="144" y="68" width="331" height="33" backcolor="#C0C0C0" uuid="49f9fbb0-c8c4-499a-9ffd-6261fd4345e8"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="485" y="142" width="34" height="20" uuid="283d371c-55e7-4cd6-9e4c-8b678296802e"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Site :]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="25" splitType="Stretch">
+			<rectangle>
+				<reportElement x="3" y="3" width="565" height="20" backcolor="#E1E1E1" uuid="26e2fbce-fa62-4712-9b21-f797025462fc"/>
+				<graphicElement>
+					<pen lineWidth="0.0" lineStyle="Solid"/>
+				</graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="5" y="3" width="156" height="20" uuid="4c215dc5-8395-48ee-848d-b9a8f7cc1bf7"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Test]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="161" y="3" width="100" height="20" uuid="3ae44e9e-9373-45b6-bc47-a237e43f95eb"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Demande]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="269" y="3" width="105" height="20" uuid="8a1b906a-0f9d-44b3-ae0f-07d383db3471"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Effectue]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="395" y="3" width="100" height="20" uuid="dfeba7cb-be9b-41c9-8219-8cb691536740"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Non effectue]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="24" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement mode="Transparent" x="6" y="2" width="155" height="20" isPrintWhenDetailOverflows="true" backcolor="#FFFFFF" uuid="bdfffc58-ff1f-4089-ba1f-75d6714fceb1"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{testName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="164" y="2" width="100" height="20" uuid="21290b86-3368-471a-abbe-0a2ab787e073"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{required}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="275" y="1" width="100" height="20" uuid="91ba471d-66f1-45af-8723-a59ebd83655c"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{performed}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="396" y="1" width="100" height="20" uuid="56c55b18-361c-4700-be9a-37141ae463d5"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{noPerformed}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="12" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="65" splitType="Stretch">
+			<textField>
+				<reportElement x="517" y="5" width="17" height="20" uuid="8ae108a4-4b46-44ae-a5bd-3ae3b6295b02"/>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="24" splitType="Stretch">
+			<rectangle>
+				<reportElement x="5" y="2" width="563" height="20" backcolor="#F2F2F2" uuid="c7b7a9de-263a-494f-9560-c872e9993172"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="7" y="3" width="100" height="20" uuid="8c41e86b-c573-4482-b4f7-0a101fd3f99c"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Totaux]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="163" y="2" width="100" height="20" uuid="851de1d0-921c-4ada-8614-04d2f71bd1c9"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{grandRequiredTotal}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="275" y="2" width="102" height="20" uuid="8817bca8-36ba-499d-87c5-b335161ab367"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{grandPerformedTotal}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="395" y="2" width="100" height="20" uuid="50e3d2d6-d465-4bdb-b052-8b5142caad66"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{grandNotPerformed}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

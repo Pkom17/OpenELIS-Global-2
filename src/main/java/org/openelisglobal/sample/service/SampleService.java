@@ -16,6 +16,7 @@ import org.openelisglobal.sample.valueholder.Sample;
 import org.openelisglobal.sample.valueholder.SampleAdditionalField;
 import org.openelisglobal.sample.valueholder.SampleAdditionalField.AdditionalFieldName;
 import org.openelisglobal.sampleqaevent.valueholder.SampleQaEvent;
+import org.openelisglobal.test.valueholder.Test;
 
 public interface SampleService extends BaseObjectService<Sample, String> {
     void getData(Sample sample);
@@ -119,4 +120,7 @@ public interface SampleService extends BaseObjectService<Sample, String> {
             LocalDate upperDate, String projectCode);
 
     List<Sample> getSamplesByPriority(OrderPriority priority);
+    
+    List<Sample> getSampleByPatientAndTestAndCollectionDate(String patientIdentifier, Test test, Date collectionDate);
+
 }

@@ -266,14 +266,28 @@ function setSaveButton() {
   </div>
   
   <div>
+	  <table>
 	  <c:if test="${form.useLowerDateRange}">
-	  	<span style="padding-left: 10px"><spring:message code="report.date.start"/>&nbsp;<%=DateUtil.getDateUserPrompt()%></span>
-		<form:input path="lowerDateRange" cssClass="input-medium" onkeyup="addDateSlashes(this, event);" onchange="checkValidEntryDate(this, 'any', true);" maxlength="10"/>
+	  	<tr>
+		  	<td>
+		  		<span style="padding-left: 10px"><spring:message code="report.date.start"/>&nbsp;<%=DateUtil.getDateUserPrompt()%></span>
+		  	</td>
+		  	<td>
+				<form:input path="lowerDateRange" cssClass="input-medium" onkeyup="addDateSlashes(this, event);" onchange="checkValidEntryDate(this, 'any', true);" maxlength="10"/>
+	  		</td>
+	  	</tr>
 	  </c:if>
 	  <c:if test="${form.useUpperDateRange}">
-	  	<span style="padding-left: 10px"><spring:message code="report.date.end"/>&nbsp;<%=DateUtil.getDateUserPrompt()%></span>
-	  	<form:input path="upperDateRange" cssClass="input-medium" maxlength="10" onkeyup="addDateSlashes(this, event);" onchange="checkValidEntryDate(this, 'any', true);"/>
+		  	<tr>
+			  	<td>
+		  			<span style="padding-left: 10px"><spring:message code="report.date.end"/>&nbsp;<%=DateUtil.getDateUserPrompt()%></span>
+		  		</td>
+			  	<td>
+		  			<form:input path="upperDateRange" cssClass="input-medium" maxlength="10" onkeyup="addDateSlashes(this, event);" onchange="checkValidEntryDate(this, 'any', true);"/>
+		  		</td>
+		  	</tr>
 	  </c:if>
+	  </table>
   </div>
  
   <c:if test="${form.useLocationCode}">
@@ -362,15 +376,22 @@ function setSaveButton() {
   </c:if>
     <c:if test="${not empty form.selectList && form.useStatisticsParams == false}">
    	<div>
-       <c:set var="selectList" value="${form.selectList}" />
-       <span style="padding-left: 10px"><label for="selectList">
-       <c:out value="${form.selectList.label}"/></label>
-	   <form:select path="selectList.selection" cssClass="text" id="selectList">
-		   <option value=""></option><form:options items="${form.selectList.list}" itemLabel="value" itemValue="id" />
-       </form:select></span>
+   	<table>
+   		<tr>
+   			<td>
+		       <c:set var="selectList" value="${form.selectList}" />
+		       <span style="padding-left: 10px"><label for="selectList">
+		       <c:out value="${form.selectList.label}"/></label>
+			   <form:select path="selectList.selection" cssClass="text" id="selectList">
+				   <option value=""></option><form:options items="${form.selectList.list}" itemLabel="value" itemValue="id" />
+		       </form:select></span>
+	       </td>
+	       <tr>
+       </table>
 	</div>
     </c:if>
 </c:if>
+
  <c:if test="${form.useStatisticsParams}">
 	<div>
 	        <b><spring:message code="report.select.labUnit"/></b><br>

@@ -200,14 +200,14 @@ highlighted rows specifies a resource that is likely out of sync with the server
     	Request Date
     	<span class="fa" onclick='sort(1)'><i class="fas fa-sort"></i></span>
     </th>
-    <th class='split-content'>
-    	Last Name
-    	<span class="fa" onclick='sort(2)'><i class="fas fa-sort"></i></span>
-    </th>
-    <th class='split-content'>
-    	First Name
-    	<span class="fa" onclick='sort(3)'><i class="fas fa-sort"></i></span>
-    </th>
+<!--     <th class='split-content'> -->
+<!--     	Last Name -->
+<!--     	<span class="fa" onclick='sort(2)'><i class="fas fa-sort"></i></span> -->
+<!--     </th> -->
+<!--     <th class='split-content'> -->
+<!--     	First Name -->
+<!--     	<span class="fa" onclick='sort(3)'><i class="fas fa-sort"></i></span> -->
+<!--     </th> -->
     <th class='split-content'>
     	National ID
     	<span class="fa" onclick='sort(4)'><i class="fas fa-sort"></i></span>
@@ -259,12 +259,12 @@ highlighted rows specifies a resource that is likely out of sync with the server
 	    <td class="dateCol">
 	       <c:out value="${eOrder.requestDateDisplay}"/>
 	    </td>
-	    <td>
-	       <c:out value="${eOrder.patientLastName}"/>
-	    </td>
-	    <td>
-	       <c:out value="${eOrder.patientFirstName}"/>
-	    </td>
+<!-- 	    <td> -->
+<%-- 	       <c:out value="${eOrder.patientLastName}"/> --%>
+<!-- 	    </td> -->
+<!-- 	    <td> -->
+<%-- 	       <c:out value="${eOrder.patientFirstName}"/> --%>
+<!-- 	    </td> -->
 	    <td>
 	       <c:out value="${eOrder.patientNationalId}"/>
 	    </td>

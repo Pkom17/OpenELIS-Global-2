@@ -27,32 +27,32 @@
 // We could put all of this 'copied-from' into a reusable JS Object included in a JSP file then here we would provide an override
 // of setPatientInfo with all of the values returned by patient search since FormFields encapsulats which fields to show and
 // setPatientInfo would pick up those to map into the edit form.
-function selectedPatientChanged(firstName, lastName, gender, DOB, stNumber, subjectNumber, nationalID, mother, pk ){
-	if( pk ){
-	    fieldValidator.setAllFieldsValid();
-	    patientLoader.clearFields();
-	    sampleLoader.clearFields();
-	    observationHistoryLoader.clearFields();
-		$("patientPK").value = pk;
-		patientLoader.loadDetails( pk );
-		//  patient loading will be followed by sample loading will be followed by observationHistory.loadDetails
-		hivStatusLoader.load( pk, fieldValidator.idPre + "hivStatus" );  // only needed viewing of HIVStatus somewhere other than hivFollowup after test is complete. 
-	}else{
+function selectedPatientChanged(firstName, lastName, gender, DOB, stNumber, subjectNumber, nationalID, mother, pk) {
+	if (pk) {
+		fieldValidator.setAllFieldsValid();
 		patientLoader.clearFields();
-	    sampleLoader.clearFields();
-	    observationHistoryLoader.clearFields();
-	    $("patientPK").value = null;
-	    $("samplePK").value = null;
-	    hivStatusLoader.clearFields();
-	    switchStudyForm( "" );
+		sampleLoader.clearFields();
+		observationHistoryLoader.clearFields();
+		$("patientPK").value = pk;
+		patientLoader.loadDetails(pk);
+		//  patient loading will be followed by sample loading will be followed by observationHistory.loadDetails
+		hivStatusLoader.load(pk, fieldValidator.idPre + "hivStatus");  // only needed viewing of HIVStatus somewhere other than hivFollowup after test is complete. 
+	} else {
+		patientLoader.clearFields();
+		sampleLoader.clearFields();
+		observationHistoryLoader.clearFields();
+		$("patientPK").value = null;
+		$("samplePK").value = null;
+		hivStatusLoader.clearFields();
+		switchStudyForm("");
 	}
 }
 
 // connect this page up to the patient search tile functionality
 var registered_PatientSearchChanged = false;
-function registerPatientSearchChanged(){
-	if( registered_PatientSearchChanged == false && window.addPatientChangedListener != undefined){
-		addPatientChangedListener( selectedPatientChanged );
+function registerPatientSearchChanged() {
+	if (registered_PatientSearchChanged == false && window.addPatientChangedListener != undefined) {
+		addPatientChangedListener(selectedPatientChanged);
 		registered_PatientSearchChanged = true;
 	}
 }
@@ -71,8 +71,8 @@ function processLoadFailure() {
  * @param elementsStr - the larger divs/TDs etc. which contains all of the HTML to show/hide; comma separate list
  * @author pahill
  */
-function enableSelectedRequiredSubfield( field, subfield, otherOptions, elementsStr ) {
-	if ( otherOptions < 0 ) {
+function enableSelectedRequiredSubfield(field, subfield, otherOptions, elementsStr) {
+	if (otherOptions < 0) {
 		nowRequired = field.selectedIndex > field.options.length - 1 + otherOptions;
 	} else {
 		nowRequired = (field.selectedIndex == otherOptions);
@@ -81,7 +81,7 @@ function enableSelectedRequiredSubfield( field, subfield, otherOptions, elements
 	// all checkers are told about all DB values when loaded, and this function is called by update() so would declare a field in another form required,
 	// you can never get that other field filled in and thus no save button ever.
 	// until we fix we won't make any subfield required.
-//	enableSubfield(nowRequired, subfield);
+	//	enableSubfield(nowRequired, subfield);
 	showElements(nowRequired, elementsStr);
 }
 
@@ -90,26 +90,26 @@ function enableSelectedRequiredSubfield( field, subfield, otherOptions, elements
  * @param required - true => make it visible and required; false => make it invisible and not required
  * @param subfield - the field to change
  */
-function enableSubfield( required, subfield ) {
-	
-	if ( required ) {
+function enableSubfield(required, subfield) {
+
+	if (required) {
 		subfield.disabled = false;
 		subfield.style.visibility = "visible";
 		subfield.style.display = "inline";
-		fieldValidator.addRequiredField( subfield.id );
-		updateFieldValidity( !$(subfield.value.blank()), subfield.id);
+		fieldValidator.addRequiredField(subfield.id);
+		updateFieldValidity(!$(subfield.value.blank()), subfield.id);
 	} else {
 		subfield.disabled = true;
 		subfield.style.visibility = "hidden";
 		subfield.style.display = "none";
-		fieldValidator.removeRequiredField( subfield.id );
-		updateFieldValidity( true, subfield.id);
+		fieldValidator.removeRequiredField(subfield.id);
+		updateFieldValidity(true, subfield.id);
 	}
 }
 
-function showElements( show, elementsStr ) {
+function showElements(show, elementsStr) {
 	var elements = elementsStr.split(',');
-	for (var i=0; i< elements.length; i++) {
+	for (var i = 0; i < elements.length; i++) {
 		var fieldName = elements[i];
 		if ($(fieldName) == null) {
 			// alert( "Programmer Error: in showElements(): field \"" + fieldName + "\" not found.");
@@ -129,37 +129,83 @@ function showElements( show, elementsStr ) {
  * @param parem2, param3, param4 .. the IDs of other fields to match to the 1st. 
  * @return void
  */
-function /*void*/ synchronizeCheckBoxes(){
+function /*void*/ synchronizeCheckBoxes() {
 	var checked = arguments[0].checked;
 
-	for(var i = 1; i < arguments.length; i++ ){
+	for (var i = 1; i < arguments.length; i++) {
 		$(arguments[i]).checked = checked;
 	}
 }
 
-	function validateSiteSubjectNumber(field){
-		 const siteSubjectNumber = /^([0-9A-Za-z]{5}\/[0-9A-Za-z]{2})\/[\d]{2}\/[\d]{5}(?:[Ee]\d?)?$/g;
-		 if(field.value){
-			  if(siteSubjectNumber.test(field.value)){
-				  field.classList.remove("error");
-			  }
-			  else{
-				  field.classList.add("error");
-			  }
-		 }
+function validateSiteSubjectNumber(field) {
+	const siteSubjectNumber = /^([0-9A-Za-z]{5}\/[0-9A-Za-z]{2})\/[\d]{2}\/[\d]{5}(?:[Ee]\d?)?$/g;
+	if (field.value) {
+		if (siteSubjectNumber.test(field.value)) {
+			field.classList.remove("error");
+		}
+		else {
+			field.classList.add("error");
+		}
 	}
+}
+
+function validateReceivedAndCollectionDate(receivedDateFieldId, interviewDateFieldId){
+    var interviewDateField = document.getElementById(interviewDateFieldId);
+    var receivedDateField = document.getElementById(receivedDateFieldId);
+
+    // Function to parse a date string in dd/mm/yyyy format to a Date object
+    function parseDate(dateStr) {
+        var parts = dateStr.split("/");
+        if (parts.length !== 3) {
+            return null; // Invalid format
+        }
+        var day = parseInt(parts[0], 10);
+        var month = parseInt(parts[1], 10) - 1;
+        var year = parseInt(parts[2], 10);
+        return new Date(year, month, day);
+    }
+
+    // Convert the date strings to Date objects
+    var interviewDateObj = parseDate(interviewDateField.value);
+    var receivedDateObj = parseDate(receivedDateField.value);
+
+    if (!interviewDateObj || isNaN(interviewDateObj.getTime())) {
+		interviewDateField.classList.add("error");
+        return false;
+    }
+	else{
+		interviewDateField.classList.remove("error");
+	}
+	if (!receivedDateObj || isNaN(receivedDateObj.getTime())) {
+		receivedDateField.classList.add("error");
+	    return false;
+	}
+	else{
+		receivedDateField.classList.remove("error");
+	}
+    if (interviewDateObj > receivedDateObj) {
+		interviewDateField.classList.add("error");
+		receivedDateField.classList.add("error");
+        return false;
+    }
+	else{
+		interviewDateField.classList.remove("error");
+		receivedDateField.classList.remove("error");
+	}
+    return true;
+}
 
 
 function  /*void*/ savePage() {
-	if ( projectChecker != null && projectChecker.checkAllFields != undefined) {
+	if (projectChecker != null && projectChecker.checkAllFields != undefined) {
 		projectChecker.checkAllFields(false);
 	} else {
 		alert("projectChecker.checkAllFields undefined");
 	}
 
-	if ( fieldValidator.isAnyConflicted() == 0 ) {
+	if (fieldValidator.isAnyConflicted() == 0) {
 		savePage__();
-	} else if ( confirm(saveNotUnderInvestigationMessage) ) {
+	} else if (confirm(saveNotUnderInvestigationMessage)) {
 		savePage__();
 	} else {
 		// no auto save, no on confirm save, thus nothing to do.
@@ -170,48 +216,48 @@ function  /*void*/ savePage() {
 function BaseLoader() {
 	/** 
 	 * method to actually make the ajax call
-	 */  
-    this.doAjax = function /*void*/ (urlParameters, onSuccessFunc, onFailureFunc) {
-    	if (onFailureFunc == null) {
-    		onFailureFunc = processLoadFailure;
-    	}
-		new Ajax.Request ('ajaxQueryXML',  //url
-                        {//options
-                          method: 'get', //http method
-                          parameters: urlParameters,
-                    	  requestHeaders : {
-                  			"X-CSRF-Token" : getCsrfToken()
-                  	      },
-                          onSuccess:  onSuccessFunc, onFailure: onFailureFunc
-                         });
+	 */
+	this.doAjax = function /*void*/(urlParameters, onSuccessFunc, onFailureFunc) {
+		if (onFailureFunc == null) {
+			onFailureFunc = processLoadFailure;
+		}
+		new Ajax.Request('ajaxQueryXML',  //url
+			{//options
+				method: 'get', //http method
+				parameters: urlParameters,
+				requestHeaders: {
+					"X-CSRF-Token": getCsrfToken()
+				},
+				onSuccess: onSuccessFunc, onFailure: onFailureFunc
+			});
 	}
-    /**
-     * Look up in any response a value given a key
-     * @param response  the value in the XML for the key
-     * @param key an element in the response of the form <key>value</key>
-     * @return
-     */
-	this.getResponseProperty = function /*string*/ getResponseProperty( response, key ) {
+	/**
+	 * Look up in any response a value given a key
+	 * @param response  the value in the XML for the key
+	 * @param key an element in the response of the form <key>value</key>
+	 * @return
+	 */
+	this.getResponseProperty = function /*string*/ getResponseProperty(response, key) {
 		var field = null;
-		if( response != null ) {
+		if (response != null) {
 			field = response.getElementsByTagName(key).item(0);
 		}
 
-		if( field != null )	{
+		if (field != null) {
 			return field.firstChild.nodeValue;
 		} else {
 			return undefined;
 		}
 	};
-	
+
 	/**
 	 * Get a value from the current saved existing value (return probably save as a result of a this.find...(...) call
 	 * @param tagName <tagName>value</tagName>
 	 * @return the value in the XML
 	 */
-	this.getExistingValue = function /* String */ (tagName) {
+	this.getExistingValue = function /* String */(tagName) {
 		return this.getResponseProperty(this.existing, tagName);
-	}	
+	}
 
 	/**
 	 * A kludge method that just tries the name of field in all possible studies.
@@ -219,7 +265,7 @@ function BaseLoader() {
 	 * when a new one is loaded.
 	 * @param fieldId
 	 */
-	this.clearFieldInAllStudies = function (fieldId) {
+	this.clearFieldInAllStudies = function(fieldId) {
 		clearField(document.getElementById(fieldId));
 		clearField(document.getElementById("farv." + fieldId));
 		clearField(document.getElementById("eid." + fieldId));
@@ -237,7 +283,7 @@ function BaseLoader() {
 	 * @param value
 	 * @return
 	 */
-	this.setFieldInAllStudies = function (fieldId, value) {
+	this.setFieldInAllStudies = function(fieldId, value) {
 		// console.info("updating field " + fieldId + " to " + value);
 		this.setField(fieldId, value);
 		this.setField("farv." + fieldId, value);
@@ -250,7 +296,7 @@ function BaseLoader() {
 	/**
 	 * Set a form field with a value, includes either a dropdown list or text field
 	 */
-	this.setField = function (fieldId, value) {
+	this.setField = function(fieldId, value) {
 		var element = document.getElementById(fieldId);
 		//console.info("Setting field " + fieldId + " to " + value); // firebugs only
 
@@ -280,40 +326,40 @@ function PatientLoader() {
 	 * This member indicates that value of the subjectNumber loaded from a sampleNumber
 	 */
 	this.existingSubjectNumber = "";
-	
-    this.loadDetails = function  /*void*/ (pk, sampleNo ) {
-		this.doAjax( this.url + "&personKey=" + pk,
-			function /*void*/ (xhr){
-		        patientLoader.processLoadSuccess(xhr, sampleNo);
-		    }
+
+	this.loadDetails = function  /*void*/(pk, sampleNo) {
+		this.doAjax(this.url + "&personKey=" + pk,
+			function /*void*/(xhr) {
+				patientLoader.processLoadSuccess(xhr, sampleNo);
+			}
 		);
 	};
-	
-	this.clearExisting = function (clearExistingSubjectNumber) {
+
+	this.clearExisting = function(clearExistingSubjectNumber) {
 		this.existing = null;
 		if (clearExistingSubjectNumber) {
 			this.existingSubjectNumber = null;
 		}
 	}
 
-	this.findPatientBy = function (byParameter, subNoField, isRequired, func) { // nationalID or personKey
+	this.findPatientBy = function(byParameter, subNoField, isRequired, func) { // nationalID or personKey
 		var subjectNumber = subNoField.value;
 		var fieldId = subNoField.id;
 		this.existing = null;
-		this.doAjax( this.url + "&" + byParameter + "=" + subjectNumber,
-			function /*void*/ (xhr){
-		        patientLoader.processFindSuccess(xhr, isRequired, fieldId, func);
-		    }
+		this.doAjax(this.url + "&" + byParameter + "=" + subjectNumber,
+			function /*void*/(xhr) {
+				patientLoader.processFindSuccess(xhr, isRequired, fieldId, func);
+			}
 		);
 	}
 
-	this.processFindSuccess = function (xhr, isRequired, fieldId, nextFunc) {
+	this.processFindSuccess = function(xhr, isRequired, fieldId, nextFunc) {
 		var xml = xhr.responseXML;
 		//alert(xhr.responseText);
 		var message = this.getResponseProperty(xml, "message");
 		if (message == 'valid') {
 			this.existing = xml.getElementsByTagName("formfield").item(0);
-			$('patientPK').value =  this.getResponseProperty(this.existing, "ID");
+			$('patientPK').value = this.getResponseProperty(this.existing, "ID");
 			updateFieldConflict(true, fieldId, "");
 			updateFieldValidity(true, fieldId);
 		} else {
@@ -328,38 +374,38 @@ function PatientLoader() {
 		nextFunc();
 	}
 
-	this.clearFields = function  /*void*/ (){
+	this.clearFields = function  /*void*/() {
 		this.setFields();
 	}
 
-	this.processLoadSuccess = function /*void*/ (xhr, sampleNo) {
+	this.processLoadSuccess = function /*void*/(xhr, sampleNo) {
 		//console.info("PatientLoader.processLoadSuccess:" + xhr.responseText);
 		var response = xhr.responseXML.getElementsByTagName("formfield").item(0);
 		this.existing = response;
 		patientLoader.setExistingSubjectNumber();
 		var nationalID = this.getResponseProperty(response, "nationalID");
-		var lastName  = this.getResponseProperty(response, "lastName");
+		var lastName = this.getResponseProperty(response, "lastName");
 		var firstName = this.getResponseProperty(response, "firstName");
 		var externalID = this.getResponseProperty(response, "externalID");
-		var dob = this.getResponseProperty(response,   "dob");
+		var dob = this.getResponseProperty(response, "dob");
 		var gender = this.getResponseProperty(response, "gender");
 
 		this.setFields(nationalID, lastName, firstName, externalID, dob, gender);
-		var searchLabNumber = $("searchLabNumber").value; 
-		if ( searchLabNumber != "" ) {
+		var searchLabNumber = $("searchLabNumber").value;
+		if (searchLabNumber != "") {
 			sampleLoader.loadDetailsByAccessionNumber(searchLabNumber);
 		} else {
 			sampleLoader.loadDetails($("patientPK").value);
 		}
 	}
-	
-	
-	
+
+
+
 	/**
 	 * load part 2: given everything read from the AJAX call, set all the fields
 	 */
-	this.setFields = function /* void */ (nationalID, lastName, firstName, externalID, dob, gender) {
-	   	this.setFieldInAllStudies("subjectNumber", blankOrValue(nationalID));
+	this.setFields = function /* void */(nationalID, lastName, firstName, externalID, dob, gender) {
+		this.setFieldInAllStudies("subjectNumber", blankOrValue(nationalID));
 		this.setFieldInAllStudies("patientFamilyName", blankOrValue(lastName));
 		this.setFieldInAllStudies("patientFirstNames", blankOrValue(firstName));
 		this.setFieldInAllStudies("siteSubjectNumber", blankOrValue(externalID));
@@ -372,21 +418,21 @@ function PatientLoader() {
 			// TODO PAHill we could go back to projectChecker to do only the current fields instead of banging on all of them, but we don't know the type of study yet because we haven't loaded the sample.
 			handlePatientBirthDateChange($("dateOfBirth"), $("interviewDate"), false, $("age"));
 			handlePatientBirthDateChange($("farv.dateOfBirth"), $("farv.interviewDate"), false, $("farv.age"));
-			handlePatientBirthDateChange($("eid.dateOfBirth"),  $("eid.interviewDate"), false, null, $('eid.month'), $('eid.ageWeek'));
-			handlePatientBirthDateChange($("vl.dateOfBirth"),  $("vl.interviewDate"), false, $("vl.age"));
-			handlePatientBirthDateChange($("rt.dateOfBirth"),  $("rt.interviewDate"), false, $("rt.age"));
-			handlePatientBirthDateChange($("rtn.dateOfBirth"),  $("rtn.interviewDate"), false, $("rtn.age"), $("rtn.month"));
+			handlePatientBirthDateChange($("eid.dateOfBirth"), $("eid.interviewDate"), false, null, $('eid.month'), $('eid.ageWeek'));
+			handlePatientBirthDateChange($("vl.dateOfBirth"), $("vl.interviewDate"), false, $("vl.age"));
+			handlePatientBirthDateChange($("rt.dateOfBirth"), $("rt.interviewDate"), false, $("rt.age"));
+			handlePatientBirthDateChange($("rtn.dateOfBirth"), $("rtn.interviewDate"), false, $("rtn.age"), $("rtn.month"));
 		}
 
 		this.setFieldInAllStudies("gender", gender);
 	}
-	
+
 	/**
 	 * This is only called after a sample is found and is valid in 2nd Entry triggered by a loading of a valid patient
 	 */
-	this.handleNewPatientId = function () {
+	this.handleNewPatientId = function() {
 		patientLoader.findPatientBy("personKey", $("patientPK"), true,
-			function () {
+			function() {
 				patientLoader.setExistingSubjectNumber();
 				projectChecker.checkAllSubjectFields(true, true);
 				// now back over to the loaders to load observation history and load hivStatus
@@ -395,14 +441,14 @@ function PatientLoader() {
 			}
 		);
 	}
-		
+
 	/**	
 	 * At some point we finish loading the patient associated with the sample and we need to record the original sample number of the patient  that is associated with the current sample.
 	 * @return
 	 */
-	this.setExistingSubjectNumber = function () {
-		this.existingSubjectNumber = this.getResponseProperty(this.existing, "nationalID"); 
-	}	
+	this.setExistingSubjectNumber = function() {
+		this.existingSubjectNumber = this.getResponseProperty(this.existing, "nationalID");
+	}
 }
 
 /**
@@ -411,15 +457,15 @@ function PatientLoader() {
 function SampleLoader() {
 	this.existing = null;
 	this.url = "provider=SampleSearchPopulateProvider";
-	
+
 	/**
 	 * Load (push value into the actual form fields) all of sample related fields. 
 	 * @param pk the patient primary PK
 	 */
-    this.loadDetails = function  /*void*/ (pk) {
+	this.loadDetails = function  /*void*/(pk) {
 		this.doAjax(this.url + "&patientKey=" + pk,
-			function /*void*/ (xhr){
-		    	sampleLoader.processLoadSuccess(xhr);
+			function /*void*/(xhr) {
+				sampleLoader.processLoadSuccess(xhr);
 			}
 		);
 	};
@@ -427,14 +473,14 @@ function SampleLoader() {
 	/**
 	 * Method to set all the fields which might be loaded to blank, so that a field unspecified form the server doesn't leave an old value in the field.
 	 */
-	this.clearFields = function  /*void*/ (){
+	this.clearFields = function  /*void*/() {
 		this.setFields();
 	}
 
 	/**
 	 * Callback when sample loading comes back from the server.
 	 */
-	this.processLoadSuccess = function /* void */ (xhr) {
+	this.processLoadSuccess = function /* void */(xhr) {
 		// console.info("SampleLoader.processLoadSuccess " + xhr.responseText);
 		var response = xhr.responseXML.getElementsByTagName("formfield").item(0);
 		this.existing = response;
@@ -450,40 +496,40 @@ function SampleLoader() {
 		this.setFields(samplePK, labNo, receivedDate, interviewDate, centerName, centerCode);
 		observationHistoryLoader.loadDetails();
 	};
-	
+
 	/**
 	 * sample load part 2:  set all the fields related directly to the sample
 	 * @return
 	 */
-	this.setFields = function /* void */ (samplePK, labNo, receivedDate, interviewDate, centerName, centerCode) {
+	this.setFields = function /* void */(samplePK, labNo, receivedDate, interviewDate, centerName, centerCode) {
 		$("samplePK").value = blankOrValue(samplePK);
 		// console.info("(samplePK).value = " + $("samplePK").value);
 		labNo = blankOrValue(labNo);
 		this.setFieldInAllStudies("labNo", labNo);
-        // All prefixes have 4-letters, so we can strip 4 to get the number
+		// All prefixes have 4-letters, so we can strip 4 to get the number
 		this.setFieldInAllStudies("labNoForDisplay", labNo.substring(4));
 		this.setFieldInAllStudies("receivedDateForDisplay", blankOrValue(receivedDate));
 		this.setFieldInAllStudies("interviewDate", blankOrValue(interviewDate));
 		this.setFieldInAllStudies("centerName", blankOrValue(centerName));
 		this.setFieldInAllStudies("centerCode", blankOrValue(centerCode));
 	};
-	
-	this.loadDetailsByAccessionNumber = function (accession) {
-		this.doAjax(this.url + "&accessionNo="+ accession,
-				function /*void*/ (xhr){
-			    	sampleLoader.processLoadSuccess(xhr);
-				}
-			);
+
+	this.loadDetailsByAccessionNumber = function(accession) {
+		this.doAjax(this.url + "&accessionNo=" + accession,
+			function /*void*/(xhr) {
+				sampleLoader.processLoadSuccess(xhr);
+			}
+		);
 	}
-	
+
 	/**
 	 * Starting with an accession number, find (get value from server but don't push into the actual form fields) all the details.  
 	 * @return
 	 */
-	this.findDetailsByAccessionNumber = function (accession, isRequired, fieldId, otherFieldsToCheckFunc) {
-		this.doAjax(this.url + "&accessionNo="+ accession,
-			function /*void*/ (xhr){
-		    	sampleLoader.processFindSuccess(xhr, isRequired, fieldId, otherFieldsToCheckFunc);
+	this.findDetailsByAccessionNumber = function(accession, isRequired, fieldId, otherFieldsToCheckFunc) {
+		this.doAjax(this.url + "&accessionNo=" + accession,
+			function /*void*/(xhr) {
+				sampleLoader.processFindSuccess(xhr, isRequired, fieldId, otherFieldsToCheckFunc);
 			}
 		);
 	}
@@ -509,7 +555,7 @@ function SampleLoader() {
 
 		patientLoader.handleNewPatientId();
 		projectChecker.checkAllSampleFields(true);
-	}	
+	}
 }
 
 /**
@@ -519,26 +565,26 @@ function ObservationHistoryLoader() {
 	this.url = "provider=ObservationHistoryPopulateProvider";
 	this.existing = null;
 
-    this.loadDetails = function  /*void*/ () {
+	this.loadDetails = function  /*void*/() {
 		this.doAjax(this.url + "&patientKey=" + $("patientPK").value + "&sampleKey=" + $("samplePK").value,
-			function /*void*/ processLoadSuccess(xhr){
+			function /*void*/ processLoadSuccess(xhr) {
 				observationHistoryLoader.processLoadSuccess(xhr);
 			}
 		);
 	};
-	
+
 	/**
 	 * find the observation history information based on the patient AND sample IDs
 	 */
-	this.findDetails = function () {
+	this.findDetails = function() {
 		var patientPK = $("patientPK").value;
 		var samplePK = $("samplePK").value;
 		if (patientPK == null || samplePK == null) {
 			this.existing = null;
 			return;
 		}
-		this.doAjax(this.url + "&patientKey=" + patientPK + "&sampleKey=" + samplePK  ,
-			function /*void*/ processFindSuccess(xhr){
+		this.doAjax(this.url + "&patientKey=" + patientPK + "&sampleKey=" + samplePK,
+			function /*void*/ processFindSuccess(xhr) {
 				observationHistoryLoader.processFindSuccess(xhr);
 			}
 		);
@@ -547,7 +593,7 @@ function ObservationHistoryLoader() {
 	/**
 	 * callback for finding (don't update form just get the data for) OH information
 	 */
-	this.processFindSuccess = function (xhr) {
+	this.processFindSuccess = function(xhr) {
 		var xml = xhr.responseXML;
 		var message = this.getResponseProperty(xml, "message");
 		this.existing = xml.getElementsByTagName("formfield").item(0);
@@ -557,7 +603,7 @@ function ObservationHistoryLoader() {
 	/**
 	 * clear all of the fields which are actually observation history fields.
 	 */
-	this.clearFields = function  /*void*/ (){
+	this.clearFields = function  /*void*/() {
 		this.clearFieldInAllStudies("projectFormName");
 		this.clearFieldInAllStudies("educationLevel");
 		this.clearFieldInAllStudies("maritalStatus");
@@ -580,7 +626,7 @@ function ObservationHistoryLoader() {
 		this.clearFieldInAllStudies("priorDiseases10");
 		this.clearFieldInAllStudies("priorDiseases11");
 		this.clearFieldInAllStudies("priorDiseases12");
-		
+
 		this.clearFieldInAllStudies("arvProphylaxisBenefit");
 		this.clearFieldInAllStudies("arvProphylaxis");
 		this.clearFieldInAllStudies("currentARVTreatment");
@@ -588,7 +634,7 @@ function ObservationHistoryLoader() {
 		this.clearFieldInAllStudies("cotrimoxazoleTreatment");
 		this.clearFieldInAllStudies("aidsStage");
 		this.clearFieldInAllStudies("anyCurrentDiseases");
-		
+
 		this.clearFieldInAllStudies("currentDiseases0");
 		this.clearFieldInAllStudies("currentDiseases1");
 		this.clearFieldInAllStudies("currentDiseases2");
@@ -602,122 +648,122 @@ function ObservationHistoryLoader() {
 		this.clearFieldInAllStudies("currentDiseases10");
 		this.clearFieldInAllStudies("currentDiseases11");
 		this.clearFieldInAllStudies("currentDiseases12");
-		
+
 		this.clearFieldInAllStudies("currentOITreatment");
 		this.clearFieldInAllStudies("patientWeight");
 		this.clearFieldInAllStudies("karnofskyScore");
 		this.clearFieldInAllStudies("hivStatus");
 		this.clearFieldInAllStudies("cd4Count");
-        this.clearFieldInAllStudies("cd4Percent");
-        this.clearFieldInAllStudies("priorCd4Date");
-        this.clearFieldInAllStudies("antiTbTreatment");
-        this.clearFieldInAllStudies("interruptedARVTreatment");
-        this.clearFieldInAllStudies("arvTreatmentAnyAdverseEffects" );
-        this.clearFieldInAllStudies("arvTreatmentChange");
-        this.clearFieldInAllStudies("arvTreatmentNew");
-        this.clearFieldInAllStudies("arvTreatmentRegime");
-        this.clearFieldInAllStudies("cotrimoxazoleTreatAnyAdvEff");
-        this.clearFieldInAllStudies("anySecondaryTreatment");
-        this.clearFieldInAllStudies("secondaryTreatment");
-        this.clearFieldInAllStudies("clinicVisits");
+		this.clearFieldInAllStudies("cd4Percent");
+		this.clearFieldInAllStudies("priorCd4Date");
+		this.clearFieldInAllStudies("antiTbTreatment");
+		this.clearFieldInAllStudies("interruptedARVTreatment");
+		this.clearFieldInAllStudies("arvTreatmentAnyAdverseEffects");
+		this.clearFieldInAllStudies("arvTreatmentChange");
+		this.clearFieldInAllStudies("arvTreatmentNew");
+		this.clearFieldInAllStudies("arvTreatmentRegime");
+		this.clearFieldInAllStudies("cotrimoxazoleTreatAnyAdvEff");
+		this.clearFieldInAllStudies("anySecondaryTreatment");
+		this.clearFieldInAllStudies("secondaryTreatment");
+		this.clearFieldInAllStudies("clinicVisits");
 
-        this.clearFieldInAllStudies("hospital");
-        this.clearFieldInAllStudies("service");
-        this.clearFieldInAllStudies("hospitalPatient");
+		this.clearFieldInAllStudies("hospital");
+		this.clearFieldInAllStudies("service");
+		this.clearFieldInAllStudies("hospitalPatient");
 
-        this.clearFieldInAllStudies("whichPCR");
-        this.clearFieldInAllStudies("reasonForSecondPCRTest");
-        this.clearFieldInAllStudies("indFirstTestName");
-        this.clearFieldInAllStudies("indSecondTestName");
-        this.clearFieldInAllStudies("indFirstTestDate");
-        this.clearFieldInAllStudies("indSecondTestDate");
-        this.clearFieldInAllStudies("indFirstTestResult");
-        this.clearFieldInAllStudies("indSecondTestResult");
-        this.clearFieldInAllStudies("indSiteFinalResult");
+		this.clearFieldInAllStudies("whichPCR");
+		this.clearFieldInAllStudies("reasonForSecondPCRTest");
+		this.clearFieldInAllStudies("indFirstTestName");
+		this.clearFieldInAllStudies("indSecondTestName");
+		this.clearFieldInAllStudies("indFirstTestDate");
+		this.clearFieldInAllStudies("indSecondTestDate");
+		this.clearFieldInAllStudies("indFirstTestResult");
+		this.clearFieldInAllStudies("indSecondTestResult");
+		this.clearFieldInAllStudies("indSiteFinalResult");
 
-        this.clearFieldInAllStudies("eidInfantPTME"           );
-        this.clearFieldInAllStudies("eidTypeOfClinic"         );
-        this.clearFieldInAllStudies("eidHowChildFed"          );
-        this.clearFieldInAllStudies("eidStoppedBreastfeeding" );
-        this.clearFieldInAllStudies("eidInfantSymptomatic"    );
-        this.clearFieldInAllStudies("eidMothersHIVStatus"     );
-        this.clearFieldInAllStudies("eidMothersARV"           );
-        this.clearFieldInAllStudies("eidInfantsARV"           );
-        this.clearFieldInAllStudies("eidInfantCotrimoxazole"  );
-        this.clearFieldInAllStudies("reasonForRequest"     );   
-        this.clearFieldInAllStudies("underInvestigationComment");   
-        this.clearFieldInAllStudies("underInvestigation");
-        
-        this.clearFieldInAllStudies("CTBPul"     );
-		this.clearFieldInAllStudies("CTBExpul"   );
-		this.clearFieldInAllStudies("CCrblToxo"  );
-		this.clearFieldInAllStudies("CCryptoMen" );
+		this.clearFieldInAllStudies("eidInfantPTME");
+		this.clearFieldInAllStudies("eidTypeOfClinic");
+		this.clearFieldInAllStudies("eidHowChildFed");
+		this.clearFieldInAllStudies("eidStoppedBreastfeeding");
+		this.clearFieldInAllStudies("eidInfantSymptomatic");
+		this.clearFieldInAllStudies("eidMothersHIVStatus");
+		this.clearFieldInAllStudies("eidMothersARV");
+		this.clearFieldInAllStudies("eidInfantsARV");
+		this.clearFieldInAllStudies("eidInfantCotrimoxazole");
+		this.clearFieldInAllStudies("reasonForRequest");
+		this.clearFieldInAllStudies("underInvestigationComment");
+		this.clearFieldInAllStudies("underInvestigation");
+
+		this.clearFieldInAllStudies("CTBPul");
+		this.clearFieldInAllStudies("CTBExpul");
+		this.clearFieldInAllStudies("CCrblToxo");
+		this.clearFieldInAllStudies("CCryptoMen");
 		this.clearFieldInAllStudies("CGenPrurigo");
-		this.clearFieldInAllStudies("CIST"       );
+		this.clearFieldInAllStudies("CIST");
 		this.clearFieldInAllStudies("CCervCancer");
-		this.clearFieldInAllStudies("COpharCand" );
+		this.clearFieldInAllStudies("COpharCand");
 		this.clearFieldInAllStudies("CKaposiSarc");
-		this.clearFieldInAllStudies("CShingles"  );
-		this.clearFieldInAllStudies("CDiarrheaC" );
-		this.clearFieldInAllStudies("PTBPul"     );
-		this.clearFieldInAllStudies("PTBExpul"   );
-		this.clearFieldInAllStudies("PCrblToxo"  );
-		this.clearFieldInAllStudies("PCryptoMen" );
-		this.clearFieldInAllStudies("PGenPrurig" );
-		this.clearFieldInAllStudies("PIST"       );
+		this.clearFieldInAllStudies("CShingles");
+		this.clearFieldInAllStudies("CDiarrheaC");
+		this.clearFieldInAllStudies("PTBPul");
+		this.clearFieldInAllStudies("PTBExpul");
+		this.clearFieldInAllStudies("PCrblToxo");
+		this.clearFieldInAllStudies("PCryptoMen");
+		this.clearFieldInAllStudies("PGenPrurig");
+		this.clearFieldInAllStudies("PIST");
 		this.clearFieldInAllStudies("PCervCancer");
-		this.clearFieldInAllStudies("POpharCand" );
+		this.clearFieldInAllStudies("POpharCand");
 		this.clearFieldInAllStudies("PKaposiSarc");
-		this.clearFieldInAllStudies("PShingles"  );
-		this.clearFieldInAllStudies("PDiarrheaC" );
-		this.clearFieldInAllStudies("weightLoss" );
-		this.clearFieldInAllStudies("diarrhea"   );
-		this.clearFieldInAllStudies("fever"      );
-		this.clearFieldInAllStudies("cough"      );
-		this.clearFieldInAllStudies("pulTB"      );
-		this.clearFieldInAllStudies("expulTB"    );
-		this.clearFieldInAllStudies("swallPaint" );
-		this.clearFieldInAllStudies("cryptoMen"  );
-		this.clearFieldInAllStudies("recPneumon" );
-		this.clearFieldInAllStudies("sespis"     );
-		this.clearFieldInAllStudies("recInfect"  );
-		this.clearFieldInAllStudies("curvixC"    );
-		this.clearFieldInAllStudies("matHIV"     );
-		this.clearFieldInAllStudies("cachexie"   );
-		this.clearFieldInAllStudies("thrush"     );
-		this.clearFieldInAllStudies("dermPruip"  );
-		this.clearFieldInAllStudies("herpes"     );
-		this.clearFieldInAllStudies("zona"       );
-		this.clearFieldInAllStudies("sarcKapo"   );
-		this.clearFieldInAllStudies("xIngPadenp" );
-		this.clearFieldInAllStudies("HIVDement"  );
-		
-		this.clearFieldInAllStudies("arvTreatmentInitDate"  );
-		this.clearFieldInAllStudies("arvTreatmentRegime"  );
-		this.clearFieldInAllStudies("vlOtherReasonForRequest"  );
-		this.clearFieldInAllStudies("initcd4Count"  );
-		this.clearFieldInAllStudies("initcd4Percent"  );
-		this.clearFieldInAllStudies("initcd4Date"  );
-		this.clearFieldInAllStudies("demandcd4Count"  );
-		this.clearFieldInAllStudies("demandcd4Percent"  );
-		this.clearFieldInAllStudies("demandcd4Date"  );
-		this.clearFieldInAllStudies("vlBenefit"  );
-		this.clearFieldInAllStudies("vlPregnancy"  );
-		this.clearFieldInAllStudies("vlSuckle"  );
-		this.clearFieldInAllStudies("priorVLLab"  );
-		this.clearFieldInAllStudies("priorVLValue"  );
-		this.clearFieldInAllStudies("priorVLDate"  );
-		
+		this.clearFieldInAllStudies("PShingles");
+		this.clearFieldInAllStudies("PDiarrheaC");
+		this.clearFieldInAllStudies("weightLoss");
+		this.clearFieldInAllStudies("diarrhea");
+		this.clearFieldInAllStudies("fever");
+		this.clearFieldInAllStudies("cough");
+		this.clearFieldInAllStudies("pulTB");
+		this.clearFieldInAllStudies("expulTB");
+		this.clearFieldInAllStudies("swallPaint");
+		this.clearFieldInAllStudies("cryptoMen");
+		this.clearFieldInAllStudies("recPneumon");
+		this.clearFieldInAllStudies("sespis");
+		this.clearFieldInAllStudies("recInfect");
+		this.clearFieldInAllStudies("curvixC");
+		this.clearFieldInAllStudies("matHIV");
+		this.clearFieldInAllStudies("cachexie");
+		this.clearFieldInAllStudies("thrush");
+		this.clearFieldInAllStudies("dermPruip");
+		this.clearFieldInAllStudies("herpes");
+		this.clearFieldInAllStudies("zona");
+		this.clearFieldInAllStudies("sarcKapo");
+		this.clearFieldInAllStudies("xIngPadenp");
+		this.clearFieldInAllStudies("HIVDement");
+
+		this.clearFieldInAllStudies("arvTreatmentInitDate");
+		this.clearFieldInAllStudies("arvTreatmentRegime");
+		this.clearFieldInAllStudies("vlOtherReasonForRequest");
+		this.clearFieldInAllStudies("initcd4Count");
+		this.clearFieldInAllStudies("initcd4Percent");
+		this.clearFieldInAllStudies("initcd4Date");
+		this.clearFieldInAllStudies("demandcd4Count");
+		this.clearFieldInAllStudies("demandcd4Percent");
+		this.clearFieldInAllStudies("demandcd4Date");
+		this.clearFieldInAllStudies("vlBenefit");
+		this.clearFieldInAllStudies("vlPregnancy");
+		this.clearFieldInAllStudies("vlSuckle");
+		this.clearFieldInAllStudies("priorVLLab");
+		this.clearFieldInAllStudies("priorVLValue");
+		this.clearFieldInAllStudies("priorVLDate");
+
 	}
 
 	/**
 	 * callback for loading ObservationHistory information.
 	 */
-	this.processLoadSuccess = function /*void*/ (xhr) {
-	    // console.info("ObservationHistoryLoader.processLoadSuccess:" + xhr.responseText);
+	this.processLoadSuccess = function /*void*/(xhr) {
+		// console.info("ObservationHistoryLoader.processLoadSuccess:" + xhr.responseText);
 		var response = null;
-		if ( xhr != null) {			
-			var xml = xhr.responseXML;			
+		if (xhr != null) {
+			var xml = xhr.responseXML;
 			response = xml.getElementsByTagName("formfield").item(0);
 			this.existing = response;
 			if (response != null) {
@@ -727,13 +773,13 @@ function ObservationHistoryLoader() {
 					var name = element.nodeName;
 					var value = element.firstChild.nodeValue;
 					this.setFieldInAllStudies(name, value);
-		  	    }
+				}
 			}
 		}
 		this.afterLoad();
 	}
 
-	this.setFields = function /* void */ () {
+	this.setFields = function /* void */() {
 		alert("unimplemented feature");
 	}
 
@@ -742,18 +788,18 @@ function ObservationHistoryLoader() {
 	 */
 	this.afterLoad = function() {
 		// tell the form related object to show/hide all the various subquestions, transfer/reformat special values etc.
-	    iarv.refresh();
-	    farv.refresh();
-	    eid.refresh();
-	    vl.refresh();
-	    rt.refresh();
-	    if (rtn != null) {
-		    rtn.refresh();
-	    }
-	    initializeStudySelection();
+		iarv.refresh();
+		farv.refresh();
+		eid.refresh();
+		vl.refresh();
+		rt.refresh();
+		if (rtn != null) {
+			rtn.refresh();
+		}
+		initializeStudySelection();
 	}
 
-	this.afterFind = function () {
+	this.afterFind = function() {
 		compareAllObservationHistoryFields(true);
 	}
 }
@@ -764,7 +810,7 @@ function ObservationHistoryLoader() {
  */
 function afterNewPatient() {
 	projectChecker.checkAllSubjectFields(true, true);
-	hivStatusLoader.find($("patientPK").value);					
+	hivStatusLoader.find($("patientPK").value);
 }
 
 /**                                                                                                                                                                                  
@@ -779,121 +825,123 @@ function afterNewPatient() {
 function BaseProjectChecker() {
 	// different study/project forms differ in the ID for the same field only by their prefix which is defined here.
 	this.idPre = "";
-	
+
 	this.refresh = function() {
 		this.refreshBase();
 	}
-	
-	this.refreshBase = function () {
-		this.fillLabNo();	    
+
+	this.refreshBase = function() {
+		this.fillLabNo();
 		this.handlePatientBirthDateChange();
 		setSaveButton();
 	}
-	
-	this.handlePatientBirthDateChange = function () {
-		handlePatientBirthDateChange( $(this.idPre + "dateOfBirth"), $(this.idPre + "interviewDate"), false, $(this.idPre + "age"), $(this.idPre + 'month'), $(this.idPre + 'ageWeek'), birthDateUsageMessage );
+
+	this.handlePatientBirthDateChange = function() {
+		handlePatientBirthDateChange($(this.idPre + "dateOfBirth"), $(this.idPre + "interviewDate"), false, $(this.idPre + "age"), $(this.idPre + 'month'), $(this.idPre + 'ageWeek'), birthDateUsageMessage);
 	}
-	
-	this.checkReceivedDate = function (blanksAllowed) {
-	 	makeDirty();
+
+	this.checkReceivedDate = function(blanksAllowed) {
+		makeDirty();
 		var field = $(this.idPre + "receivedDateForDisplay");
 		if (field == null) return; // just so we don't have to have this field on all forms, but is listed in checkAllSampleFields
 		checkValidDate(field);
 		checkRequiredField(field, blanksAllowed);
-		compareSampleField( field.id, false, blanksAllowed);
+		compareSampleField(field.id, false, blanksAllowed);
+		validateReceivedAndCollectionDate(this.idPre + "receivedDateForDisplay", this.idPre + "interviewDate");
 	}
 
-	this.checkReceivedTime = function (blanksAllowed) {
-	 	makeDirty();
+	this.checkReceivedTime = function(blanksAllowed) {
+		makeDirty();
 		var field = $(this.idPre + "receivedTimeForDisplay");
 		if (field == null) return; // just so we don't have to have this field on all forms, but is listed in checkAllSampleFields
 		var isValid = checkValidTimeEntry(field, blanksAllowed);
-		compareSampleField( field.id, false, blanksAllowed);		
-		updateFieldValidity(isValid, field.id );
-	}	
+		compareSampleField(field.id, false, blanksAllowed);
+		updateFieldValidity(isValid, field.id);
+	}
 
-	this.checkInterviewDate = function (blanksAllowed) {
+	this.checkInterviewDate = function(blanksAllowed) {
 		makeDirty();
 		var field = $(this.idPre + "interviewDate");
 		checkValidDate(field);
 		checkRequiredField(field, blanksAllowed);
-		compareSampleField( field.id, false, blanksAllowed, "collectionDateForDisplay");
+		compareSampleField(field.id, false, blanksAllowed, "collectionDateForDisplay");
+		validateReceivedAndCollectionDate(this.idPre + "receivedDateForDisplay", this.idPre + "interviewDate");
 		this.handlePatientBirthDateChange();
 	}
 
-	this.checkInterviewTime = function (blanksAllowed) {
-	 	makeDirty();
+	this.checkInterviewTime = function(blanksAllowed) {
+		makeDirty();
 		var field = $(this.idPre + "interviewTime");
 		if (field == null) return; // just so we don't have to have this field on all forms, but is listed in checkAllSampleFields
 		var isValid = checkValidTimeEntry(field, blanksAllowed);
-		compareSampleField( field.id, false, blanksAllowed, "collectionTimeForDisplay");
-		updateFieldValidity(isValid, field.id );
-	};	
+		compareSampleField(field.id, false, blanksAllowed, "collectionTimeForDisplay");
+		updateFieldValidity(isValid, field.id);
+	};
 
-	this.setSubjectOrSiteSubjectEntered = function () {
+	this.setSubjectOrSiteSubjectEntered = function() {
 		var subjectNumber = $(this.idPre + "subjectNumber");
-		subjectNumber = (subjectNumber == null)?"":subjectNumber.value;
+		subjectNumber = (subjectNumber == null) ? "" : subjectNumber.value;
 		var siteSubjectNumber = $(this.idPre + "siteSubjectNumber");
-		siteSubjectNumber = (siteSubjectNumber == null)?"":siteSubjectNumber.value;
-		if ( siteSubjectNumber == "" && subjectNumber == "" ) {
+		siteSubjectNumber = (siteSubjectNumber == null) ? "" : siteSubjectNumber.value;
+		if (siteSubjectNumber == "" && subjectNumber == "") {
 			document.getElementById("mainForm").subjectOrSiteSubject.value = "";
 		} else {
 			document.getElementById("mainForm").subjectOrSiteSubject.value = "1 OR The other IS set";
 		}
 	};
-	
-	this.checkSubjectNumber = function (blanksAllowed) {
+
+	this.checkSubjectNumber = function(blanksAllowed) {
 		makeDirty();
 		this.setSubjectOrSiteSubjectEntered();
 		var field = $(this.idPre + "subjectNumber");
 		this.handleSubjectChange("nationalID", field, false, afterNewPatient);
 	}
-	
-	this.checkSiteSubjectNumber = function (blanksAllowed, isWanted) {
+
+	this.checkSiteSubjectNumber = function(blanksAllowed, isWanted) {
 		makeDirty();
 		this.setSubjectOrSiteSubjectEntered();
 		var snField = $(this.idPre + "subjectNumber");
 		var ssnField = $(this.idPre + "siteSubjectNumber");
-		if (sampleLoader.existing != null ) {
+		if (sampleLoader.existing != null) {
 			// if we already found a sample, we just compare to that 
-			var compared = comparePatientField( this.idPre + "siteSubjectNumber", false, blanksAllowed, "externalID");
+			var compared = comparePatientField(this.idPre + "siteSubjectNumber", false, blanksAllowed, "externalID");
 			// updateFieldValidity(compared, this.idPre + "siteSubjectNumber");
-		} else if ( snField.value == "" && ssnField.value != "" ) {
+		} else if (snField.value == "" && ssnField.value != "") {
 			// if the siteSubjectNumber is filled in try that
 			this.handleSubjectChange("externalID", ssnField, isWanted, afterNewPatient);
 		} else {
 			this.checkAllSubjectFields(blanksAllowed, true);
 		}
 	}
-	
+
 	/**
 	 * Only call this if you want to load any matching subject from the server  It does load, if a sample is already loaded, so that the subject stay with the LAB #
 	 * @param field
 	 * @param isWanted
 	 * @return
 	 */
-	this.handleSubjectChange = function ( findByTag, field, isWanted, func ) {
+	this.handleSubjectChange = function(findByTag, field, isWanted, func) {
 		patientLoader.findPatientBy(findByTag, field, isWanted, func);
 	}
-	
-	this.checkAllSubjectFields = function (blanksAllowed, validateSubjectNumber) {
+
+	this.checkAllSubjectFields = function(blanksAllowed, validateSubjectNumber) {
 		this.checkAllSubjectFieldsBasic(blanksAllowed, validateSubjectNumber);
 	}
-	this.checkAllSubjectFieldsBasic = function (blanksAllowed, validateSubjectNumbers) {
-		if ( validateSubjectNumbers != undefined && validateSubjectNumbers == true ) {
-		    // var isWanted = (requestType != 'initial');
+	this.checkAllSubjectFieldsBasic = function(blanksAllowed, validateSubjectNumbers) {
+		if (validateSubjectNumbers != undefined && validateSubjectNumbers == true) {
+			// var isWanted = (requestType != 'initial');
 			// Mark both the subject and site subject as not savable if the user changes them and doesn't have the priv.
 			var existingVal = patientLoader.existingSubjectNumber;
-			existingVal = ( existingVal != "" && existingVal != null && existingVal != undefined )?existingVal:null;
+			existingVal = (existingVal != "" && existingVal != null && existingVal != undefined) ? existingVal : null;
 			var isGood = compareFieldToExisting(this.idPre + "subjectNumber", true, patientLoader, true, "nationalID", simpleComparator, existingVal)
-							|| canEditPatientSubjectNos;
+				|| canEditPatientSubjectNos;
 			// this was commented out, but seems needed, if a user enters a known sample and a mismatched patientID, then moves to an unknown. At that point we need to make sure mismatches are cleared, once sample, subject etc. have been cleared appropriately.
 			updateFieldValidity(isGood, this.idPre + "subjectNumber");
 			isGood = compareFieldToExisting(this.idPre + "siteSubjectNumber", true, patientLoader, true, "externalID")
-							|| canEditPatientSubjectNos;
+				|| canEditPatientSubjectNos;
 			updateFieldValidity(isGood, this.idPre + "siteSubjectNumber");
 		}
-		
+
 		this.checkGender(blanksAllowed);
 		this.checkDateOfBirth(blanksAllowed);
 		this.checkFamilyName(blanksAllowed);
@@ -901,7 +949,7 @@ function BaseProjectChecker() {
 		this.checkHivStatus(blanksAllowed);
 	}
 
-	this.checkCenterName = function (blanksAllowed) {
+	this.checkCenterName = function(blanksAllowed) {
 		makeDirty();
 		var nameField = $(this.idPre + "centerName");
 		var codeField = $(this.idPre + "centerCode");
@@ -910,7 +958,7 @@ function BaseProjectChecker() {
 		compareSampleField(codeField.id, false, blanksAllowed);
 	}
 
-	this.checkCenterCode = function (blanksAllowed) {
+	this.checkCenterCode = function(blanksAllowed) {
 		makeDirty();
 		var nameField = $(this.idPre + "centerName");
 		var codeField = $(this.idPre + "centerCode");
@@ -919,55 +967,55 @@ function BaseProjectChecker() {
 		syncLists(codeField, nameField);
 	}
 
-	this.checkFamilyName = function (blanksAllowed) {
+	this.checkFamilyName = function(blanksAllowed) {
 		makeDirty();
-		if ( $(this.idPre + "patientFamilyName") != undefined && $(this.idPre + "patientFamilyName").value == "UNKNOWN_" ) {
-			updateFieldValidity(false, this.idPre + "patientFamilyName" );
+		if ($(this.idPre + "patientFamilyName") != undefined && $(this.idPre + "patientFamilyName").value == "UNKNOWN_") {
+			updateFieldValidity(false, this.idPre + "patientFamilyName");
 		} else {
-			comparePatientField( this.idPre + "patientFamilyName", false, blanksAllowed, "lastName");
+			comparePatientField(this.idPre + "patientFamilyName", false, blanksAllowed, "lastName");
 		}
 	}
-	this.checkFirstNames = function (blanksAllowed) {
+	this.checkFirstNames = function(blanksAllowed) {
 		makeDirty();
-		comparePatientField( this.idPre + "patientFirstNames", false, blanksAllowed, "firstName");
+		comparePatientField(this.idPre + "patientFirstNames", false, blanksAllowed, "firstName");
 	}
 
-	this.checkGenderForVlPregnancyOrSuckle = function () {
+	this.checkGenderForVlPregnancyOrSuckle = function() {
 		//Observation[YES_NO] set No option selected by default when selected gender = "F"
-		if($(this.idPre+"gender").value === 'F'){
-			$(this.idPre+"vlPregnancy").value=1251; //1251 is th dictionary ID for "No" response 
-			$(this.idPre+"vlSuckle").value=1251;
+		if ($(this.idPre + "gender").value === 'F') {
+			$(this.idPre + "vlPregnancy").value = 1251; //1251 is th dictionary ID for "No" response 
+			$(this.idPre + "vlSuckle").value = 1251;
 		}
 	}
 
-	this.checkGender = function (blanksAllowed) {
+	this.checkGender = function(blanksAllowed) {
 		makeDirty();
-		if(this.idPre === 'hpv.'){
+		if (this.idPre === 'hpv.') {
 			return; //don't check gender for HPV project
 		}
 		checkRequiredField($(this.idPre + "gender"), blanksAllowed);
-		comparePatientField( this.idPre + "gender", false, blanksAllowed);
+		comparePatientField(this.idPre + "gender", false, blanksAllowed);
 		var selectedValue = $(this.idPre + "gender").value;
-		if(this.idPre === 'vl.' || this.idPre === 'rt.'){// do it only for viral load form
-			if(selectedValue==='F'){
+		if (this.idPre === 'vl.' || this.idPre === 'rt.') {// do it only for viral load form
+			if (selectedValue === 'F') {
 				$(this.idPre + "vlPregnancyRow").show();
 				$(this.idPre + "vlSuckleRow").show();
 			}
-			else{
+			else {
 				$(this.idPre + "vlPregnancyRow").hide();
 				$(this.idPre + "vlSuckleRow").hide();
 				$(this.idPre + "vlPregnancy").clear();
-				$(this.idPre + "vlSuckle").clear();		
+				$(this.idPre + "vlSuckle").clear();
 			}
 		}
 	}
-	
+
 	/**
 	 * general patient field checking of non-required field.
 	 */
-	this.checkPatientField = function (fieldBaseId, blanksAllowed, tagName) {
+	this.checkPatientField = function(fieldBaseId, blanksAllowed, tagName) {
 		makeDirty();
-		comparePatientField( this.idPre + fieldBaseId, false, blanksAllowed, tagName);
+		comparePatientField(this.idPre + fieldBaseId, false, blanksAllowed, tagName);
 	}
 
 	this.checkDateOfBirth = function(blanksAllowed) {
@@ -980,20 +1028,20 @@ function BaseProjectChecker() {
 		checkValidDate(dobField);
 		checkRequiredField(dobField, blanksAllowed);
 	}
-	
+
 	this.checkAge = function(field, blanksAllowed, ageFieldType) {
 		makeDirty();
-		handlePatientAgeChange(field, this.idPre + "dateOfBirth", this.idPre + "interviewDate", ageFieldType );
+		handlePatientAgeChange(field, this.idPre + "dateOfBirth", this.idPre + "interviewDate", ageFieldType);
 		this.checkDateOfBirth(blanksAllowed);
 	}
 
-	this.checkAllSampleFields = function (blanksAllowed) {
+	this.checkAllSampleFields = function(blanksAllowed) {
 		this.checkCenterName(blanksAllowed);
 		this.checkCenterCode(blanksAllowed);
 		this.checkInterviewDate(blanksAllowed);
 		this.checkReceivedDate(blanksAllowed);
 		this.checkInterviewTime(true);
-        this.checkReceivedTime(true);
+		this.checkReceivedTime(true);
 	}
 
 	this.checkAllFields = function(blanksAllowed) {
@@ -1004,44 +1052,44 @@ function BaseProjectChecker() {
 		this.checkAllSampleItemFields();
 	}
 
-	this.checkAllSampleItemFields = function () {
+	this.checkAllSampleItemFields = function() {
 		// nothing to do during patient entry, but sample entry includes various fields to check
 	}
 
-	this.checkSampleItem = function (itemField, testField) {
+	this.checkSampleItem = function(itemField, testField) {
 		// sometimes the same projectChecker is used in sample and patient entry, thus, if we called this with nothing, forget it.
 		// OR if we are doing initial entry, we'll have a sample, but no sample entries, so don't bother
 		if (itemField == null || requestType == 'initial') {
 			return;
 		}
 		var samplePK = $("samplePK").value;
-		if ( samplePK == null || samplePK == "") {
+		if (samplePK == null || samplePK == "") {
 			// Clear itemField of conflict message
 			return;
 		}
 		var itemId = itemField.id;
 		// each itemField ID has the form like rtn.dryTubeTaken - what we want is the "dryTube" part. It become "Dry Tube" on the server.
-		var itemTag = itemId.substring(itemId.indexOf(".")+1);
+		var itemTag = itemId.substring(itemId.indexOf(".") + 1);
 		itemTag = itemTag.substring(0, itemTag.indexOf("Taken"));
 
 		var testTag = null;
-		if ( testField !=  null) {
+		if (testField != null) {
 			var testId = testField.id;
-			testTag = testId.substring(testId.indexOf(".")+1);
+			testTag = testId.substring(testId.indexOf(".") + 1);
 		}
 
 		// ask the server, if value in this field is actually set in the data.  Report back to the appropriate field
-		sampleItemTestLoader.find(samplePK, (testField != null)?testField:itemField, itemTag, $('projectFormName').value, testTag);
+		sampleItemTestLoader.find(samplePK, (testField != null) ? testField : itemField, itemTag, $('projectFormName').value, testTag);
 	}
 
 	/**
 	 * Clear the existing known patient, if we should.
 	 */
-	this.clearExistingPatient = function () {
+	this.clearExistingPatient = function() {
 		var subjectNumber = $(this.idPre + "subjectNumber");
-		subjectNumber = (subjectNumber == null)?"":subjectNumber.value;
+		subjectNumber = (subjectNumber == null) ? "" : subjectNumber.value;
 		var siteSubjectNumber = $(this.idPre + "siteSubjectNumber");
-		siteSubjectNumber = (siteSubjectNumber == null)?"":siteSubjectNumber.value;
+		siteSubjectNumber = (siteSubjectNumber == null) ? "" : siteSubjectNumber.value;
 		// if no explicit Sub# nor Site Sub # => forget any existing patient info
 		if (subjectNumber == "" && siteSubjectNumber == "") {
 			patientLoader.clearExisting(true);
@@ -1052,26 +1100,26 @@ function BaseProjectChecker() {
 		var existingSsn = patientLoader.getExistingValue("externalID");
 		// a. if there is some subjectNumber and it matches the data, we can keep the current patient data.
 		// b. if there is NO subjectNumber, but the siteSubjectNumber matches, we can keep the patient data.
-		if (subjectNumber == "" ) {
-			if ( siteSubjectNumber != existingSsn) {
+		if (subjectNumber == "") {
+			if (siteSubjectNumber != existingSsn) {
 				// case b.
 				patientLoader.clearExisting(true);
 				hivStatusLoader.existing = null;
-			} 
+			}
 		} else if (subjectNumber != existingSn) {
 			// case a.
 			patientLoader.clearExisting(subjectNumber != "");
 			hivStatusLoader.existing = null;
 		}
 	}
-	
-	this.checkHivStatus = function (isBlankAllowed) {
+
+	this.checkHivStatus = function(isBlankAllowed) {
 		var hivStatusFieldId = this.idPre + "hivStatus";
-		if ( $(hivStatusFieldId) != null) {		
+		if ($(hivStatusFieldId) != null) {
 			compareFieldToExisting(hivStatusFieldId, false, hivStatusLoader, isBlankAllowed);
 		}
 	}
-	
+
 	/**
 	 * tweak the right fields to setup the form when editing an entry (readWrite)
 	 */
@@ -1080,25 +1128,25 @@ function BaseProjectChecker() {
 		this.setFieldReadOnly("subjectNumber", !canEditPatientIDs);
 		this.setFieldReadOnly("siteSubjectNumber", !canEditPatientIDs);
 	}
-	
+
 	this.setFieldReadOnly = function(fieldId, readOnly) {
-		setFieldReadOnly($(this.idPre + fieldId), readOnly );
+		setFieldReadOnly($(this.idPre + fieldId), readOnly);
 	}
-	
-	this.fillLabNo = function () {
+
+	this.fillLabNo = function() {
 		$(this.idPre + "labNoForDisplay").value = $(this.idPre + "labNo").value.substring(4);
 	}
-	
+
 }
 
 /**
  * Disable the field and add to the class "readOnly" OR NOT disable (enable) the field and remove the class "readOnly", depending on the value of 2nd arg.
  */
-function setFieldReadOnly(field, readOnly ) {
-    if( field) {
-        field.disabled = (readOnly) ? true : false;
-        field.className = (readOnly) ? field.className + " readOnly " : field.className.replace(" readOnly ", "");
-    }
+function setFieldReadOnly(field, readOnly) {
+	if (field) {
+		field.disabled = (readOnly) ? true : false;
+		field.className = (readOnly) ? field.className + " readOnly " : field.className.replace(" readOnly ", "");
+	}
 }
 
 function compareTimeFields(isBlankAllowed, fieldPrefix) {
@@ -1127,8 +1175,8 @@ function compareAllObservationHistoryFields(isBlankAllowed, fieldPrefix) {
 	compareFieldToExisting(idPre + "arvProphylaxis", false, observationHistoryLoader, isBlankAllowed);
 	compareFieldToExisting(idPre + "currentARVTreatment", false, observationHistoryLoader, isBlankAllowed);
 	compareFieldToExisting(idPre + "priorARVTreatment", false, observationHistoryLoader, isBlankAllowed);
-	for(var i = 0; i <= 11; i++) {
-		compareFieldToExisting(idPre + "priorARVTreatmentINNs"+i, false, observationHistoryLoader, isBlankAllowed);
+	for (var i = 0; i <= 11; i++) {
+		compareFieldToExisting(idPre + "priorARVTreatmentINNs" + i, false, observationHistoryLoader, isBlankAllowed);
 	}
 	compareFieldToExisting(idPre + "cotrimoxazoleTreatment", false, observationHistoryLoader, isBlankAllowed);
 	compareFieldToExisting(idPre + "aidsStage", false, observationHistoryLoader, isBlankAllowed);
@@ -1139,107 +1187,107 @@ function compareAllObservationHistoryFields(isBlankAllowed, fieldPrefix) {
 
 	compareFieldToExisting(idPre + "cd4Count", false, observationHistoryLoader, isBlankAllowed);
 	compareFieldToExisting(idPre + "hivStatus", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "cd4Percent", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "priorCd4Date", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "antiTbTreatment", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "interruptedARVTreatment", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "arvTreatmentAnyAdverseEffects", false, observationHistoryLoader, isBlankAllowed);
-    for(var i = 0; i < 4; i ++) {
-		compareFieldToExisting(idPre + "arvTreatmentAdvEffType"+i, false, observationHistoryLoader, isBlankAllowed, "arvTreatmentAdvEffType"+i);    	
-		compareFieldToExisting(idPre + "arvTreatmentAdvEffGrd"+i, false, observationHistoryLoader, isBlankAllowed, "arvTreatmentAdvEffGrd"+i);    	
-    }
-    for(var i = 0; i < 4; i ++) {
-		compareFieldToExisting(idPre + "currentARVTreatmentINNs"+i, false, observationHistoryLoader, isBlankAllowed, "currentARVTreatmentINNs"+i);    	
-    }
-    compareFieldToExisting(idPre + "arvTreatmentChange", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "arvTreatmentNew", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "arvTreatmentRegime", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "cotrimoxazoleTreatAnyAdvEff", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "anySecondaryTreatment", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "secondaryTreatment", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "clinicVisits", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "cd4Percent", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "priorCd4Date", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "antiTbTreatment", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "interruptedARVTreatment", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "arvTreatmentAnyAdverseEffects", false, observationHistoryLoader, isBlankAllowed);
+	for (var i = 0; i < 4; i++) {
+		compareFieldToExisting(idPre + "arvTreatmentAdvEffType" + i, false, observationHistoryLoader, isBlankAllowed, "arvTreatmentAdvEffType" + i);
+		compareFieldToExisting(idPre + "arvTreatmentAdvEffGrd" + i, false, observationHistoryLoader, isBlankAllowed, "arvTreatmentAdvEffGrd" + i);
+	}
+	for (var i = 0; i < 4; i++) {
+		compareFieldToExisting(idPre + "currentARVTreatmentINNs" + i, false, observationHistoryLoader, isBlankAllowed, "currentARVTreatmentINNs" + i);
+	}
+	compareFieldToExisting(idPre + "arvTreatmentChange", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "arvTreatmentNew", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "arvTreatmentRegime", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "cotrimoxazoleTreatAnyAdvEff", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "anySecondaryTreatment", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "secondaryTreatment", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "clinicVisits", false, observationHistoryLoader, isBlankAllowed);
 
-    compareFieldToExisting(idPre + "hospital", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "service", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "hospitalPatient", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "reason", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "hospital", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "service", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "hospitalPatient", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "reason", false, observationHistoryLoader, isBlankAllowed);
 
-    compareFieldToExisting(idPre + "whichPCR", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "reasonForSecondPCRTest", false, observationHistoryLoader, isBlankAllowed);
-    
-    compareFieldToExisting(idPre + "nameOfRequestor" , false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "nameOfSampler" , false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "eidInfantPTME" , false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "eidTypeOfClinic"        , false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "eidTypeOfClinicOther"   , false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "eidHowChildFed"         , false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "eidStoppedBreastfeeding", false, observationHistoryLoader, isBlankAllowed);        
-    compareFieldToExisting(idPre + "eidInfantSymptomatic"   , false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "eidMothersHIVStatus"    , false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "eidMothersARV"          , false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "eidInfantsARV"          , false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "eidInfantCotrimoxazole" , false, observationHistoryLoader, isBlankAllowed);
-    
-    compareFieldToExisting(idPre + "indFirstTestName", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "indSecondTestName", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "indFirstTestDate", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "indSecondTestDate", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "indFirstTestResult", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "indSecondTestResult", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "indSiteFinalResult", false, observationHistoryLoader, isBlankAllowed);
-    compareFieldToExisting(idPre + "reasonForRequest", false, observationHistoryLoader, isBlankAllowed, "reason");
-    compareFieldToExisting(idPre + "underInvestigation", false, observationHistoryLoader, isBlankAllowed);
-    
-    compareFieldToExisting(idPre + "hivStatus", false, hivStatusLoader, isBlankAllowed);
-    // we do not compare previous underInvestigationComment to the current value.
-    
-    compareFieldToExisting(idPre + "CTBPul"     , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "CTBExpul"   , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "CCrblToxo"  , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "CCryptoMen" , false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "whichPCR", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "reasonForSecondPCRTest", false, observationHistoryLoader, isBlankAllowed);
+
+	compareFieldToExisting(idPre + "nameOfRequestor", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "nameOfSampler", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "eidInfantPTME", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "eidTypeOfClinic", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "eidTypeOfClinicOther", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "eidHowChildFed", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "eidStoppedBreastfeeding", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "eidInfantSymptomatic", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "eidMothersHIVStatus", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "eidMothersARV", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "eidInfantsARV", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "eidInfantCotrimoxazole", false, observationHistoryLoader, isBlankAllowed);
+
+	compareFieldToExisting(idPre + "indFirstTestName", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "indSecondTestName", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "indFirstTestDate", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "indSecondTestDate", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "indFirstTestResult", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "indSecondTestResult", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "indSiteFinalResult", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "reasonForRequest", false, observationHistoryLoader, isBlankAllowed, "reason");
+	compareFieldToExisting(idPre + "underInvestigation", false, observationHistoryLoader, isBlankAllowed);
+
+	compareFieldToExisting(idPre + "hivStatus", false, hivStatusLoader, isBlankAllowed);
+	// we do not compare previous underInvestigationComment to the current value.
+
+	compareFieldToExisting(idPre + "CTBPul", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "CTBExpul", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "CCrblToxo", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "CCryptoMen", false, observationHistoryLoader, isBlankAllowed);
 	compareFieldToExisting(idPre + "CGenPrurigo", false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "CIST"       , false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "CIST", false, observationHistoryLoader, isBlankAllowed);
 	compareFieldToExisting(idPre + "CCervCancer", false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "COpharCand" , false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "COpharCand", false, observationHistoryLoader, isBlankAllowed);
 	compareFieldToExisting(idPre + "CKaposiSarc", false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "CShingles"  , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "CDiarrheaC" , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "PTBPul"     , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "PTBExpul"   , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "PCrblToxo"  , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "PCryptoMen" , false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "CShingles", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "CDiarrheaC", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "PTBPul", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "PTBExpul", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "PCrblToxo", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "PCryptoMen", false, observationHistoryLoader, isBlankAllowed);
 	compareFieldToExisting(idPre + "PGenPrurigo", false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "PIST"       , false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "PIST", false, observationHistoryLoader, isBlankAllowed);
 	compareFieldToExisting(idPre + "PCervCancer", false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "POpharCand" , false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "POpharCand", false, observationHistoryLoader, isBlankAllowed);
 	compareFieldToExisting(idPre + "PKaposiSarc", false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "PShingles"  , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "PDiarrheaC" , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "weightLoss" , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "diarrhea"   , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "fever"      , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "cough"      , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "pulTB"      , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "expulTB"    , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "swallPaint" , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "cryptoMen"  , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "recPneumon" , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "sespis"     , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "recInfect"  , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "curvixC"    , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "matHIV"     , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "cachexie"   , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "thrush"     , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "dermPruip"  , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "herpes"     , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "zona"       , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "sarcKapo"   , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "xIngPadenp" , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "HIVDement"  , false, observationHistoryLoader, isBlankAllowed);
-	compareFieldToExisting(idPre + "priorDiseases",   false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "PShingles", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "PDiarrheaC", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "weightLoss", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "diarrhea", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "fever", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "cough", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "pulTB", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "expulTB", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "swallPaint", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "cryptoMen", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "recPneumon", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "sespis", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "recInfect", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "curvixC", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "matHIV", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "cachexie", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "thrush", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "dermPruip", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "herpes", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "zona", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "sarcKapo", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "xIngPadenp", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "HIVDement", false, observationHistoryLoader, isBlankAllowed);
+	compareFieldToExisting(idPre + "priorDiseases", false, observationHistoryLoader, isBlankAllowed);
 	compareFieldToExisting(idPre + "currentDiseases", false, observationHistoryLoader, isBlankAllowed);
-	
-	
+
+
 	compareFieldToExisting(idPre + "arvTreatmentInitDate", false, observationHistoryLoader, isBlankAllowed);
 	compareFieldToExisting(idPre + "arvTreatmentRegime", false, observationHistoryLoader, isBlankAllowed);
 	compareFieldToExisting(idPre + "vlReasonForRequest", false, observationHistoryLoader, isBlankAllowed);
@@ -1256,7 +1304,7 @@ function compareAllObservationHistoryFields(isBlankAllowed, fieldPrefix) {
 	compareFieldToExisting(idPre + "priorVLLab", false, observationHistoryLoader, isBlankAllowed);
 	compareFieldToExisting(idPre + "priorVLValue", false, observationHistoryLoader, isBlankAllowed);
 	compareFieldToExisting(idPre + "priorVLDate", false, observationHistoryLoader, isBlankAllowed);
-		
+
 }
 
 function SampleItemTestLoader() {
@@ -1264,27 +1312,27 @@ function SampleItemTestLoader() {
 	this.url = "provider=SampleItemTestProvider";
 
 	// field is the field onto which to put any comparison error
-    this.find = function  /*void*/ (samplePK, field, itemTag, projectFormName, testTag) {
+	this.find = function  /*void*/(samplePK, field, itemTag, projectFormName, testTag) {
 		this.doAjax(this.url + "&sampleKey=" + samplePK + "&projectFormName=" + projectFormName
-				+ "&sampleItemTypeTag=" + itemTag + "&testTag=" + blankOrValue(testTag),
-			function /*void*/ (xhr){
-		    	sampleItemTestLoader.processFindSuccess(xhr, field);
+			+ "&sampleItemTypeTag=" + itemTag + "&testTag=" + blankOrValue(testTag),
+			function /*void*/(xhr) {
+				sampleItemTestLoader.processFindSuccess(xhr, field);
 			},
-			function (xhr) {
+			function(xhr) {
 				sampleItemTestLoader.processFindFailure(xhr, field);
 			}
 		);
 	};
 
 	this.processFindFailure = function(xhr, field) {
-		updateFieldConflict(false, field.id, testInvalid );
+		updateFieldConflict(false, field.id, testInvalid);
 	};
 
 	this.processFindSuccess = function(xhr, field) {
 		var xml = xhr.responseXML;
 		var message = this.getResponseProperty(xml, "message");
 		var result = xml.getElementsByTagName("formfield").item(0).firstChild.wholeText;
-		updateFieldConflict((result == "true") == field.checked, field.id, previousNotMatchedMessage );
+		updateFieldConflict((result == "true") == field.checked, field.id, previousNotMatchedMessage);
 	}
 }
 
@@ -1293,42 +1341,42 @@ function HivStatusLoader() {
 	this.url = "provider=HivStatusProvider";
 
 	// field is the field onto which to put any comparison error
-    this.find = function  /*void*/ (patientId) {
-    	if ( projectChecker != farv ) {
-    		return;
-    	}
-    	if ( patientId == "" ) {
-    		farv.checkHivStatus(true);
-    		return;
-    	}
+	this.find = function  /*void*/(patientId) {
+		if (projectChecker != farv) {
+			return;
+		}
+		if (patientId == "") {
+			farv.checkHivStatus(true);
+			return;
+		}
 		this.doAjax(this.url + "&patientId=" + patientId,
-			function /*void*/ (xhr){
-		    	hivStatusLoader.processFindSuccess(xhr);
+			function /*void*/(xhr) {
+				hivStatusLoader.processFindSuccess(xhr);
 			},
-			function (xhr) {
+			function(xhr) {
 				hivStatusLoader.processFailure(xhr);
 			}
 		);
 	};
-	
+
 	/**
 	 * Only used during read only viewing to show the latest known value.
 	 */
-	this.load = function (patientId, fieldId) {
-    	if ( projectChecker != farv ) {
-    		return;
-    	}
+	this.load = function(patientId, fieldId) {
+		if (projectChecker != farv) {
+			return;
+		}
 		this.doAjax(this.url + "&patientId=" + patientId,
-			function /*void*/ (xhr){
-		    	hivStatusLoader.processLoadSuccess(xhr, fieldId);
+			function /*void*/(xhr) {
+				hivStatusLoader.processLoadSuccess(xhr, fieldId);
 			},
-			function (xhr) {
+			function(xhr) {
 				hivStatusLoader.processFailure(xhr, fieldId);
 			}
 		);
 	};
-	
-	this.processLoadSuccess = function (xhr, fieldId) {
+
+	this.processLoadSuccess = function(xhr, fieldId) {
 		fieldId = "farv.hivStatus";	// there really is only one right field.
 		var xml = xhr.responseXML;
 		var message = this.getResponseProperty(xml, "message");
@@ -1342,7 +1390,7 @@ function HivStatusLoader() {
 	}
 
 	this.processFailure = function(xhr, fieldId) {
-		updateFieldConflict(false, fieldId );
+		updateFieldConflict(false, fieldId);
 	}
 
 	this.processFindSuccess = function(xhr, fieldId) {
@@ -1352,64 +1400,60 @@ function HivStatusLoader() {
 		var message = this.getResponseProperty(xml, "message");
 		if (message == 'valid') {
 			this.existing = xml.getElementsByTagName("formfield").item(0);
-		    farv.checkHivStatus(true);
+			farv.checkHivStatus(true);
 		} else {
 			this.existing = undefined;
-		    farv.checkHivStatus(true);
+			farv.checkHivStatus(true);
 		}
 	}
-	
-	this.setFields = function (value) {
-		this.setField( fieldValidator.idPre + "hivStatus", value);		
+
+	this.setFields = function(value) {
+		this.setField(fieldValidator.idPre + "hivStatus", value);
 	}
-	
-	this.clearFields = function () {
+
+	this.clearFields = function() {
 		this.setFields();
-	}	
+	}
 }
 
-function searchForEOrder(patientField,message){
+function searchForEOrder(patientField, message) {
 	var eorderExternalIdField = document.getElementById('externalOrderNumber');
-	if(eorderExternalIdField){
-		if(eorderExternalIdField.value){
+	if (eorderExternalIdField) {
+		if (eorderExternalIdField.value) {
 			return false;
-		} 
+		}
 	}
-	if(patientField.value){
-		patientCode  = encodeURIComponent(patientField.value.trim());
-        fetch('rest_eorder/external_id?patientCode='+patientCode)
-        .then(response => {
-            if (response.ok) {
-                const contentType = response.headers.get('content-type');
-                if (contentType && (contentType.includes('text/plain') || contentType.includes('application/json'))) {
-                    return response.text();
-                } else {
-                    console.log('Unexpected content type: ' + contentType);
-                    return false;
-                }
-            } else {
-            	console.log('Network response was not ok: ' + response.statusText);
-            	return false;
-            }
-        }).then(externalId => {
-    		if(externalId){
-    			dirty = false;
-    			window.onbeforeunload = null;
-    			alert(message); 
-   			    var newUrl = new URL(window.location.href);
-   			    newUrl.searchParams.set('ID', externalId);
-   			    window.location.href = newUrl.toString();
-    
-    		}
-        }) .catch(error => {
-        	console.error('There was a problem with the fetch operation:', error);
-            return false;
-        });
+	if (patientField.value) {
+		patientCode = encodeURIComponent(patientField.value.trim());
+		fetch('rest_eorder/external_id?patientCode=' + patientCode)
+			.then(response => {
+				if (response.ok) {
+					const contentType = response.headers.get('content-type');
+					if (contentType && (contentType.includes('text/plain') || contentType.includes('application/json'))) {
+						return response.text();
+					} else {
+						console.log('Unexpected content type: ' + contentType);
+						return false;
+					}
+				} else {
+					return false;
+				}
+			}).then(externalId => {
+				if (externalId) {
+					dirty = false;
+					window.onbeforeunload = null;
+					alert(message);
+					var newUrl = new URL(window.location.href);
+					newUrl.searchParams.set('ID', externalId);
+					window.location.href = newUrl.toString();
+
+				}
+			}).catch(error => {
+				console.error('There was a problem with the fetch operation:', error);
+				return false;
+			});
 	}
 }
-
-
-
 
 // Define all of the loaders as Loaders and create one of each
 PatientLoader.prototype = new BaseLoader();

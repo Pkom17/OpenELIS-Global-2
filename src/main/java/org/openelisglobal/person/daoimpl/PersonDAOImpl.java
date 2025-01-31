@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -152,6 +153,27 @@ public class PersonDAOImpl extends BaseDAOImpl<Person, String> implements Person
             handleException(e, "getPersonById");
         }
         return null;
+    }
+    
+    @Transactional
+    @Override
+    public String insert(Person person) {
+        try {
+            entityManager.persist(person);
+            return person.getId();
+        } catch (HibernateException e) {
+            throw new LIMSRuntimeException("Error in " + this.getClass().getSimpleName() + " " + "insert", e);
+        }
+    }
+
+    @Override
+    public Person update(Person person) {
+        try {
+            Person dbObject = entityManager.merge(person);
+            return dbObject;
+        } catch (HibernateException e) {
+            throw new LIMSRuntimeException("Error in " + this.getClass().getSimpleName() + " " + "save", e);
+        }
     }
 
 }

@@ -29,6 +29,7 @@ public final class ClinicalPatientData {
     private String stNumber;
     private String subjectNumber;
     private String contactInfo;
+    private String phoneContact;
     private String siteInfo;
     private String testName;
     private String testRefRange;
@@ -671,6 +672,14 @@ public final class ClinicalPatientData {
 
 	public void setPrescriber(String prescriber) {
 		this.prescriber = prescriber;
+	}
+
+	public String getPhoneContact() {
+		return phoneContact;
+	}
+
+	public void setPhoneContact(String phoneContact) {
+		this.phoneContact = phoneContact;
 	}
     
     

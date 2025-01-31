@@ -161,6 +161,8 @@ public abstract class PatientReport extends Report {
                 ADDRESS_DEPT_ID = part.getId();
             } else if ("commune".equals(part.getPartName())) {
                 ADDRESS_COMMUNE_ID = part.getId();
+            } else if ("phone".equals(part.getPartName())) {
+                PHONE = part.getId();
             }
         }
     }
@@ -892,6 +894,8 @@ public abstract class PatientReport extends Report {
         }
         ObservationHistoryService observationHistoryService = SpringContext.getBean(ObservationHistoryService.class);
 
+        Map<String,String> addresses =  personService.getAddressComponents(currentPatient.getPerson());
+        data.setPhoneContact(addresses.get("phone"));
         data.setContactInfo(currentContactInfo);
         data.setSiteInfo(currentSiteInfo);
         data.setReceivedDate(receivedDate);

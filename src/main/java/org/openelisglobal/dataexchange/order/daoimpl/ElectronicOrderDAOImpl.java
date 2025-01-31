@@ -104,6 +104,9 @@ public class ElectronicOrderDAOImpl extends BaseDAOImpl<ElectronicOrder, String>
 		case "externalId":
 			sql = sql + "eo.externalId asc";
 			break;
+		case "orderTimestampdesc":
+			sql = sql + "eo.statusId asc, eo.orderTimestamp desc";
+			break;
 		default:
 			//
 			break;
@@ -152,6 +155,9 @@ public class ElectronicOrderDAOImpl extends BaseDAOImpl<ElectronicOrder, String>
 		case "externalId":
 			hql = hql + "eo.externalId asc";
 			break;
+		case "orderTimestampdesc":
+			hql = hql + "eo.statusId asc, eo.orderTimestamp desc";
+			break;
 		default:
 			//
 			break;
@@ -159,6 +165,7 @@ public class ElectronicOrderDAOImpl extends BaseDAOImpl<ElectronicOrder, String>
 		try {
 
 			Query<?> query = entityManager.unwrap(Session.class).createQuery(hql);
+			System.out.println(query.toString());
 			query.setParameterList("identifierValues", identifierValues);
 			query.setParameter("patientValue", patientValue);
 			// query.setParameter("order", order.getValue());
@@ -201,6 +208,9 @@ public class ElectronicOrderDAOImpl extends BaseDAOImpl<ElectronicOrder, String>
 			break;
 		case EXTERNAL_ID:
 			sql = sql + "eo.externalId asc";
+			break;
+		case RECEPTION_DATE:
+			sql = sql + "eo.statusId asc, eo.orderTimestamp desc";
 			break;
 		default:
 			//
@@ -271,6 +281,9 @@ public class ElectronicOrderDAOImpl extends BaseDAOImpl<ElectronicOrder, String>
 		case "externalId":
 			sql = sql + "eo.externalId asc";
 			break;
+		case "orderTimestampdesc":
+			sql = sql + "eo.statusId asc, eo.orderTimestamp desc";
+			break;
 		default:
 			//
 			break;
@@ -337,6 +350,9 @@ public class ElectronicOrderDAOImpl extends BaseDAOImpl<ElectronicOrder, String>
 		case EXTERNAL_ID:
 			hql += "ORDER BY eo.externalId asc ";
 			break;
+		case RECEPTION_DATE:
+			hql = hql + "ORDER BY eo.statusId asc, eo.orderTimestamp desc";
+			break;
 		default:
 			//
 			break;
@@ -381,6 +397,9 @@ public class ElectronicOrderDAOImpl extends BaseDAOImpl<ElectronicOrder, String>
 			break;
 		case EXTERNAL_ID:
 			hql += "ORDER BY eo.externalId asc ";
+			break;
+		case RECEPTION_DATE:
+			hql = hql + "ORDER BY eo.statusId asc, eo.orderTimestamp desc";
 			break;
 		default:
 			//

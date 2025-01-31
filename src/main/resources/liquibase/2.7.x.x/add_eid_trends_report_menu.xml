@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+	  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+	
+	<changeSet author="CIV developer Group" id="24110501" context="ci_regional,ci_general,CDIRetroCI,ci_TB">
+		<preConditions onFail="MARK_RAN">
+			<tableExists tableName="menu" schemaName="clinlims" />
+			<sqlCheck  expectedResult="1">SELECT count(*) FROM clinlims.menu WHERE element_id = 'menu_reports_export'</sqlCheck> 
+			<sqlCheck  expectedResult="0">SELECT count(*) FROM clinlims.menu WHERE element_id = 'menu_eid_trends_report'</sqlCheck> 
+		</preConditions>
+		<comment>Add menu entry for electronic order report</comment>
+		<insert tableName="menu" schemaName="clinlims">
+			<column name="id" valueSequenceNext="menu_seq"/>
+			<column name="parent_id" valueComputed="(SELECT id FROM clinlims.menu WHERE element_id = 'menu_reports_export')"/>
+			<column name="presentation_order" value="35"/>
+			<column name="element_id" value="menu_eid_trends_report"/>
+			<column name="action_url" value="/Report?type=patient&amp;report=EIDTrends"/>
+			<column name="display_key" value="banner.menu.eidtrends"/>
+			<column name="tool_tip_key" value="banner.menu.eidtrends"/>
+			<column name="new_window" value="false"/>
+			<column name="is_active" value="true"/>
+		</insert>
+	</changeSet>
+
+</databaseChangeLog>

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RetroCI_Patient_EID" pageWidth="612" pageHeight="862" columnWidth="552" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RetroCI_Patient_EID" pageWidth="612" pageHeight="862" columnWidth="552" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20" uuid="872f5fad-f745-4fa1-8e8c-e5a25d825c2b">
 	<property name="ireport.scriptlethandling" value="0"/>
 	<property name="ireport.encoding" value="UTF-8"/>
-	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.zoom" value="3.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="1425"/>
+	<property name="ireport.y" value="1460"/>
 	<import value="net.sf.jasperreports.engine.*"/>
 	<import value="java.util.*"/>
 	<import value="net.sf.jasperreports.engine.data.*"/>
@@ -51,10 +51,10 @@
 	<pageHeader>
 		<band height="254" splitType="Stretch">
 			<line>
-				<reportElement key="line-3" x="1" y="251" width="551" height="1"/>
+				<reportElement key="line-3" x="1" y="251" width="551" height="1" uuid="97f11edb-d082-40f6-820c-487517b01409"/>
 			</line>
 			<subreport>
-				<reportElement x="1" y="154" width="550" height="95"/>
+				<reportElement x="1" y="154" width="550" height="95" uuid="4bb95539-39af-458e-b279-f375b089c702"/>
 				<subreportParameter name="accession_number">
 					<subreportParameterExpression><![CDATA[$F{accession_number}]]></subreportParameterExpression>
 				</subreportParameter>
@@ -95,16 +95,16 @@
 					<subreportParameterExpression><![CDATA[$F{sitesubjectno}]]></subreportParameterExpression>
 				</subreportParameter>
 				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.JREmptyDataSource()]]></dataSourceExpression>
-				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "RetroCI_Patient_EID_info.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "RetroCI_Patient_EID_info.jasper"]]></subreportExpression>
 			</subreport>
 			<line>
-				<reportElement key="line-1" x="0" y="149" width="551" height="1"/>
+				<reportElement key="line-1" x="0" y="149" width="551" height="1" uuid="378caca9-f0fc-4c1f-b784-4d7e90e830dd"/>
 				<graphicElement>
 					<pen lineStyle="Dashed"/>
 				</graphicElement>
 			</line>
 			<subreport>
-				<reportElement x="0" y="1" width="552" height="146"/>
+				<reportElement x="0" y="1" width="552" height="146" uuid="2051299d-2849-43b8-811a-dadf940078f4"/>
 				<subreportParameter name="SUBREPORT_DIR">
 					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
 				</subreportParameter>
@@ -130,7 +130,7 @@
 					<subreportParameterExpression><![CDATA[$P{imagesPath}]]></subreportParameterExpression>
 				</subreportParameter>
 				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.JREmptyDataSource()]]></dataSourceExpression>
-				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "RetroCIHeader.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "RetroCIHeader.jasper"]]></subreportExpression>
 			</subreport>
 		</band>
 	</pageHeader>
@@ -139,139 +139,144 @@
 	</columnHeader>
 	<detail>
 		<band height="448" splitType="Stretch">
-			<rectangle>
-				<reportElement x="167" y="210" width="174" height="20"/>
-			</rectangle>
 			<image>
-				<reportElement x="10" y="168" width="114" height="20"/>
-				<imageExpression class="java.lang.String"><![CDATA[$P{imagesPath}+ "RESULTATS.jpg"]]></imageExpression>
+				<reportElement x="351" y="344" width="191" height="102" uuid="ced636b7-45bf-4331-98cb-57f353d6a4fa"/>
+				<imageExpression><![CDATA[$P{imagesPath}+ "EIDSign.jpg"]]></imageExpression>
 			</image>
 			<rectangle>
-				<reportElement x="167" y="230" width="174" height="20"/>
+				<reportElement x="167" y="210" width="174" height="20" uuid="34c10ccc-da68-4801-a82e-5d3760e679fb"/>
+			</rectangle>
+			<image>
+				<reportElement x="10" y="168" width="114" height="20" uuid="7173767f-e964-4c4e-966d-aa9a4f2627d5"/>
+				<imageExpression><![CDATA[$P{imagesPath}+ "RESULTATS.jpg"]]></imageExpression>
+			</image>
+			<rectangle>
+				<reportElement x="167" y="230" width="174" height="20" uuid="baafe207-37d9-4b6f-8589-06ce5a0e3a09"/>
 			</rectangle>
 			<textField isBlankWhenNull="false">
-				<reportElement key="textField-2" x="175" y="232" width="94" height="17"/>
+				<reportElement key="textField-2" x="175" y="232" width="145" height="17" uuid="c88ea808-e9cf-474c-b8e2-c74e0cfeac15"/>
 				<textElement>
-					<font size="12"/>
+					<font size="14"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{pcr_type} == null ? "Inconnu" : $F{pcr_type}.equals("First PCR") ? "1" : $F{pcr_type}.equals("Second PCR") ? "2" : $F{pcr_type}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{pcr_type} == null ? "Inconnu" : $F{pcr_type}.equals("First PCR") ? "1" : $F{pcr_type}.equals("Second PCR") ? "2" : $F{pcr_type}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="false">
-				<reportElement key="textField-190" x="130" y="102" width="339" height="15" isRemoveLineWhenBlank="true"/>
-				<textElement/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{virologyEidQaEvent} == null ? "Normal (3 spots de sang collectés selon les procédures nationales)" : $F{virologyEidQaEvent}+" (3 spots de sang collectés selon les procédures nationales)"]]></textFieldExpression>
+				<reportElement key="textField-190" x="130" y="102" width="339" height="15" isRemoveLineWhenBlank="true" uuid="fed6a355-54d4-4a0f-8da0-1d0ff8301f33"/>
+				<textFieldExpression><![CDATA[$F{virologyEidQaEvent} == null ? "Normal (3 spots de sang collectés selon les procédures nationales)" : $F{virologyEidQaEvent}+" (3 spots de sang collectés selon les procédures nationales)"]]></textFieldExpression>
 			</textField>
-			<image>
-				<reportElement x="351" y="344" width="191" height="102"/>
-				<imageExpression class="java.lang.String"><![CDATA[$P{imagesPath}+ "EIDSign.jpg"]]></imageExpression>
-			</image>
 			<image onErrorType="Blank">
-				<reportElement x="257" y="2" width="260" height="24"/>
-				<imageExpression class="java.lang.String"><![CDATA[$P{imagesPath}+ "EID_LaboRef.jpg"]]></imageExpression>
+				<reportElement x="257" y="2" width="260" height="24" uuid="b4ea3fd4-2e43-4f00-adcc-87db42cd461f"/>
+				<imageExpression><![CDATA[$P{imagesPath}+ "EID_LaboRef.jpg"]]></imageExpression>
 			</image>
 			<staticText>
-				<reportElement x="130" y="86" width="301" height="15"/>
-				<textElement/>
+				<reportElement x="130" y="86" width="301" height="15" uuid="a19d4130-2d44-43d4-bbce-a53824a8b458"/>
 				<text><![CDATA[Sang total sur EDTA  ou sur  Papier Buvard Type Whatman 903]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="12" y="86" width="115" height="15"/>
+				<reportElement x="12" y="86" width="115" height="15" uuid="ec14f6bb-95ff-4a4a-b688-5e0d8a19b526"/>
 				<textElement>
 					<font isUnderline="true"/>
 				</textElement>
 				<text><![CDATA[Type de prélèvement :]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="12" y="118" width="115" height="15"/>
+				<reportElement x="12" y="118" width="115" height="15" uuid="daeff7bb-2a3c-456b-b9cb-749b95b46800"/>
 				<textElement>
 					<font isUnderline="true"/>
 				</textElement>
 				<text><![CDATA[Analyseur :]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="12" y="102" width="115" height="15"/>
+				<reportElement x="12" y="102" width="115" height="15" uuid="86b354c0-ed06-4e55-bd7d-b98706dbfc53"/>
 				<textElement>
 					<font isUnderline="true"/>
 				</textElement>
 				<text><![CDATA[Etat de l’échantillon :]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="130" y="137" width="416" height="15"/>
-				<textElement/>
+				<reportElement x="130" y="137" width="416" height="15" uuid="0f74eb0b-b882-4cfb-bdf7-ad7a2a27ec35"/>
 				<text><![CDATA[Cobas Ampliprep/Cobas Taqman HIV 1 Qualitative (HI2QCAP)]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="12" y="137" width="115" height="15"/>
+				<reportElement x="12" y="137" width="115" height="15" uuid="9ab118ab-71d1-459d-ba20-3d188d907728"/>
 				<textElement>
 					<font isUnderline="true"/>
 				</textElement>
 				<text><![CDATA[Trousse commerciale:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="130" y="118" width="356" height="15"/>
-				<textElement/>
+				<reportElement x="130" y="118" width="356" height="15" uuid="b1ad20f5-4ec9-408a-8188-fec07830e39c"/>
 				<text><![CDATA[Cobas Ampliprep/Cobas Taqman]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="118" y="70" width="431" height="15"/>
-				<textElement/>
+				<reportElement x="118" y="70" width="431" height="15" uuid="547caa86-35cc-4b13-b0e9-8956ed72f363"/>
 				<text><![CDATA[Recherche de l’ADN du virus HIV-1 par amplification génétique (PCR) ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="12" y="70" width="89" height="15"/>
+				<reportElement x="12" y="70" width="89" height="15" uuid="abb18355-81e4-4541-a722-e641233b7dea"/>
 				<textElement>
 					<font isUnderline="true"/>
 				</textElement>
 				<text><![CDATA[Type d’Examen : ]]></text>
 			</staticText>
 			<image>
-				<reportElement x="10" y="29" width="476" height="35"/>
-				<imageExpression class="java.lang.String"><![CDATA[$P{imagesPath}+ "EXAMEN_EID.jpg"]]></imageExpression>
+				<reportElement x="10" y="29" width="476" height="35" uuid="826d4e31-0371-4569-a327-82313b60b860"/>
+				<imageExpression><![CDATA[$P{imagesPath}+ "EXAMEN_EID.jpg"]]></imageExpression>
 			</image>
 			<rectangle>
-				<reportElement x="10" y="210" width="157" height="20"/>
+				<reportElement x="10" y="210" width="157" height="20" uuid="752aeeed-e845-4065-980f-cdeff0c3eb7b"/>
 			</rectangle>
 			<rectangle>
-				<reportElement x="10" y="190" width="157" height="20"/>
+				<reportElement x="10" y="190" width="157" height="20" uuid="2a5b4835-3257-4161-bd06-8ca69f4437c5"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="19" y="211" width="100" height="18"/>
+				<reportElement x="19" y="211" width="100" height="18" uuid="f1e389bd-2baf-4061-b96f-df7cb996407a"/>
 				<textElement>
 					<font size="12"/>
 				</textElement>
 				<text><![CDATA[HIV-1]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="19" y="192" width="100" height="18"/>
+				<reportElement x="19" y="192" width="100" height="18" uuid="f9bdb850-4cb3-4a5a-8227-58e53c0e0a43"/>
 				<textElement>
 					<font size="12"/>
 				</textElement>
 				<text><![CDATA[Virologie]]></text>
 			</staticText>
 			<textField isBlankWhenNull="false">
-				<reportElement key="textField-1" x="175" y="211" width="105" height="18"/>
+				<reportElement key="textField-1" x="175" y="211" width="145" height="18" uuid="ab1fb43d-c8a4-408c-a7c3-e5400fd4f12d">
+					<printWhenExpression><![CDATA[!$F{hiv_status}.toLowerCase().contains("pos")]]></printWhenExpression>
+				</reportElement>
 				<textElement>
-					<font size="12"/>
+					<font size="14"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{hiv_status} == null ? "Négatif" : $F{hiv_status}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{hiv_status} == null ? "Négatif" : $F{hiv_status}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="false">
+				<reportElement key="textField-1" x="175" y="211" width="145" height="18" uuid="c6f64de2-a150-4294-a1f3-7d504660db0b">
+					<printWhenExpression><![CDATA[$F{hiv_status}.toLowerCase().contains("pos")]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{hiv_status} == null ? "Négatif" : $F{hiv_status}]]></textFieldExpression>
 			</textField>
 			<image>
-				<reportElement x="10" y="272" width="189" height="20"/>
-				<imageExpression class="java.lang.String"><![CDATA[$P{imagesPath}+ "INTERPRETATIONS.jpg"]]></imageExpression>
+				<reportElement x="10" y="266" width="189" height="20" uuid="4539938a-ea9b-4ab0-abfe-edda329ac637"/>
+				<imageExpression><![CDATA[$P{imagesPath}+ "INTERPRETATIONS.jpg"]]></imageExpression>
 			</image>
 			<rectangle>
-				<reportElement x="10" y="230" width="157" height="20"/>
+				<reportElement x="10" y="230" width="157" height="20" uuid="0cd9a8fd-572b-481b-a397-11677d8fd399"/>
 			</rectangle>
 			<staticText>
-				<reportElement key="staticText-5" x="19" y="232" width="106" height="18"/>
+				<reportElement key="staticText-5" x="19" y="234" width="106" height="18" uuid="ee4cde19-18a5-40cb-876e-38d12916340d"/>
 				<textElement>
 					<font size="12"/>
 				</textElement>
 				<text><![CDATA[Rang de la PCR]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="6" y="297" width="401" height="151"/>
-				<textElement/>
+				<reportElement x="6" y="286" width="401" height="162" uuid="da1664a5-bc66-48be-97c5-084f0a0a1312"/>
 				<text><![CDATA[1-	Si la PCR sur ADN est positive sur le premier prélèvement (PCR1),  refaire un deuxième prélèvement (PCR2) pour une deuxième PCR dont le but est de confirmer le premier résultat. Et commencer immédiatement le traitement antirétroviral
 
 2-	Si la PCR sur ADN est négative, l’enfant n’est pas infecté par le VIH
@@ -283,34 +288,34 @@ b.	Si l’enfant est sous allaitement maternel, répéter la PCR  6 semaines apr
 ]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="167" y="190" width="174" height="20"/>
+				<reportElement x="167" y="190" width="174" height="20" uuid="0e60eb0d-9466-4f86-8d8c-b661d7086eea"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="175" y="190" width="99" height="17"/>
+				<reportElement x="175" y="190" width="99" height="17" uuid="c34060df-d810-4bd4-8ec2-8c893eae7525"/>
 				<textElement>
 					<font size="12"/>
 				</textElement>
 				<text><![CDATA[Résultats]]></text>
 			</staticText>
 			<image onErrorType="Blank">
-				<reportElement x="365" y="189" width="169" height="60"/>
-				<imageExpression class="java.lang.String"><![CDATA[$P{imagesPath}+ "ciphiaLogo.jpg"]]></imageExpression>
+				<reportElement x="365" y="189" width="169" height="60" uuid="16a32697-fda0-468d-a9eb-c72480b2418c"/>
+				<imageExpression><![CDATA[$P{imagesPath}+ "ciphiaLogo.jpg"]]></imageExpression>
 			</image>
 		</band>
 		<band height="448">
 			<printWhenExpression><![CDATA[$F{virologyEidQaEvent}!=null]]></printWhenExpression>
 			<rectangle>
-				<reportElement x="0" y="74" width="551" height="13"/>
+				<reportElement x="0" y="74" width="551" height="13" uuid="709cde79-21ee-4ee6-8b65-87fdbbb20bb8"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="4" y="74" width="165" height="13"/>
+				<reportElement x="4" y="74" width="165" height="13" uuid="d7bc553b-5d42-4e7e-8f3a-8b50858a54b9"/>
 				<textElement>
 					<font fontName="Arial"/>
 				</textElement>
 				<text><![CDATA[ Age de l’enfant > 18 mois]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="425" y="74" width="115" height="13">
+				<reportElement x="425" y="74" width="115" height="13" uuid="525e7e0a-3011-4391-8f44-59e93c3e8ddc">
 					<printWhenExpression><![CDATA[$F{allQaEvents}!=null && $F{allQaEvents}.contains("qa_event.adult")]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -319,15 +324,14 @@ b.	Si l’enfant est sous allaitement maternel, répéter la PCR  6 semaines apr
 				<text><![CDATA[X]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="0" y="87" width="551" height="13"/>
+				<reportElement x="0" y="87" width="551" height="13" uuid="181beaa4-6bf9-4b99-8375-3b8f45e7eee4"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="4" y="87" width="230" height="13"/>
-				<textElement/>
+				<reportElement x="4" y="87" width="230" height="13" uuid="956969a9-f603-489d-b993-8bdf9f4314cf"/>
 				<text><![CDATA[ Date de prélèvement au-delà d’un (1) mois]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="425" y="87" width="115" height="13">
+				<reportElement x="425" y="87" width="115" height="13" uuid="6c127b72-bce1-4009-917c-c77342d83e0c">
 					<printWhenExpression><![CDATA[$F{allQaEvents}!=null && $F{allQaEvents}.contains("qa_event.Date_1")]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -336,15 +340,14 @@ b.	Si l’enfant est sous allaitement maternel, répéter la PCR  6 semaines apr
 				<text><![CDATA[X]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="0" y="100" width="551" height="13"/>
+				<reportElement x="0" y="100" width="551" height="13" uuid="8fdfc458-55e9-42e2-8420-2c38a5eaf056"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="4" y="100" width="204" height="13"/>
-				<textElement/>
+				<reportElement x="4" y="100" width="204" height="13" uuid="5f789cfb-7935-47c3-992c-d69ebd7b16ba"/>
 				<text><![CDATA[ DBS: Nombre de spot rempli  < 3]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="425" y="100" width="115" height="13">
+				<reportElement x="425" y="100" width="115" height="13" uuid="393ee289-231a-49f0-96f9-d66ec2d07183">
 					<printWhenExpression><![CDATA[$F{allQaEvents}!=null && $F{allQaEvents}.contains("qa_event.DBS_3")]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -353,15 +356,14 @@ b.	Si l’enfant est sous allaitement maternel, répéter la PCR  6 semaines apr
 				<text><![CDATA[X]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="0" y="113" width="551" height="13"/>
+				<reportElement x="0" y="113" width="551" height="13" uuid="7e093fbb-d792-4a3a-a000-4ddf188fd9d0"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="4" y="113" width="164" height="13"/>
-				<textElement/>
+				<reportElement x="4" y="113" width="164" height="13" uuid="667c5cfa-70dc-4df9-8c1f-e38159b3994f"/>
 				<text><![CDATA[ Diamètre des spots < 5mm]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="425" y="113" width="115" height="13">
+				<reportElement x="425" y="113" width="115" height="13" uuid="38df9d73-ce4f-4718-8d04-b10c3bc7d12d">
 					<printWhenExpression><![CDATA[$F{allQaEvents}!=null && $F{allQaEvents}.contains("qa_event.Diametre")]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -370,15 +372,14 @@ b.	Si l’enfant est sous allaitement maternel, répéter la PCR  6 semaines apr
 				<text><![CDATA[X]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="0" y="126" width="551" height="13"/>
+				<reportElement x="0" y="126" width="551" height="13" uuid="b49cd768-dc09-48ac-aedb-05c8eec69d33"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="4" y="126" width="164" height="13"/>
-				<textElement/>
+				<reportElement x="4" y="126" width="164" height="13" uuid="34f8430a-c140-4b94-88d7-44e1e86e334b"/>
 				<text><![CDATA[ DBS spot de sang coagulé]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="425" y="126" width="115" height="13">
+				<reportElement x="425" y="126" width="115" height="13" uuid="e5a57299-9c07-453c-bc47-ecce70959b74">
 					<printWhenExpression><![CDATA[$F{allQaEvents}!=null && $F{allQaEvents}.contains("qa_event.DBS_C")]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -387,15 +388,14 @@ b.	Si l’enfant est sous allaitement maternel, répéter la PCR  6 semaines apr
 				<text><![CDATA[X]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="0" y="139" width="551" height="13"/>
+				<reportElement x="0" y="139" width="551" height="13" uuid="05ec4290-d03d-477a-b19d-4fb9ecfa4c6e"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="4" y="139" width="164" height="13"/>
-				<textElement/>
+				<reportElement x="4" y="139" width="164" height="13" uuid="03073d46-54fd-472b-8dc0-6e0671b5d5a1"/>
 				<text><![CDATA[ DBS spot de sang insuffisant]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="425" y="139" width="115" height="13">
+				<reportElement x="425" y="139" width="115" height="13" uuid="4898f824-475d-4f08-8f52-447f0fa0b362">
 					<printWhenExpression><![CDATA[$F{allQaEvents}!=null && $F{allQaEvents}.contains("qa_event.DBS_I")]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -404,15 +404,14 @@ b.	Si l’enfant est sous allaitement maternel, répéter la PCR  6 semaines apr
 				<text><![CDATA[X]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="0" y="152" width="551" height="13"/>
+				<reportElement x="0" y="152" width="551" height="13" uuid="a29f4a60-80d1-49e7-a3a0-2f760347b7e8"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="4" y="152" width="166" height="13"/>
-				<textElement/>
+				<reportElement x="4" y="152" width="166" height="13" uuid="cc95ff6b-8205-4c8a-a315-474dfbde09d1"/>
 				<text><![CDATA[ Elution du disque DBS impossible]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="425" y="152" width="115" height="13">
+				<reportElement x="425" y="152" width="115" height="13" uuid="e20b0a73-9d40-4d6c-917d-d9a9e0e9fea4">
 					<printWhenExpression><![CDATA[$F{allQaEvents}!=null && $F{allQaEvents}.contains("qa_event.DBS_DI")]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -421,15 +420,14 @@ b.	Si l’enfant est sous allaitement maternel, répéter la PCR  6 semaines apr
 				<text><![CDATA[X]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="0" y="165" width="551" height="13"/>
+				<reportElement x="0" y="165" width="551" height="13" uuid="72685d50-957a-4af0-a050-bfc3484d5d9a"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="3" y="165" width="166" height="13"/>
-				<textElement/>
+				<reportElement x="3" y="165" width="166" height="13" uuid="56d9e01c-5cde-42fd-8554-ac5363907a88"/>
 				<text><![CDATA[ DBS spot de sang dilué par l’alcool]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="424" y="165" width="115" height="13">
+				<reportElement x="424" y="165" width="115" height="13" uuid="f336810e-7ebd-429e-9c3b-f46092e75033">
 					<printWhenExpression><![CDATA[$F{allQaEvents}!=null && $F{allQaEvents}.contains("qa_event.DBS_D")]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -438,15 +436,14 @@ b.	Si l’enfant est sous allaitement maternel, répéter la PCR  6 semaines apr
 				<text><![CDATA[X]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="0" y="178" width="551" height="13"/>
+				<reportElement x="0" y="178" width="551" height="13" uuid="14cc5c0d-2472-4dea-be24-3341da1fade4"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="3" y="179" width="372" height="13"/>
-				<textElement/>
+				<reportElement x="3" y="179" width="372" height="13" uuid="c584aaa8-86c5-44ca-8edd-00322f926db5"/>
 				<text><![CDATA[ Carte DBS sans enveloppe glassine (si plusieurs DBS dans un sachet Ziplock)]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="425" y="179" width="114" height="13">
+				<reportElement x="425" y="179" width="114" height="13" uuid="22707759-6304-473c-b2a0-44a243ffd9df">
 					<printWhenExpression><![CDATA[$F{allQaEvents}!=null && $F{allQaEvents}.contains("qa_event.DBS_E")]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -455,15 +452,14 @@ b.	Si l’enfant est sous allaitement maternel, répéter la PCR  6 semaines apr
 				<text><![CDATA[X]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="0" y="191" width="551" height="13"/>
+				<reportElement x="0" y="191" width="551" height="13" uuid="76b9d0a7-2aa5-4be3-b9a7-6dcf0e9dcfa9"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="3" y="191" width="347" height="13"/>
-				<textElement/>
+				<reportElement x="3" y="191" width="347" height="13" uuid="f7fc42a3-07d4-4a3c-9fa8-221a74176655"/>
 				<text><![CDATA[ Carte DBS non conforme (différente du Whatman 903)]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="424" y="191" width="115" height="13">
+				<reportElement x="424" y="191" width="115" height="13" uuid="269eecee-1039-4d42-adde-d9c723a115e8">
 					<printWhenExpression><![CDATA[$F{allQaEvents}!=null && $F{allQaEvents}.contains("qa_event.DBS_NC")]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -472,15 +468,14 @@ b.	Si l’enfant est sous allaitement maternel, répéter la PCR  6 semaines apr
 				<text><![CDATA[X]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="0" y="204" width="551" height="13"/>
+				<reportElement x="0" y="204" width="551" height="13" uuid="db87ada5-7d5e-4e61-91ed-76907748e50b"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="3" y="204" width="166" height="13"/>
-				<textElement/>
+				<reportElement x="3" y="204" width="166" height="13" uuid="1455f40c-89c5-46c0-8c1c-6f3ffd51377c"/>
 				<text><![CDATA[ DBS non identifié]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="424" y="204" width="115" height="13">
+				<reportElement x="424" y="204" width="115" height="13" uuid="23a9ffab-8eac-4927-a4b6-e0aef4acc91a">
 					<printWhenExpression><![CDATA[$F{allQaEvents}!=null && $F{allQaEvents}.contains("qa_event.DBS_NI")]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -489,15 +484,14 @@ b.	Si l’enfant est sous allaitement maternel, répéter la PCR  6 semaines apr
 				<text><![CDATA[X]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="0" y="217" width="551" height="13"/>
+				<reportElement x="0" y="217" width="551" height="13" uuid="11c236a1-6be1-4ff7-847c-a7dbcb84c625"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="3" y="217" width="372" height="13"/>
-				<textElement/>
+				<reportElement x="3" y="217" width="372" height="13" uuid="05f08719-9309-40f3-bd01-6266d2e32dc9"/>
 				<text><![CDATA[ DBS mal identifié (Identité discordante sur DBS et fiche)]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="424" y="217" width="115" height="13">
+				<reportElement x="424" y="217" width="115" height="13" uuid="472dda6d-7b76-4dc6-ad89-3cc4e9740a54">
 					<printWhenExpression><![CDATA[$F{allQaEvents}!=null && $F{allQaEvents}.contains("qa_event.DBS_MI")]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -506,15 +500,14 @@ b.	Si l’enfant est sous allaitement maternel, répéter la PCR  6 semaines apr
 				<text><![CDATA[X]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="0" y="230" width="551" height="13"/>
+				<reportElement x="0" y="230" width="551" height="13" uuid="35661603-be59-4c1c-bb85-e4fe114c935c"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="3" y="230" width="166" height="13"/>
-				<textElement/>
+				<reportElement x="3" y="230" width="166" height="13" uuid="6751e3f8-f126-4d31-93f6-71ee602839b5"/>
 				<text><![CDATA[ DBS sans fiche]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="424" y="230" width="115" height="13">
+				<reportElement x="424" y="230" width="115" height="13" uuid="51fc06d6-e274-423a-8a36-cc874a7cf86e">
 					<printWhenExpression><![CDATA[$F{allQaEvents}!=null && $F{allQaEvents}.contains("qa_event.DBS_SF")]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -523,15 +516,14 @@ b.	Si l’enfant est sous allaitement maternel, répéter la PCR  6 semaines apr
 				<text><![CDATA[X]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="0" y="243" width="551" height="13"/>
+				<reportElement x="0" y="243" width="551" height="13" uuid="30c225b3-fce7-4187-9464-610477353572"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="3" y="243" width="288" height="13"/>
-				<textElement/>
+				<reportElement x="3" y="243" width="288" height="13" uuid="0edb0201-66e0-4675-bddd-112891fee57e"/>
 				<text><![CDATA[ Fiche de prélèvement entachée de sang]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="424" y="243" width="115" height="13">
+				<reportElement x="424" y="243" width="115" height="13" uuid="0f191ae3-f0bb-48e1-b42b-f441ae7d0a02">
 					<printWhenExpression><![CDATA[$F{allQaEvents}!=null && $F{allQaEvents}.contains("qa_event.bloodstained.form")]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -540,15 +532,14 @@ b.	Si l’enfant est sous allaitement maternel, répéter la PCR  6 semaines apr
 				<text><![CDATA[X]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="0" y="256" width="551" height="13"/>
+				<reportElement x="0" y="256" width="551" height="13" uuid="9b879316-8d92-4550-8544-69e25ecc13dd"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="3" y="256" width="331" height="13"/>
-				<textElement/>
+				<reportElement x="3" y="256" width="331" height="13" uuid="b42ad98f-688b-4f0b-9b3a-043455e6b5b6"/>
 				<text><![CDATA[ Fiche de prélèvement sans échantillon DBS]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="424" y="256" width="115" height="13">
+				<reportElement x="424" y="256" width="115" height="13" uuid="1708aa25-51e1-4ef2-9fa4-09f53773109f">
 					<printWhenExpression><![CDATA[$F{allQaEvents}!=null && $F{allQaEvents}.contains("qa_event.Fiche_no_DBS")]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -557,208 +548,198 @@ b.	Si l’enfant est sous allaitement maternel, répéter la PCR  6 semaines apr
 				<text><![CDATA[X]]></text>
 			</staticText>
 			<line>
-				<reportElement x="391" y="75" width="1" height="194"/>
+				<reportElement x="391" y="75" width="1" height="194" uuid="a68ddbea-c040-43c8-a831-f9d80fb018a4"/>
 			</line>
 			<rectangle>
-				<reportElement x="0" y="278" width="551" height="38"/>
+				<reportElement x="0" y="278" width="551" height="38" uuid="bfac4966-1732-4f59-8542-2ac014f05cf4"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="4" y="284" width="150" height="16"/>
+				<reportElement x="4" y="284" width="150" height="16" uuid="6481948e-19d3-474e-b5a1-9ad37c7bfa18"/>
 				<textElement>
 					<font size="11" isBold="true"/>
 				</textElement>
 				<text><![CDATA[AUTRES MOTIFS]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="154" y="284" width="35" height="13"/>
+				<reportElement x="154" y="284" width="35" height="13" uuid="1d1d2086-3cec-4379-a3ae-0bcff2be8fb8"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="6" y="302" width="543" height="13"/>
-				<textElement/>
+				<reportElement x="6" y="302" width="543" height="13" uuid="110e6f4f-8c23-4e8f-b11c-9b8addc199f6"/>
 				<text><![CDATA[A décrire :…………………………………………………………………….................................................................………….]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="0" y="358" width="551" height="34"/>
+				<reportElement x="0" y="358" width="551" height="34" uuid="02164f04-6d2a-450a-8f2e-00cab2f3df98"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="4" y="358" width="85" height="16"/>
+				<reportElement x="4" y="358" width="85" height="16" uuid="981b7fd4-4d62-4817-bcd1-b19e94ef7089"/>
 				<textElement>
 					<font size="11" isBold="true"/>
 				</textElement>
 				<text><![CDATA[CONCLUSION :]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="4" y="373" width="195" height="16"/>
+				<reportElement x="4" y="373" width="195" height="16" uuid="9ddef73b-1f41-43bb-b279-c7c5652c4413"/>
 				<textElement>
 					<font size="11" isBold="true" isItalic="true"/>
 				</textElement>
 				<text><![CDATA[Prière refaire le prélèvement sur :                      ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="88" y="358" width="361" height="16"/>
+				<reportElement x="88" y="358" width="361" height="16" uuid="0e7a7ece-d019-4c35-9199-9e24cae76e21"/>
 				<textElement>
 					<font size="11"/>
 				</textElement>
 				<text><![CDATA[L’échantillon ne peut être traité ou analysé ce jour. ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="197" y="374" width="352" height="16"/>
+				<reportElement x="197" y="374" width="352" height="16" uuid="8eb47955-51dd-46ef-a5cf-02f95cbdd10f"/>
 				<textElement>
 					<font size="11" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Tube EDTA                Tube sec          Carte DBS Whatman 903]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="14" y="319" width="57" height="16"/>
+				<reportElement x="14" y="319" width="57" height="16" uuid="e4948526-5bf4-46cb-8a31-a0083cb389a1"/>
 				<textElement>
 					<font size="11" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Section:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="76" y="319" width="36" height="16"/>
-				<textElement/>
+				<reportElement x="76" y="319" width="36" height="16" uuid="b96b150d-d0b8-4c14-b70f-aea168673478"/>
 				<text><![CDATA[Saisie]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="114" y="320" width="14" height="14"/>
+				<reportElement x="114" y="320" width="14" height="14" uuid="95e68eed-3272-46d8-9768-62aababaec82"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="146" y="319" width="62" height="16"/>
-				<textElement/>
+				<reportElement x="146" y="319" width="62" height="16" uuid="c45da802-b7c2-4fa4-8b8b-041aace87e87"/>
 				<text><![CDATA[Réception]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="202" y="320" width="14" height="14"/>
+				<reportElement x="202" y="320" width="14" height="14" uuid="25141628-973e-49c0-a3f3-9224b5393640"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="237" y="319" width="56" height="16"/>
-				<textElement/>
+				<reportElement x="237" y="319" width="56" height="16" uuid="d3df11a4-5189-465c-98a7-b8a3bda42369"/>
 				<text><![CDATA[Biochimie]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="291" y="320" width="14" height="14"/>
+				<reportElement x="291" y="320" width="14" height="14" uuid="7d2ddd4f-64e6-469a-8723-c082a96098b0"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="320" y="319" width="100" height="16"/>
-				<textElement/>
+				<reportElement x="320" y="319" width="100" height="16" uuid="53b619d0-2db3-4720-b295-966c43597a33"/>
 				<text><![CDATA[Immunologie(CD4) ]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="425" y="320" width="14" height="14"/>
+				<reportElement x="425" y="320" width="14" height="14" uuid="14335a54-2552-49cf-a7be-e096bc0873c8"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="455" y="320" width="66" height="16"/>
-				<textElement/>
+				<reportElement x="455" y="320" width="66" height="16" uuid="9459fca3-c5df-4b41-82f3-274183633928"/>
 				<text><![CDATA[Charge virale]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="526" y="320" width="14" height="14"/>
+				<reportElement x="526" y="320" width="14" height="14" uuid="4f687d82-2dfb-4ac5-afe8-8e3fb3b0ed19"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="77" y="339" width="123" height="16"/>
-				<textElement/>
+				<reportElement x="77" y="339" width="123" height="16" uuid="7af60ea6-b228-4c6a-9090-838994fcdad7"/>
 				<text><![CDATA[Diagnostic précoce (EID) ]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="202" y="340" width="14" height="14"/>
+				<reportElement x="202" y="340" width="14" height="14" uuid="effd560a-d50d-4d6e-bb63-d1ae432fd008"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="204" y="341" width="11" height="13">
+				<reportElement x="204" y="341" width="11" height="13" uuid="2a92f645-b1f9-4d0c-90c5-cdc73e5b2f25">
 					<printWhenExpression><![CDATA[$F{virologyEidQaEvent}!=null]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center"/>
 				<text><![CDATA[X]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="237" y="339" width="54" height="16"/>
-				<textElement/>
+				<reportElement x="237" y="339" width="54" height="16" uuid="9d1b4cf8-00c3-433a-be8b-1342fa1e17b8"/>
 				<text><![CDATA[Sérologie VIH]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="291" y="340" width="14" height="14"/>
+				<reportElement x="291" y="340" width="14" height="14" uuid="5e11f56b-6182-4657-b8fb-b2c5d16c7fb7"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="351" y="339" width="68" height="16"/>
-				<textElement/>
+				<reportElement x="351" y="339" width="68" height="16" uuid="cb6831e3-fa04-40bd-83c5-2c57f8b046c2"/>
 				<text><![CDATA[Hématologie]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="425" y="340" width="14" height="14"/>
+				<reportElement x="425" y="340" width="14" height="14" uuid="b9f8b0a6-f82e-4e0c-813f-e94d8aaa4ea5"/>
 			</rectangle>
 			<rectangle>
-				<reportElement x="0" y="34" width="170" height="40"/>
+				<reportElement x="0" y="34" width="170" height="40" uuid="0d085533-a4cf-4562-b552-7fa9a6e2c3b7"/>
 			</rectangle>
 			<rectangle>
-				<reportElement x="170" y="34" width="381" height="20"/>
+				<reportElement x="170" y="34" width="381" height="20" uuid="22d42dd4-f257-4f06-97fa-93c3a2ab2e59"/>
 			</rectangle>
 			<rectangle>
-				<reportElement x="170" y="54" width="381" height="20"/>
+				<reportElement x="170" y="54" width="381" height="20" uuid="6c3606e0-5e6f-418a-b4aa-752ac950cc22"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="178" y="33" width="118" height="20"/>
+				<reportElement x="178" y="33" width="118" height="20" uuid="450b5ded-73ca-4255-b5fd-a3595049c6ad"/>
 				<textElement>
 					<font size="11" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Echantillon en tube : ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="-1" y="8" width="552" height="20"/>
+				<reportElement x="-1" y="8" width="552" height="20" uuid="f157b847-1b0c-4af3-b67e-19432ad082ec"/>
 				<textElement textAlignment="Center">
 					<font size="14" isBold="true"/>
 				</textElement>
 				<text><![CDATA[RAPPORT DE NON-CONFORMITE CLIENT]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="301" y="33" width="241" height="20"/>
-				<textElement/>
+				<reportElement x="301" y="33" width="241" height="20" uuid="d2328653-3511-4756-abf8-4298550bcd8c"/>
 				<text><![CDATA[Type de tube/Type d’échantillon]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="10" y="40" width="157" height="34"/>
+				<reportElement x="10" y="40" width="157" height="34" uuid="0c95fa96-90ed-4c4b-b7cc-9d70ea809bf2"/>
 				<textElement textAlignment="Center">
 					<font size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[MOTIF DU REFUS]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="178" y="55" width="361" height="19"/>
+				<reportElement x="178" y="55" width="361" height="19" uuid="217a8412-0f4f-4d3f-8611-0ef7dc4d99a0"/>
 				<textElement textAlignment="Center">
 					<font size="11" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Carte DBS Whatman 903]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="265" y="373" width="14" height="14"/>
+				<reportElement x="265" y="373" width="14" height="14" uuid="c8b5ce40-db4d-4f76-8bb4-06e19f1e06a6"/>
 			</rectangle>
 			<rectangle>
-				<reportElement x="359" y="373" width="14" height="14"/>
+				<reportElement x="359" y="373" width="14" height="14" uuid="dfdb3b2b-0e5c-4412-afea-f7c77a60a41b"/>
 			</rectangle>
 			<rectangle>
-				<reportElement x="521" y="373" width="14" height="14"/>
+				<reportElement x="521" y="373" width="14" height="14" uuid="6b137cb6-f6f5-4a6b-925f-d2a3cbc52032"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="523" y="374" width="11" height="13"/>
+				<reportElement x="523" y="374" width="11" height="13" uuid="b8497be6-a229-443f-88b0-ab84271a862b"/>
 				<textElement textAlignment="Center"/>
 				<text><![CDATA[X]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="204" y="321" width="11" height="13">
+				<reportElement x="204" y="321" width="11" height="13" uuid="5e62e51d-9b95-410d-80d6-bd8fdaa3cae8">
 					<printWhenExpression><![CDATA[$F{receptionQaEvent}!=null]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center"/>
 				<text><![CDATA[X]]></text>
 			</staticText>
 			<image onErrorType="Blank">
-				<reportElement x="4" y="5" width="337" height="12"/>
-				<imageExpression class="java.lang.String"><![CDATA[$P{imagesPath}+"PRECAUTIONS.jpg"]]></imageExpression>
+				<reportElement x="4" y="5" width="337" height="12" uuid="df5982b1-3b8c-4bf1-9a4a-f49c4af55c13"/>
+				<imageExpression><![CDATA[$P{imagesPath}+"PRECAUTIONS.jpg"]]></imageExpression>
 			</image>
 		</band>
 	</detail>
 	<columnFooter>
 		<band height="90" splitType="Stretch">
 			<staticText>
-				<reportElement key="staticText-2" x="2" y="22" width="551" height="59"/>
+				<reportElement key="staticText-2" x="2" y="22" width="551" height="59" uuid="bca3784d-d7f5-47a6-86a0-b42a8cb3865f"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
@@ -769,10 +750,10 @@ La performance de ce test a été évaluée uniquement sur HIV-1 group O et N, e
 ]]></text>
 			</staticText>
 			<line>
-				<reportElement key="line-2" x="0" y="0" width="549" height="1"/>
+				<reportElement key="line-2" x="0" y="0" width="549" height="1" uuid="098231ef-4e14-4777-b37c-80e53e2b8c08"/>
 			</line>
 			<line>
-				<reportElement x="0" y="4" width="549" height="1"/>
+				<reportElement x="0" y="4" width="549" height="1" uuid="f56ae9e6-f39c-4db8-9e7d-8b260f307bce"/>
 				<graphicElement>
 					<pen lineStyle="Dashed"/>
 				</graphicElement>
@@ -782,16 +763,15 @@ La performance de ce test a été évaluée uniquement sur HIV-1 group O et N, e
 	<pageFooter>
 		<band height="30" splitType="Stretch">
 			<textField pattern="dd/MM/yyyy">
-				<reportElement x="452" y="14" width="100" height="16"/>
-				<textElement/>
-				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+				<reportElement x="452" y="14" width="100" height="16" uuid="0ff4f1cd-a7d5-4f9d-beb6-2ad0bb339529"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="7" y="14" width="112" height="16" isPrintWhenDetailOverflows="true"/>
+				<reportElement x="7" y="14" width="112" height="16" isPrintWhenDetailOverflows="true" uuid="d1e18827-1e6d-4e95-9c08-81e22d37bbc3"/>
 				<textElement verticalAlignment="Middle">
 					<font size="9"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA["Page 1 sur 1"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Page 1 sur 1"]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>

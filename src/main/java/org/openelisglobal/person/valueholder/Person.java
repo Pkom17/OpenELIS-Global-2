@@ -28,7 +28,9 @@ import org.openelisglobal.validation.constraintvalidator.NameValidator.NameType;
 
 public class Person extends BaseObject<String> {
 
-    @Pattern(regexp = ValidationHelper.ID_REGEX)
+    private static final long serialVersionUID = 1L;
+
+	@Pattern(regexp = ValidationHelper.ID_REGEX)
     private String id;
 
     @ValidName(nameType = NameType.LAST_NAME)

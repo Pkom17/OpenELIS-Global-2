@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+	  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+<!-- TB patient identity type -->
+<changeSet author="CIV developer Group" id="25010701"
+		context="ci_TB">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">SELECT count(*) FROM clinlims.patient_identity_type WHERE identity_type = 'TB_PATIENT_CODE'
+			</sqlCheck>
+		</preConditions>
+		<sql>
+			INSERT INTO clinlims.patient_identity_type(id,identity_type, description,lastupdated) VALUES
+			(nextval('patient_identity_type_seq'),'TB_PATIENT_CODE','Code for TB Patient',now()),
+			(nextval('patient_identity_type_seq'),'TB_PATIENT_CODE_RR','Code for TB Resistant Patient',now());
+		</sql>
+	</changeSet>
+	
+</databaseChangeLog>

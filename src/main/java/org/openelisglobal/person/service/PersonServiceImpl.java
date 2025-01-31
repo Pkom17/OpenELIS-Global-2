@@ -56,6 +56,20 @@ public class PersonServiceImpl extends BaseObjectServiceImpl<Person, String> imp
         return baseObjectDAO;
     }
 
+    
+    @Transactional
+    @Override
+    public String insert(Person person) {
+        return super.insert(person);
+    }
+    
+    @Transactional
+    @Override
+    public Person update(Person person) {
+        return super.update(person);
+    }
+    
+    
     @Override
     @Transactional(readOnly = true)
     public String getFirstName(Person person) {

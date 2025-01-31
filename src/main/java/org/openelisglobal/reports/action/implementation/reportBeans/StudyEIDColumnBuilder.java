@@ -33,7 +33,7 @@ import org.openelisglobal.test.valueholder.Test;
  * @since May 16, 2011
  */
 public class StudyEIDColumnBuilder extends CIStudyColumnBuilder {
-    private DateType dateType;
+    private DateType dateType = DateType.RESULT_DATE;
 
     /**
      * @param dateRange
@@ -90,7 +90,7 @@ public class StudyEIDColumnBuilder extends CIStudyColumnBuilder {
      */
     public void makeSQL_original() {// without analysis completed date ......
         // Switch date column according to selected DateType: PK
-        String dateColumn = "s.entered_date ";
+        String dateColumn = "a.released_date ";
         switch (dateType) {
         case ORDER_DATE:
             dateColumn = "s.entered_date ";
@@ -101,6 +101,7 @@ public class StudyEIDColumnBuilder extends CIStudyColumnBuilder {
         case PRINT_DATE:
             dateColumn = "dt.report_generation_time ";
         default:
+        	dateColumn = "a.released_date ";
             break;
         }
         query = new StringBuilder();
