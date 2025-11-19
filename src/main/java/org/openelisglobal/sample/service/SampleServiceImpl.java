@@ -107,7 +107,7 @@ public class SampleServiceImpl extends BaseObjectServiceImpl<Sample, String> imp
     
     @Override
     public Sample update(Sample sample) {
-        return super.update(sample);
+        return getBaseObjectDAO().update(sample);
     }
 
     @Override
@@ -608,6 +608,11 @@ public class SampleServiceImpl extends BaseObjectServiceImpl<Sample, String> imp
 	public List<Sample> getSampleByPatientAndTestAndCollectionDate(String patientIdentifier, Test test,
 			Date collectionDate) {
 		return sampleDAO.getSampleByPatientAndTestAndCollectionDate(patientIdentifier, test, collectionDate);
+	}
+
+	@Override
+	public Sample getById(String id) {
+		return sampleDAO.getById(id);
 	}
 
 }

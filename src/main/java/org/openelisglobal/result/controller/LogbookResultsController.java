@@ -378,7 +378,7 @@ public class LogbookResultsController extends LogbookResultsBaseController {
 				return findForward(FWD_VALIDATION_ERROR, form);
 			}
 		}
-
+		
 		List<IResultUpdate> updaters = ResultUpdateRegister.getRegisteredUpdaters();
 
 		ResultsPaging paging = new ResultsPaging();
@@ -422,6 +422,8 @@ public class LogbookResultsController extends LogbookResultsBaseController {
 			return findForward(FWD_FAIL_INSERT, form);
 
 		}
+		
+		
 
 		for (IResultUpdate updater : updaters) {
 			try {
@@ -444,6 +446,7 @@ public class LogbookResultsController extends LogbookResultsBaseController {
 	}
 
 	private void createAnalysisOnlyUpdates(ResultsUpdateDataSet actionDataSet) {
+		
 		for (TestResultItem testResultItem : actionDataSet.getAnalysisOnlyChangeResults()) {
 
 			Analysis analysis = analysisService.get(testResultItem.getAnalysisId());
@@ -502,7 +505,6 @@ public class LogbookResultsController extends LogbookResultsBaseController {
 			// to that result
 			for (Result result : results) {
 				addResult(result, testResultItem, analysis, results.size() > 1, actionDataSet, useTechnicianName);
-
 				if (analysisShouldBeUpdated(testResultItem, result, supportReferrals)) {
 					updateAnalysis(testResultItem, testResultItem.getTestDate(), analysis, statusRuleSet);
 				}

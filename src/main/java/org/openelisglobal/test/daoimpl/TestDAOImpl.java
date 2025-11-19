@@ -839,40 +839,40 @@ public class TestDAOImpl extends BaseDAOImpl<Test, String> implements TestDAO {
 	public List<Map<String, Object>> getTbMicroscopyTestCountByResult(Date startDate, Date endDate)
 			throws LIMSRuntimeException {
 		List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
-		String sql = "select * from (select dict_diagnostic_reason.dict_entry as diagnostic_reason, dict_result.dict_entry as result_value, COUNT(*) AS result_count\n"
-				+ " FROM clinlims.analysis AS a join clinlims.test AS t on a.test_id = t.id  \n"
-				+ "  JOIN (select * from test_section ts where ts.name = 'TB') ts ON t.test_section_id = ts.id \n"
-				+ " join clinlims.sample_item AS si on si.id = a.sampitem_id \n"
-				+ " join clinlims.sample AS s on s.id = si.samp_id  \n"
-				+ " left join clinlims.result AS r on a.id = r.analysis_id  \n"
-				+ " left join \"dictionary\" dict_result on cast(dict_result.id as varchar) = r.value\n"
-				+ " left join \n"
-				+ " (select oh.* from observation_history oh join observation_history_type oht on oh.observation_history_type_id = oht.id\n"
-				+ "    where oht.type_name = 'TbDiagnosticReason') \n"
-				+ " 	obs_diagnostic_reason on obs_diagnostic_reason.sample_id = s.id \n"
-				+ " left join \"dictionary\" dict_diagnostic_reason on cast(dict_diagnostic_reason.id as varchar) = obs_diagnostic_reason.value \n"
-				+ " WHERE s.entered_date >= :startDate  AND s.entered_date <= :endDate -- and t.\"name\" ='GeneXpert MTB/RIF'\n"
-				+ "GROUP BY  dict_result.dict_entry , dict_diagnostic_reason.dict_entry\n"
-				+ "ORDER BY  result_value,diagnostic_reason) query1 \n"
-				+ "union \n"
-				+ "select * from (select obs_followup_reason_line2.value as reason, dict_result.dict_entry as result_value, COUNT(*) AS result_count\n"
-				+ " FROM clinlims.analysis AS a join clinlims.test AS t on a.test_id = t.id  \n"
-				+ "  JOIN (select * from test_section ts where ts.name = 'TB') ts ON t.test_section_id = ts.id \n"
-				+ " join clinlims.sample_item AS si on si.id = a.sampitem_id \n"
-				+ " join clinlims.sample AS s on s.id = si.samp_id  \n"
-				+ " join \n"
-				+ " (select oh.* from observation_history oh join observation_history_type oht on oh.observation_history_type_id = oht.id\n"
-				+ "    where oht.type_name = 'TbFollowupReasonPeriodLine2') \n"
-				+ " 	obs_followup_reason_line2 on obs_followup_reason_line2.sample_id = s.id \n"
-				+ " join (select oh.* from observation_history oh join observation_history_type oht on oh.observation_history_type_id = oht.id\n"
-				+ "    where oht.type_name = 'TbAnalysisMethod') \n"
-				+ " 	obs_analysis_method on obs_analysis_method.sample_id = s.id \n"
-				+ "  join clinlims.result AS r on a.id = r.analysis_id  \n"
-				+ "  join \"dictionary\" dict_result on cast(dict_result.id as varchar) = r.value\n"
-				+ " WHERE s.entered_date >= :startDate  AND s.entered_date <= :endDate and obs_followup_reason_line2.value != ''\n"
-				+ " and obs_analysis_method.value = cast((select id from dictionary where dict_entry = 'Microscopie TB' limit 1) as varchar)\n"
-				+ "GROUP BY obs_followup_reason_line2.value,dict_result.dict_entry\n"
-				+ "ORDER by result_value,reason) query2";
+		String sql = "SELECT obs_tb_reason.reason, result_value,count(*) FROM\n"
+				+ "(SELECT \n"
+				+ "s.id sample_id, si.id sample_item_id, \n"
+				+ "a.id analysis_id,t.id test_id,\n"
+				+ "s.accession_number,t.name test_name,\n"
+				+ "analysis_result.result_value,\n"
+				+ "obs_analysis_method.value analysis_method\n"
+				+ "FROM clinlims.analysis AS a  \n"
+				+ "JOIN clinlims.test AS t ON a.test_id = t.id  \n"
+				+ "JOIN (SELECT * FROM test_section ts WHERE ts.name = 'TB') ts ON t.test_section_id = ts.id \n"
+				+ "JOIN clinlims.sample_item AS si ON si.id = a.sampitem_id \n"
+				+ "JOIN clinlims.sample AS s ON s.id = si.samp_id\n"
+				+ "LEFT JOIN (\n"
+				+ "    SELECT r.analysis_id, dict_result.dict_entry AS result_value \n"
+				+ "    FROM clinlims.result AS r \n"
+				+ "    JOIN \"dictionary\" dict_result ON CAST(dict_result.id AS VARCHAR) = r.value\n"
+				+ ") analysis_result ON analysis_result.analysis_id = a.id\n"
+				+ " JOIN (\n"
+				+ "    SELECT oh.sample_id, oh.value \n"
+				+ "    FROM observation_history oh \n"
+				+ "    JOIN observation_history_type oht ON oh.observation_history_type_id = oht.id\n"
+				+ "    WHERE oht.type_name = 'TbAnalysisMethod'\n"
+				+ ") obs_analysis_method ON obs_analysis_method.sample_id = s.id \n"
+				+ "where s.entered_date BETWEEN :startDate AND :endDate\n"
+				+ "AND obs_analysis_method.value = CAST((SELECT id FROM dictionary WHERE dict_entry = 'Microscopie TB' LIMIT 1) AS VARCHAR)) query1\n"
+				+ "JOIN \n"
+				+ "(\n"
+				+ "    SELECT oh.sample_id, oh.value obs_hist_id,COALESCE(dict_result.dict_entry,oh.value) reason\n"
+				+ "    FROM observation_history oh \n"
+				+ "    JOIN observation_history_type oht ON oh.observation_history_type_id = oht.id\n"
+				+ "    left JOIN dictionary dict_result on CAST(dict_result.id AS VARCHAR) = oh.value\n"
+				+ "    WHERE oht.type_name in ('TbDiagnosticReason','TbFollowupReasonPeriodLine1','TbFollowupReasonPeriodLine2') and oh.value != ''\n"
+				+ ") obs_tb_reason on query1.sample_id = obs_tb_reason.sample_id\n"
+				+ "group by result_value, reason; \n";
 		try {
 			Query query = entityManager.unwrap(Session.class).createNativeQuery(sql);
 			query.setParameter("startDate", startDate);
@@ -890,6 +890,89 @@ public class TestDAOImpl extends BaseDAOImpl<Test, String> implements TestDAO {
 			handleException(e, "getTbMicroscopyTestCountByResult");
 		}
 		return null;
+	}
+
+	@Override
+	public Integer getReceivedTbPresumedMicroscopyTestCount(Date startDate, Date endDate)
+			throws LIMSRuntimeException {
+		Integer result = null;
+		String sql = "SELECT count(*) FROM\n"
+				+ "(SELECT \n"
+				+ "s.id sample_id\n"
+				+ "FROM clinlims.analysis AS a  \n"
+				+ "JOIN clinlims.test AS t ON a.test_id = t.id  \n"
+				+ "JOIN (SELECT * FROM test_section ts WHERE ts.name = 'TB') ts ON t.test_section_id = ts.id \n"
+				+ "JOIN clinlims.sample_item AS si ON si.id = a.sampitem_id \n"
+				+ "JOIN clinlims.sample AS s ON s.id = si.samp_id\n"
+				+ " JOIN ( SELECT oh.sample_id, oh.value \n"
+				+ "    FROM observation_history oh \n"
+				+ "    JOIN observation_history_type oht ON oh.observation_history_type_id = oht.id\n"
+				+ "    WHERE oht.type_name = 'TbAnalysisMethod'\n"
+				+ ") obs_analysis_method ON obs_analysis_method.sample_id = s.id \n"
+				+ "where s.entered_date BETWEEN :startDate AND :endDate\n"
+				+ "AND obs_analysis_method.value = CAST((SELECT id FROM dictionary WHERE dict_entry = 'Microscopie TB' LIMIT 1) AS VARCHAR)) query1\n"
+				+ "JOIN \n"
+				+ "(SELECT oh.sample_id, oh.value obs_hist_id,COALESCE(dict_result.dict_entry,oh.value) reason\n"
+				+ "    FROM observation_history oh \n"
+				+ "    JOIN observation_history_type oht ON oh.observation_history_type_id = oht.id\n"
+				+ "    JOIN dictionary dict_result on CAST(dict_result.id AS VARCHAR) = oh.value\n"
+				+ "    WHERE oht.type_name = 'TbDiagnosticReason' and oh.value != '' and dict_result.dict_entry='Cas présumé jamais traité'\n"
+				+ ") obs_tb_reason on query1.sample_id = obs_tb_reason.sample_id";
+		try {
+			Query query = entityManager.unwrap(Session.class).createNativeQuery(sql);
+			query.setParameter("startDate", startDate);
+			query.setParameter("endDate", endDate);
+			List<Object> data = query.list();
+			return Integer.parseInt(data.get(0).toString());
+		} catch (HibernateException e) {
+			handleException(e, "getReceivedTbPresumedMicroscopyTestCount");
+		}
+		return result;
+	}
+
+	@Override
+	public Integer getPositiveTbMicroscopyTestCount(Date startDate, Date endDate)
+			throws LIMSRuntimeException {
+		Integer result = null;
+		String sql = "SELECT count(*) FROM\n"
+				+ "(SELECT \n"
+				+ "distinct s.id sample_id\n"
+				+ "FROM clinlims.analysis AS a  \n"
+				+ "JOIN clinlims.test AS t ON a.test_id = t.id  \n"
+				+ "JOIN (SELECT * FROM test_section ts WHERE ts.name = 'TB') ts ON t.test_section_id = ts.id \n"
+				+ "JOIN clinlims.sample_item AS si ON si.id = a.sampitem_id \n"
+				+ "JOIN clinlims.sample AS s ON s.id = si.samp_id\n"
+				+ "JOIN (\n"
+				+ "    SELECT r.analysis_id, dict_result.dict_entry AS result_value \n"
+				+ "    FROM clinlims.result AS r \n"
+				+ "    JOIN \"dictionary\" dict_result ON CAST(dict_result.id AS VARCHAR) = r.value\n"
+				+ "    where dict_result.dict_entry ilike 'Positif%'\n"
+				+ ") analysis_result ON analysis_result.analysis_id = a.id\n"
+				+ " JOIN (\n"
+				+ "    SELECT oh.sample_id, oh.value \n"
+				+ "    FROM observation_history oh \n"
+				+ "    JOIN observation_history_type oht ON oh.observation_history_type_id = oht.id\n"
+				+ "    WHERE oht.type_name = 'TbAnalysisMethod'\n"
+				+ ") obs_analysis_method ON obs_analysis_method.sample_id = s.id \n"
+				+ "where s.entered_date BETWEEN :startDate AND :endDate\n"
+				+ "AND obs_analysis_method.value = CAST((SELECT id FROM dictionary WHERE dict_entry = 'Microscopie TB' LIMIT 1) AS VARCHAR)) query1\n"
+				+ "JOIN (\n"
+				+ "    SELECT oh.sample_id, oh.value obs_hist_id,COALESCE(dict_result.dict_entry,oh.value) reason\n"
+				+ "    FROM observation_history oh \n"
+				+ "    JOIN observation_history_type oht ON oh.observation_history_type_id = oht.id\n"
+				+ "    JOIN dictionary dict_result on CAST(dict_result.id AS VARCHAR) = oh.value\n"
+				+ "    WHERE oht.type_name = 'TbDiagnosticReason' and oh.value != '' \n"
+				+ ") obs_tb_reason on query1.sample_id = obs_tb_reason.sample_id";
+		try {
+			Query query = entityManager.unwrap(Session.class).createNativeQuery(sql);
+			query.setParameter("startDate", startDate);
+			query.setParameter("endDate", endDate);
+			List<Object> data = query.list();
+			return Integer.parseInt(data.get(0).toString());
+		} catch (HibernateException e) {
+			handleException(e, "getPositiveTbMicroscopyTestCount");
+		}
+		return result;
 	}
 
 }

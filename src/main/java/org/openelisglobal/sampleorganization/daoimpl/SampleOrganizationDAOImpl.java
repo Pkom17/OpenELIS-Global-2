@@ -122,7 +122,7 @@ public class SampleOrganizationDAOImpl extends BaseDAOImpl<SampleOrganization, S
     
     @Transactional
     @Override
-    public SampleOrganization update(SampleOrganization object) {
+    public SampleOrganization update(SampleOrganization object) {    	
         try {
         	String sql="UPDATE sample_organization set samp_id = :samp_id, org_id = :org_id, lastupdated=:lastupdated where id = :id";
         	javax.persistence.Query query = entityManager.createNativeQuery(sql);

@@ -135,8 +135,9 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 		this.validators["VL_Id"] = new FieldValidator();
 		this.validators["VL_Id"].setRequiredFields(new Array(
 				"vl.centerCode","vl.receivedDateForDisplay", "vl.interviewDate", "vl.gender",
-				"vl.dateOfBirth", "subjectOrSiteSubject", "vl.labNo","vl.hivStatus",
-				"vl.vlSuckle","vl.vlPregnancy"));
+				"vl.dateOfBirth", "subjectOrSiteSubject", "vl.labNo","vl.hivStatus"));
+
+		//"vl.vlSuckle","vl.vlPregnancy"
 
 		this.validators["Recency_Id"] = new FieldValidator();
 		this.validators["Recency_Id"].setRequiredFields(new Array(
@@ -586,16 +587,16 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 				<td colspan="3" class="sectionTitle"><spring:message
 						code="sample.entry.project.title.otherTests" /></td>
 			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message
-						code="sample.entry.project.ARV.viralLoadTest" /></td>
-				<td><form:checkbox path="ProjectData.viralLoadTest"
-						id="iarv.viralLoadTest"
-						onchange="iarv.checkSampleItem($('iarv.edtaTubeTaken'), this);" />
-						<div id="iarv.viralLoadTestMessage" class="blank"></div>
-				</td>
-			</tr>
+<!-- 			<tr> -->
+<!-- 				<td></td> -->
+<%-- 				<td><spring:message --%>
+<%-- 						code="sample.entry.project.ARV.viralLoadTest" /></td> --%>
+<%-- 				<td><form:checkbox path="ProjectData.viralLoadTest" --%>
+<%-- 						id="iarv.viralLoadTest" --%>
+<%-- 						onchange="iarv.checkSampleItem($('iarv.edtaTubeTaken'), this);" /> --%>
+<!-- 						<div id="iarv.viralLoadTestMessage" class="blank"></div> -->
+<!-- 				</td> -->
+<!-- 			</tr> -->
 			<tr>
 				<td></td>
 				<td><spring:message
@@ -2410,7 +2411,7 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 				<td class="required">*</td>
 				<td><spring:message code="patient.project.gender" /></td>
 				<td><form:select path="gender" id="vl.gender"
-						onchange="vl.checkGender(true);">
+						onchange="vl.checkGender(false);makeDirty();">
 						<form:option value="">&nbsp;</form:option>
 						<form:options items="${form.formLists['GENDERS']}"
 							itemLabel="localizedName" itemValue="id" />
@@ -2418,11 +2419,11 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 					<div id="vl.genderMessage" class="blank"></div></td>
 			</tr>
 			<tr id="vl.vlPregnancyRow" style="display: none">
-				<td></td>
+				<td class="required">*</td>
 				<td><spring:message code="sample.project.vlPregnancy" /></td>
 				<td><form:select path="observations.vlPregnancy"
 						id="vl.vlPregnancy"
-						onchange="makeDirty();compareAllObservationHistoryFields(true)">
+						onchange="vl.checkVlPregnancy(false);makeDirty();compareAllObservationHistoryFields(true)">
 						<form:option value="">&nbsp;</form:option>
 						<form:options items="${form.dictionaryLists['YES_NO']}"
 							itemLabel="localizedName" itemValue="id" />
@@ -2431,10 +2432,10 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 			</tr>
 
 			<tr id="vl.vlSuckleRow" style="display: none">
-				<td></td>
+				<td class="required">*</td>
 				<td><spring:message code="sample.project.vlSuckle" /></td>
 				<td><form:select path="observations.vlSuckle" id="vl.vlSuckle"
-						onchange="makeDirty();compareAllObservationHistoryFields(true)">
+						onchange="vl.checkVlSuckle(false);makeDirty();compareAllObservationHistoryFields(true)">
 						<form:option value="">&nbsp;</form:option>
 						<form:options items="${form.dictionaryLists['YES_NO']}"
 							itemLabel="localizedName" itemValue="id" />

@@ -103,7 +103,7 @@ public class AnalyzerResultsController extends BaseController {
 			"resultList*.reflexSelectionId", };
 
 	private static final boolean IS_RETROCI = ConfigurationProperties.getInstance()
-			.isPropertyValueEqual(ConfigurationProperties.Property.configurationName, "CI_GENERAL");
+			.isPropertyValueEqual(ConfigurationProperties.Property.configurationName, "RETROCI");
 	private static final String REJECT_VALUE = "XXXX";
 	private String RESULT_SUBJECT = "Analyzer Result Note";
 

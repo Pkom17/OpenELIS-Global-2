@@ -227,7 +227,7 @@ public class FhirTransformServiceImpl implements FhirTransformService {
 		for (String sampleId : sampleIds) {
 			LogEvent.logDebug(this.getClass().getSimpleName(), "transformPersistObjectsUnderSamples",
 					"transforming sampleId: " + sampleId);
-			Sample sample = sampleService.get(sampleId);
+			Sample sample = sampleService.getById(sampleId);
 			Patient patient = sampleHumanService.getPatientForSample(sample);
 			Provider provider = sampleHumanService.getProviderForSample(sample);
 			List<SampleItem> sampleItems = sampleItemService.getSampleItemsBySampleId(sampleId);
@@ -510,7 +510,7 @@ public class FhirTransformServiceImpl implements FhirTransformService {
 	}
 
 	private Task transformToTask(String sampleId) {
-		return this.transformToTask(sampleService.get(sampleId));
+		return this.transformToTask(sampleService.getById(sampleId));
 	}
 
 	private Task transformToTask(Sample sample) {
@@ -548,12 +548,39 @@ public class FhirTransformServiceImpl implements FhirTransformService {
 				sample.getAccessionNumber()));
 
 		for (Analysis analysis : analysises) {
+			final String RECEPTION_CODE = "165284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+			final String VALIDATION_CODE = "165283AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 			task.addBasedOn(this.createReferenceFor(ResourceType.ServiceRequest, analysis.getFhirUuidAsString()));
 			if (sample.getStatusId().equals(statusService.getStatusID(OrderStatus.Finished))) {
 				task.addOutput()//
 						.setType(new CodeableConcept().addCoding(new Coding().setCode("reference")))//
 						.setValue(
 								this.createReferenceFor(ResourceType.DiagnosticReport, analysis.getFhirUuidAsString()));
+				// before remove if exists
+				task.getOutput().removeIf(out -> {
+					if (out.getType() != null && out.getType().getCoding() != null) {
+						for (Coding coding : out.getType().getCoding()) {
+							String code = coding.getCode();
+							if (RECEPTION_CODE.equals(code) || VALIDATION_CODE.equals(code)) {
+								return true;
+							}
+						}
+					}
+					return false;
+				});
+
+				if (ObjectUtils.isNotEmpty(sample.getReceivedDate())) {
+					task.addOutput()
+							.setType(new CodeableConcept().addCoding(
+									new Coding().setCode(RECEPTION_CODE).setDisplay("Date de Réception au labo")))
+							.setValue(new DateType(sample.getReceivedDate()));
+				}
+				if (ObjectUtils.isNotEmpty(analysis.getCompletedDate())) {
+					task.addOutput()
+							.setType(new CodeableConcept().addCoding(
+									new Coding().setCode(VALIDATION_CODE).setDisplay("Date de Validation technique")))
+							.setValue(new DateType(analysis.getCompletedDate()));
+				}
 			}
 
 		}
@@ -1099,9 +1126,9 @@ public class FhirTransformServiceImpl implements FhirTransformService {
 		observation.addBasedOn(this.createReferenceFor(ResourceType.ServiceRequest, analysis.getFhirUuidAsString()));
 		observation.setSpecimen(this.createReferenceFor(ResourceType.Specimen, sampleItem.getFhirUuidAsString()));
 		observation.setSubject(this.createReferenceFor(ResourceType.Patient, patient.getFhirUuidAsString()));
-		observation.setIssued(analysis.getReleasedDate()); //observation.setIssued(result.getOriginalLastupdated());// update to get Released Date instead of commpleted date
+		observation.setIssued(analysis.getReleasedDate()); // observation.setIssued(result.getOriginalLastupdated());//
 		// observation.setEffective(new DateTimeType(result.getLastupdated()));
-		observation.setEffective(new DateTimeType(analysis.getCompletedDate()));
+		observation.setEffective(new DateTimeType(analysis.getReleasedDate()));
 		return observation;
 	}
 

@@ -85,7 +85,7 @@ public class FhirApiWorkFlowServiceImpl implements FhirApiWorkflowService {
 	@Value("${org.openelisglobal.remote.source.identifier:}#{T(java.util.Collections).emptyList()}")
 	private List<String> remoteStoreIdentifier;
 
-	@Scheduled(initialDelay = 60 * 1000, fixedRate = 5 * 60 * 1000)
+	@Scheduled(initialDelay = 60 * 1000, fixedDelay = 60 * 1000)
 	@Async
 	@Override
 	public void pollForRemoteTasks() {
@@ -484,10 +484,22 @@ public class FhirApiWorkFlowServiceImpl implements FhirApiWorkflowService {
 			}
 			localObjects.task.setStatus(taskStatus);
 			if (remoteStoreUpdateStatus.isPresent() && remoteStoreUpdateStatus.get()) {
-				LogEvent.logDebug(this.getClass().getName(), "beginTaskPath",
-						"updating remote status to " + taskStatus);
 				remoteTask.setStatus(taskStatus);
-				sourceFhirClient.update().resource(remoteTask).execute();
+				try {
+					LogEvent.logDebug(this.getClass().getName(), "beginTaskPath",
+							"updating remote status to " + taskStatus);
+					sourceFhirClient.update().resource(remoteTask).execute();
+				} catch (ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException e) {
+					LogEvent.logWarn(this.getClass().getName(), "processTaskImportOrder",
+							"Version conflict (HTTP 409) detected for Task " + remoteTask.getId()
+									+ ". Re-reading resource to keep last version");
+					Task currentRemoteTask = sourceFhirClient.read().resource(Task.class)
+							.withId(remoteTask.getIdElement().getIdPart()).execute();
+					currentRemoteTask.setStatus(taskStatus);
+					sourceFhirClient.update().resource(currentRemoteTask).execute();
+					remoteTask = currentRemoteTask;
+
+				}
 			}
 			IGenericClient localFhirClient = fhirContext.newRestfulGenericClient(localFhirStorePath);
 			localFhirClient.update().resource(localObjects.task).execute();
@@ -539,19 +551,33 @@ public class FhirApiWorkFlowServiceImpl implements FhirApiWorkflowService {
 		Patient remotePatientForTask = getForPatientFromServer(sourceFhirClient, remoteTask);
 		Location remoteTaskLocation = getTaskLocationFromServer(sourceFhirClient, remoteTask);
 		if (remoteTaskLocation != null) {
-			Organization localOrganization = organizationService
-					.getOrganizationByFhirId(remoteTaskLocation.getIdElement().getIdPart());
+			Organization localOrganization = null;
+			String shortName = "";
+			String idPart = remoteTaskLocation.getIdElement().getIdPart();
+			try {
+				localOrganization = organizationService.getOrganizationByFhirId(idPart);
+			} catch (Exception e) {
+				if (localOrganization == null && idPart.length() >= 5) {
+					try {
+						shortName = idPart.substring(idPart.length() - 5);
+						localOrganization = organizationService.getOrganizationByShortName(shortName, true);
+					} catch (Exception e2) {
+					}
+				}
+			}
 			if (localOrganization == null) {
 				Organization newOrg = new Organization();
 				if (remoteTaskLocation.hasName()) {
 					newOrg.setOrganizationName(remoteTaskLocation.getName());
+					newOrg.setShortName(shortName);
+					newOrg.setFhirUuid(UUID.randomUUID());// UUID.fromString(remoteTaskLocation.getIdElement().getIdPart())
+					newOrg.setIsActive(IActionConstants.YES);
+					newOrg.setMlsLabFlag(IActionConstants.NO);
+					newOrg.setMlsSentinelLabFlag(IActionConstants.NO);
+					organizationService.save(newOrg);
+					organizationService.linkOrganizationAndType(newOrg,
+							TableIdService.getInstance().REFERRING_ORG_TYPE_ID);
 				}
-				newOrg.setFhirUuid(UUID.fromString(remoteTaskLocation.getIdElement().getIdPart()));
-				newOrg.setIsActive(IActionConstants.YES);
-				newOrg.setMlsLabFlag(IActionConstants.NO);
-				newOrg.setMlsSentinelLabFlag(IActionConstants.NO);
-				organizationService.save(newOrg);
-				organizationService.linkOrganizationAndType(newOrg, TableIdService.getInstance().REFERRING_ORG_TYPE_ID);
 			}
 		}
 		if (remotePatientForTask == null) {
@@ -907,14 +933,17 @@ public class FhirApiWorkFlowServiceImpl implements FhirApiWorkflowService {
 
 	private Location getTaskLocationFromServer(IGenericClient fhirClient, Task remoteTask) {
 		Location taskLocation = null;
-		if (!(remoteTask.getLocation() == null || remoteTask.getLocation().getReference() == null)) {
-			taskLocation = fhirClient.read().resource(Location.class)
-					.withId(remoteTask.getLocation().getReferenceElement().getIdPart()).execute();
-		}
+		try {
+			if (!(remoteTask.getLocation() == null || remoteTask.getLocation().getReference() == null)) {
+				taskLocation = fhirClient.read().resource(Location.class)
+						.withId(remoteTask.getLocation().getReferenceElement().getIdPart()).execute();
+			}
 
-		if (taskLocation == null) {
-			LogEvent.logWarn(this.getClass().getName(), "getTaskLoctionFromServer",
-					"remoteTask doesn't reference a Location, or referenced patient returned null");
+			if (taskLocation == null) {
+				LogEvent.logWarn(this.getClass().getName(), "getTaskLoctionFromServer",
+						"remoteTask doesn't reference a Location, or referenced patient returned null");
+			}
+		} catch (Exception e) {
 		}
 		return taskLocation;
 	}

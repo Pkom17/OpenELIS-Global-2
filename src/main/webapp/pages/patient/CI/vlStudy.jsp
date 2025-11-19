@@ -235,12 +235,12 @@
 			<div id="vl.genderMessage" class="blank"></div></td>
 	</tr>
 
-	<tr>
-		<td></td>
+	<tr id="vl.vlPregnancyRow" style="display: none">
+		<td class="required">*</td>
 		<td class="observationsQuestion"><spring:message
 				code="sample.project.vlPregnancy" /></td>
 		<td><form:select path="observations.vlPregnancy"
-				onchange="makeDirty();compareAllObservationHistoryFields(true)"
+				onchange="vl.checkVlPregnancy(false);makeDirty();compareAllObservationHistoryFields(true)"
 				id="vl.vlPregnancy">
 				<option value=""></option>
 				<form:options items="${form.dictionaryLists.YES_NO.list}"
@@ -249,12 +249,12 @@
 			<div id="vl.vlPregnancyMessage" class="blank"></div></td>
 	</tr>
 
-	<tr>
-		<td></td>
+	<tr id="vl.vlSuckleRow" style="display: none">
+		<td class="required">*</td>
 		<td class="observationsQuestion"><spring:message
 				code="sample.project.vlSuckle" /></td>
 		<td><form:select path="observations.vlSuckle"
-				onchange="makeDirty();compareAllObservationHistoryFields(true)"
+				onchange="vl.checkVlSuckle(false);makeDirty();compareAllObservationHistoryFields(true)"
 				id="vl.vlSuckle">
 				<option value=""></option>
 				<form:options items="${form.dictionaryLists.YES_NO.list}"
@@ -579,7 +579,7 @@
 		<td><spring:message code="sample.entry.project.ARV.viralLoadTest" /></td>
 		<td><form:checkbox path="ProjectData.viralLoadTest"
 				id="vl.viralLoadTest"
-				onchange="vl.checkSampleItem($('vl.edtaTubeTaken'), this);" />
+				onchange="vl.checkSampleItem($('vl.edtaTubeTaken'), this);" checked = "checked" />
 			<div id="vl.viralLoadTestMessage" class="blank"></div></td>
 	</tr>
 

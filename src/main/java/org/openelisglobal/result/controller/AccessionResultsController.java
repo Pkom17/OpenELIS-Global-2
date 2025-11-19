@@ -110,7 +110,7 @@ public class AccessionResultsController extends BaseController {
 				form.setSearchFinished(Boolean.TRUE);
 
 				Sample sample = getSample(accessionNumber);
-				if(ObjectUtils.isEmpty(sample)){
+				if (ObjectUtils.isEmpty(sample)) {
 					sample = getSampleByObservationHistoryType(accessionNumber);
 				}
 
@@ -213,6 +213,8 @@ public class AccessionResultsController extends BaseController {
 		Sample sample = null;
 		List<ObservationHistory> tbObservationHistoryList = observationHistoryService
 				.getObservationsByTypeAndValue(ObservationType.TB_LAB_ACCESSION_NUMBER, value);
+		if (ObjectUtils.isEmpty(tbObservationHistoryList))
+			return null;
 		if (tbObservationHistoryList.size() > 0) {
 			ObservationHistory tbObservationHistory = tbObservationHistoryList.get(0);
 			String sampleId = tbObservationHistory.getSampleId();

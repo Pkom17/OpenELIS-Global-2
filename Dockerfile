@@ -1,7 +1,7 @@
 ##
 # Build Stage
 #
-FROM maven:3-jdk-11 as build
+FROM maven:3-jdk-11 AS build
 
 RUN apt-get -y update
 RUN apt-get -y install git apache2-utils

@@ -171,8 +171,22 @@ public class TBOrderReport extends Report implements IReportCreator, IReportPara
 		reportParameters.put("categoryReportDataSource", new JRBeanCollectionDataSource(categoryReportItems));
 		reportParameters.put("microscopyReportDataSource", new JRBeanCollectionDataSource(microscopyReportItems));
 
-		reportParameters.put("presumedCase", presumedCase);
-		reportParameters.put("positiveCase", positiveCase);
+		lowDate = DateUtil.convertStringDateToSqlDate(lowerDateRange);
+		highDate = DateUtil.convertStringDateToSqlDate(upperDateRange);
+
+		Integer receivedTbPresumedMicroscopyTestCountInteger = testService
+				.getReceivedTbPresumedMicroscopyTestCount(lowDate, highDate);
+
+		Integer positiveTbMicroscopyTestCountInteger = testService.getPositiveTbMicroscopyTestCount(lowDate, highDate);
+
+		reportParameters.put("presumedCase",
+				ObjectUtils.isNotEmpty(receivedTbPresumedMicroscopyTestCountInteger)
+						? receivedTbPresumedMicroscopyTestCountInteger.intValue()
+						: 0);
+		reportParameters.put("positiveCase",
+				ObjectUtils.isNotEmpty(positiveTbMicroscopyTestCountInteger)
+						? positiveTbMicroscopyTestCountInteger.intValue()
+						: 0);
 
 	}
 

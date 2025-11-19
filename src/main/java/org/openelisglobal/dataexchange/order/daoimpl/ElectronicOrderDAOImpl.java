@@ -165,7 +165,6 @@ public class ElectronicOrderDAOImpl extends BaseDAOImpl<ElectronicOrder, String>
 		try {
 
 			Query<?> query = entityManager.unwrap(Session.class).createQuery(hql);
-			System.out.println(query.toString());
 			query.setParameterList("identifierValues", identifierValues);
 			query.setParameter("patientValue", patientValue);
 			// query.setParameter("order", order.getValue());

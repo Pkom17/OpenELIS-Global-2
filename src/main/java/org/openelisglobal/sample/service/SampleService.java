@@ -122,5 +122,7 @@ public interface SampleService extends BaseObjectService<Sample, String> {
     List<Sample> getSamplesByPriority(OrderPriority priority);
     
     List<Sample> getSampleByPatientAndTestAndCollectionDate(String patientIdentifier, Test test, Date collectionDate);
+    
+    Sample getById(String id);
 
 }

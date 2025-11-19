@@ -25,8 +25,12 @@
 	<parameter name="imagesPath" class="java.lang.String"/>
 	<parameter name="labName2" class="java.lang.String"/>
 	<parameter name="testReportDataSource" class="net.sf.jasperreports.engine.JRDataSource"/>
-	<parameter name="presumedCase" class="java.lang.Integer"/>
-	<parameter name="positiveCase" class="java.lang.Integer"/>
+	<parameter name="presumedCase" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
+	</parameter>
+	<parameter name="positiveCase" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
+	</parameter>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>

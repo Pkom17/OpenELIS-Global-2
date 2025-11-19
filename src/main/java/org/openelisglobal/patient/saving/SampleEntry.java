@@ -109,9 +109,8 @@ public class SampleEntry extends Accessioner implements ISampleEntry {
 
         boolean testSampleMismatch = false;
         testSampleMismatch = (null == typeofSampleTestList) || (typeofSampleTestList.isEmpty());
-
         if (!((null == typeofSampleTestList) || (typeofSampleTestList.isEmpty()))) {
-            for (TypeOfSampleTests typeOfSampleTest : typeofSampleTestList) {
+            for (TypeOfSampleTests typeOfSampleTest : typeofSampleTestList) {            	
                 if (typeOfSampleTest.tests.isEmpty()) {
                     testSampleMismatch = true;
                     break;
@@ -172,6 +171,13 @@ public class SampleEntry extends Accessioner implements ISampleEntry {
         } else {
             ProjectData tProjectData = buildProjectDataTestsReversed(submittedProjectData);
             tProjectData.setDbsTaken(true);
+            cleanupExistingAnalysis(projectForm, sampleId, tProjectData);
+        }
+        if (!submittedProjectData.isPscvlTaken()) {
+            cleanupSampleAndAnalysis(sampleId, "PSC");
+        } else {
+            ProjectData tProjectData = buildProjectDataTestsReversed(submittedProjectData);
+            tProjectData.setPscvlTaken(true);
             cleanupExistingAnalysis(projectForm, sampleId, tProjectData);
         }
         return;

@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.openelisglobal</groupId>
 	<artifactId>openelisglobal</artifactId>
@@ -11,10 +13,12 @@
 		<maven.java.release>11</maven.java.release>
 		<major.version>2</major.version>
 		<minor.version>7</minor.version>
-		<state.version>3</state.version> <!-- 0 = alpha, 1 = beta, 2 = rc, 3 = deployable -->
-		<fix.version>7</fix.version>
+		<state.version>3</state.version> <!-- 0 = alpha, 1 = beta, 2 = rc, 3 =
+		deployable -->
+		<fix.version>13</fix.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<liquibase.propertyFile>${project.basedir}/liquibase/liquibase.properties</liquibase.propertyFile>
+		<liquibase.propertyFile>
+			${project.basedir}/liquibase/liquibase.properties</liquibase.propertyFile>
 		<castor.version>1.4.1</castor.version>
 		<hapi.version>2.3</hapi.version>
 		<hibernate.version>5.6.12.Final</hibernate.version>
@@ -402,6 +406,11 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-fonts</artifactId>
+			<version>6.15.0</version>
+		</dependency>
+		<dependency>
 			<groupId>com.sun.activation</groupId>
 			<artifactId>javax.activation</artifactId>
 			<version>1.2.0</version>
@@ -478,7 +487,8 @@
 			<version>71.1</version>
 		</dependency>
 		<!-- this fixes running test containers on the apple silicon mac -->
-		<!-- see https://github.com/testcontainers/testcontainers-java/issues/3834 -->
+		<!-- see
+		https://github.com/testcontainers/testcontainers-java/issues/3834 -->
 		<dependency>
 			<groupId>net.java.dev.jna</groupId>
 			<artifactId>jna</artifactId>
@@ -494,7 +504,8 @@
 	<repositories>
 		<repository>
 			<id>jaspersoft-third-party</id>
-			<url>https://jaspersoft.jfrog.io/jaspersoft/third-party-ce-artifacts/</url>
+			<url>
+				https://jaspersoft.jfrog.io/jaspersoft/third-party-ce-artifacts/</url>
 		</repository>
 	</repositories>
 	<build>

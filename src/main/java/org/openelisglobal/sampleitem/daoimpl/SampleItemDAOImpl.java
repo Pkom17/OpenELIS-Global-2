@@ -19,6 +19,7 @@ package org.openelisglobal.sampleitem.daoimpl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -258,7 +259,7 @@ public class SampleItemDAOImpl extends BaseDAOImpl<SampleItem, String> implement
         	javax.persistence.Query query = entityManager.createNativeQuery(sql);
         	query.setParameter("samp_id", Integer.parseInt(object.getSample().getId()));
         	query.setParameter("typeosamp_id", Integer.parseInt(object.getTypeOfSampleId()));
-        	query.setParameter("lastupdated", object.getLastupdated());
+        	query.setParameter("lastupdated", new Date());
         	query.setParameter("id", Integer.parseInt(object.getId()));
         	query.executeUpdate();
             return object;

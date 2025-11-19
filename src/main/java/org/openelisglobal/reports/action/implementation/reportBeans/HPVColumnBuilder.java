@@ -209,6 +209,7 @@ public class HPVColumnBuilder extends CIStudyColumnBuilder {
 				+ "\n AND s.id = demo.samp_id " + "\n AND s.id = result.samp_id " + "\n ORDER BY s.accession_number ");
 		// no don't insert another crosstab or table here, go up before the main WHERE
 		// clause
+		System.out.println(query.toString());
 		return;
 	}
 

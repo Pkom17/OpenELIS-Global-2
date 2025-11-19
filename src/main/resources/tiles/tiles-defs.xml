@@ -427,10 +427,21 @@
 		<put-attribute name="preSelectionHeaderFragment"
 			value="/pages/common/actionSuccess.jsp" />
 		<put-attribute name="bodyFragment"
-			value="/pages/sample/sampleTbAdd.jsp" />
+			value="/pages/sample/tb/sampleTbAdd.jsp" />
+		<put-attribute name="patientInfoFragment"
+			value="tbPatientManagementCore" />
 		<put-attribute name="footerFragment"
 			value="/pages/common/saveCancelFooterButtons.jsp" />
 	</definition>
+	
+	<definition name="tbPatientManagementCore"
+		template="/pages/sample/tb/patientManagement.jsp">
+		<put-attribute name="patientSearchFragment"
+			value="/pages/sample/tb/patientSearch.jsp" />
+		<put-attribute name="patientEnhancedSearchFragment"
+			value="/pages/sample/tb/patientEnhancedSearch.jsp" />
+	</definition>
+	
 
 	<definition name="sampleEntryEIDDefinition"
 		extends="baseDefinition">

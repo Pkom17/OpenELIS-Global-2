@@ -91,7 +91,7 @@
 				<td class="required">*</td>
 				<td><spring:message code="patient.project.gender" /></td>
 				<td><form:select path="gender" id="rt.gender"
-						onchange="rt.checkGender(true);rt.checkGenderForVlPregnancyOrSuckle()">
+						onchange="rt.checkGender(false);">
 						<form:option value="">&nbsp;</form:option>
 						<form:options items="${form.formLists.GENDERS}"
 							itemLabel="localizedName" itemValue="id" />

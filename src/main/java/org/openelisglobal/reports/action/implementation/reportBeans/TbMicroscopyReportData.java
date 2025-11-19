@@ -46,5 +46,5 @@ public class TbMicroscopyReportData {
 	public void setTotalResult(Integer totalResult) {
 		this.totalResult = totalResult;
 	}
-
+	
 }

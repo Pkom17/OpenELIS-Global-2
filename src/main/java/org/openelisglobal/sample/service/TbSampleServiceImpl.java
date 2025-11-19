@@ -104,7 +104,6 @@ public class TbSampleServiceImpl implements TbSampleService {
 	private IStatusService statusService;
 
 	private String sampleId;
-	private String oldSampleId;
 	private String patientId;
 	private String providerId;
 	private Sample sample;
@@ -113,7 +112,6 @@ public class TbSampleServiceImpl implements TbSampleService {
 	public boolean persistTbData(SampleTbEntryForm form, HttpServletRequest request) {
 		boolean isOK = false;
 		try {
-			oldSampleId = form.getSampleId();
 			persistPatientData(form);
 			createPatientIdentity(form, patientId);
 			providerId = createPersonAndProvider(form);
@@ -144,58 +142,68 @@ public class TbSampleServiceImpl implements TbSampleService {
 		List<ObservationHistory> obervations = new ArrayList<ObservationHistory>();
 
 		// tb order reason
-		ObservationHistory orderReason = new ObservationHistory();
-		orderReason.setSampleId(sampleId);
-		orderReason.setPatientId(patientId);
-		orderReason.setLastupdated(DateUtil.getNowAsTimestamp());
-		orderReason.setSysUserId(formData.getSysUserId());
-		orderReason.setValueType(ValueType.DICTIONARY);
-		orderReason.setValue(formData.getTbOrderReason());
-		orderReason.setObservationHistoryTypeId(getObservationHistoryTypeId("TbOrderReason"));
-		obervations.add(orderReason);
+		if (ObjectUtils.isNotEmpty(formData.getTbOrderReason())) {
+			ObservationHistory orderReason = new ObservationHistory();
+			orderReason.setSampleId(sampleId);
+			orderReason.setPatientId(patientId);
+			orderReason.setLastupdated(DateUtil.getNowAsTimestamp());
+			orderReason.setSysUserId(formData.getSysUserId());
+			orderReason.setValueType(ValueType.DICTIONARY);
+			orderReason.setValue(formData.getTbOrderReason());
+			orderReason.setObservationHistoryTypeId(getObservationHistoryTypeId("TbOrderReason"));
+			obervations.add(orderReason);
+		}
 		// tb diagnostic reason
-		ObservationHistory diagnosticReason = new ObservationHistory();
-		diagnosticReason.setSampleId(sampleId);
-		diagnosticReason.setPatientId(patientId);
-		diagnosticReason.setLastupdated(DateUtil.getNowAsTimestamp());
-		diagnosticReason.setSysUserId(formData.getSysUserId());
-		diagnosticReason.setValueType(ValueType.DICTIONARY);
-		diagnosticReason.setValue(formData.getTbDiagnosticReason());
-		diagnosticReason.setObservationHistoryTypeId(getObservationHistoryTypeId("TbDiagnosticReason"));
-		obervations.add(diagnosticReason);
+		if (ObjectUtils.isNotEmpty(formData.getTbDiagnosticReason())) {
+			ObservationHistory diagnosticReason = new ObservationHistory();
+			diagnosticReason.setSampleId(sampleId);
+			diagnosticReason.setPatientId(patientId);
+			diagnosticReason.setLastupdated(DateUtil.getNowAsTimestamp());
+			diagnosticReason.setSysUserId(formData.getSysUserId());
+			diagnosticReason.setValueType(ValueType.DICTIONARY);
+			diagnosticReason.setValue(formData.getTbDiagnosticReason());
+			diagnosticReason.setObservationHistoryTypeId(getObservationHistoryTypeId("TbDiagnosticReason"));
+			obervations.add(diagnosticReason);
+		}
 		// tb followup reason
-		ObservationHistory tbFollowupReason = new ObservationHistory();
-		tbFollowupReason.setSampleId(sampleId);
-		tbFollowupReason.setPatientId(patientId);
-		tbFollowupReason.setLastupdated(DateUtil.getNowAsTimestamp());
-		tbFollowupReason.setSysUserId(formData.getSysUserId());
-		tbFollowupReason.setValueType(ValueType.DICTIONARY);
-		tbFollowupReason.setValue(formData.getTbFollowupReason());
-		tbFollowupReason.setObservationHistoryTypeId(getObservationHistoryTypeId("TbFollowupReason"));
-		obervations.add(tbFollowupReason);
+		if (ObjectUtils.isNotEmpty(formData.getTbFollowupReason())) {
+			ObservationHistory tbFollowupReason = new ObservationHistory();
+			tbFollowupReason.setSampleId(sampleId);
+			tbFollowupReason.setPatientId(patientId);
+			tbFollowupReason.setLastupdated(DateUtil.getNowAsTimestamp());
+			tbFollowupReason.setSysUserId(formData.getSysUserId());
+			tbFollowupReason.setValueType(ValueType.DICTIONARY);
+			tbFollowupReason.setValue(formData.getTbFollowupReason());
+			tbFollowupReason.setObservationHistoryTypeId(getObservationHistoryTypeId("TbFollowupReason"));
+			obervations.add(tbFollowupReason);
+		}
 
 		// tb follwup period Line 1
-		ObservationHistory tbFollowupReasonPeriodLine1 = new ObservationHistory();
-		tbFollowupReasonPeriodLine1.setSampleId(sampleId);
-		tbFollowupReasonPeriodLine1.setPatientId(patientId);
-		tbFollowupReasonPeriodLine1.setLastupdated(DateUtil.getNowAsTimestamp());
-		tbFollowupReasonPeriodLine1.setSysUserId(formData.getSysUserId());
-		tbFollowupReasonPeriodLine1.setValueType(ValueType.LITERAL);
-		tbFollowupReasonPeriodLine1.setValue(formData.getTbFollowupPeriodLine1());
-		tbFollowupReasonPeriodLine1
-				.setObservationHistoryTypeId(getObservationHistoryTypeId("TbFollowupReasonPeriodLine1"));
-		obervations.add(tbFollowupReasonPeriodLine1);
+		if (ObjectUtils.isNotEmpty(formData.getTbFollowupPeriodLine1())) {
+			ObservationHistory tbFollowupReasonPeriodLine1 = new ObservationHistory();
+			tbFollowupReasonPeriodLine1.setSampleId(sampleId);
+			tbFollowupReasonPeriodLine1.setPatientId(patientId);
+			tbFollowupReasonPeriodLine1.setLastupdated(DateUtil.getNowAsTimestamp());
+			tbFollowupReasonPeriodLine1.setSysUserId(formData.getSysUserId());
+			tbFollowupReasonPeriodLine1.setValueType(ValueType.LITERAL);
+			tbFollowupReasonPeriodLine1.setValue(formData.getTbFollowupPeriodLine1());
+			tbFollowupReasonPeriodLine1
+					.setObservationHistoryTypeId(getObservationHistoryTypeId("TbFollowupReasonPeriodLine1"));
+			obervations.add(tbFollowupReasonPeriodLine1);
+		}
 		// tb follwup period Line 2
-		ObservationHistory tbFollowupReasonPeriodLine2 = new ObservationHistory();
-		tbFollowupReasonPeriodLine2.setSampleId(sampleId);
-		tbFollowupReasonPeriodLine2.setPatientId(patientId);
-		tbFollowupReasonPeriodLine2.setLastupdated(DateUtil.getNowAsTimestamp());
-		tbFollowupReasonPeriodLine2.setSysUserId(formData.getSysUserId());
-		tbFollowupReasonPeriodLine2.setValueType(ValueType.LITERAL);
-		tbFollowupReasonPeriodLine2.setValue(formData.getTbFollowupPeriodLine2());
-		tbFollowupReasonPeriodLine2
-				.setObservationHistoryTypeId(getObservationHistoryTypeId("TbFollowupReasonPeriodLine2"));
-		obervations.add(tbFollowupReasonPeriodLine2);
+		if (ObjectUtils.isNotEmpty(formData.getTbFollowupPeriodLine2())) {
+			ObservationHistory tbFollowupReasonPeriodLine2 = new ObservationHistory();
+			tbFollowupReasonPeriodLine2.setSampleId(sampleId);
+			tbFollowupReasonPeriodLine2.setPatientId(patientId);
+			tbFollowupReasonPeriodLine2.setLastupdated(DateUtil.getNowAsTimestamp());
+			tbFollowupReasonPeriodLine2.setSysUserId(formData.getSysUserId());
+			tbFollowupReasonPeriodLine2.setValueType(ValueType.LITERAL);
+			tbFollowupReasonPeriodLine2.setValue(formData.getTbFollowupPeriodLine2());
+			tbFollowupReasonPeriodLine2
+					.setObservationHistoryTypeId(getObservationHistoryTypeId("TbFollowupReasonPeriodLine2"));
+			obervations.add(tbFollowupReasonPeriodLine2);
+		}
 		return observationHistoryService.insertAll(obervations);
 	}
 
@@ -211,40 +219,53 @@ public class TbSampleServiceImpl implements TbSampleService {
 		}
 
 		// tb sample aspect
-		ObservationHistory tbAspect = new ObservationHistory();
-		tbAspect.setSampleId(sampleId);
-		tbAspect.setSampleItemId(sampleItemId);
-		tbAspect.setPatientId(patientId);
-		tbAspect.setLastupdated(DateUtil.getNowAsTimestamp());
-		tbAspect.setSysUserId(tbSampleTest.getSysUserId());
-		tbAspect.setValueType(ValueType.DICTIONARY);
-		tbAspect.setValue(tbSampleTest.getTbAspect());
-		tbAspect.setObservationHistoryTypeId(getObservationHistoryTypeId("TbSampleAspects"));
-		obervations.add(tbAspect);
+		if (ObjectUtils.isNotEmpty(tbSampleTest.getTbAspect().trim())) {
+			ObservationHistory tbAspect = new ObservationHistory();
+			tbAspect.setSampleId(sampleId);
+			tbAspect.setSampleItemId(sampleItemId);
+			tbAspect.setPatientId(patientId);
+			tbAspect.setLastupdated(DateUtil.getNowAsTimestamp());
+			tbAspect.setSysUserId(tbSampleTest.getSysUserId());
+			tbAspect.setValueType(ValueType.DICTIONARY);
+			tbAspect.setValue(tbSampleTest.getTbAspect());
+			tbAspect.setObservationHistoryTypeId(getObservationHistoryTypeId("TbSampleAspects"));
+			obervations.add(tbAspect);
+		}
 
 		// tb Analysis Method
-		ObservationHistory analysisMethod = new ObservationHistory();
-		analysisMethod.setSampleId(sampleId);
-		analysisMethod.setSampleItemId(sampleItemId);
-		analysisMethod.setPatientId(patientId);
-		analysisMethod.setLastupdated(DateUtil.getNowAsTimestamp());
-		analysisMethod.setSysUserId(tbSampleTest.getSysUserId());
-		analysisMethod.setValueType(ValueType.DICTIONARY);
-		analysisMethod.setValue(tbSampleTest.getSelectedTbMethod());
-		analysisMethod.setObservationHistoryTypeId(getObservationHistoryTypeId("TbAnalysisMethod"));
-		obervations.add(analysisMethod);
+		if (ObjectUtils.isNotEmpty(tbSampleTest.getSelectedTbMethod().trim())) {
+			ObservationHistory analysisMethod = new ObservationHistory();
+			analysisMethod.setSampleId(sampleId);
+			analysisMethod.setSampleItemId(sampleItemId);
+			analysisMethod.setPatientId(patientId);
+			analysisMethod.setLastupdated(DateUtil.getNowAsTimestamp());
+			analysisMethod.setSysUserId(tbSampleTest.getSysUserId());
+			analysisMethod.setValueType(ValueType.DICTIONARY);
+			analysisMethod.setValue(tbSampleTest.getSelectedTbMethod());
+			analysisMethod.setObservationHistoryTypeId(getObservationHistoryTypeId("TbAnalysisMethod"));
+			obervations.add(analysisMethod);
+		}
 
 		return observationHistoryService.insertAll(obervations);
 	}
 
 	private Patient persistPatientData(SampleTbEntryForm formData) {
 		Patient oldPatient = null;
-		if (!GenericValidator.isBlankOrNull(formData.getTbSubjectNumber())) {
+		if (!GenericValidator.isBlankOrNull(formData.getPatientPK())) {
+			oldPatient = patientService.get(formData.getPatientPK());
+		}
+		if (ObjectUtils.isEmpty(oldPatient) && !GenericValidator.isBlankOrNull(formData.getGuid())) {
+			oldPatient = patientService.getPatientForGuid(formData.getGuid());
+		}
+		if (ObjectUtils.isEmpty(oldPatient) && !GenericValidator.isBlankOrNull(formData.getTbSubjectNumber())) {
 			oldPatient = patientService.getByExternalId(formData.getTbSubjectNumber());
 		}
+
+		Person thisPerson = createPersonAndAddress(formData);
+
 		if (ObjectUtils.isEmpty(oldPatient)) {
 			Patient patient = new Patient();
-			patient.setPerson(createPersonAndAddress(formData));
+			patient.setPerson(thisPerson);
 			patient.setExternalId(formData.getTbSubjectNumber());
 			patient.setBirthDateForDisplay(formData.getPatientBirthDate());
 			patient.setBirthDate(DateUtil.convertStringDateToTruncatedTimestamp(formData.getPatientBirthDate()));
@@ -255,7 +276,7 @@ public class TbSampleServiceImpl implements TbSampleService {
 			return patient;
 		} else {
 			// update
-			oldPatient.setPerson(createPersonAndAddress(formData));
+			oldPatient.setPerson(thisPerson);
 			oldPatient.setBirthDateForDisplay(formData.getPatientBirthDate());
 			oldPatient.setBirthDate(DateUtil.convertStringDateToTimestamp(formData.getPatientBirthDate() + " 00:00"));
 			oldPatient.setGender(formData.getPatientGender());
@@ -607,9 +628,11 @@ public class TbSampleServiceImpl implements TbSampleService {
 				form.setLabNo(searchSample.getAccessionNumber());
 				form.setRequestDate(searchSample.getCollectionDateForDisplay());
 				form.setReceivedDate(searchSample.getReceivedDateForDisplay());
-				form.setReferringSiteId(sampOrg.getOrganization().getId());
-				form.setReferringSiteCode(sampOrg.getOrganization().getShortName());
-				form.setReferringSiteName(sampOrg.getOrganization().getName());
+				if (ObjectUtils.isNotEmpty(sampOrg)) {
+					form.setReferringSiteId(sampOrg.getOrganization().getId());
+					form.setReferringSiteCode(sampOrg.getOrganization().getShortName());
+					form.setReferringSiteName(sampOrg.getOrganization().getName());
+				}
 				if (ObjectUtils.isNotEmpty(provider)) {
 					form.setProviderLastName(provider.getPerson().getLastName());
 					form.setProviderFirstName(provider.getPerson().getFirstName());

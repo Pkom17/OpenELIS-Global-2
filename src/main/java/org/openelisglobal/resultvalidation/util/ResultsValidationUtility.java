@@ -488,8 +488,7 @@ public class ResultsValidationUtility {
 				}
 			}
 		} catch (Exception e) {
-			LogEvent.logInfo(this.getClass().getName(), "isNormalResult",
-					e.getMessage());
+			LogEvent.logInfo(this.getClass().getName(), "isNormalResult", e.getMessage());
 		}
 		return normalResult;
 	}
@@ -522,16 +521,20 @@ public class ResultsValidationUtility {
 		if (results.size() == 1) {
 			return false;
 		}
-
-		Long testResultId = Long.parseLong(testResult.getId());
+		try {
+			Long testResultId = Long.parseLong(testResult.getId());
+			for (Result result : results) {
+				if (Long.parseLong(result.getId()) > testResultId) {
+					return false;
+				}
+			}
+		} catch (Exception e) {
+			LogEvent.logError(this.getClass().getName(), "isConclusion", e.getMessage());
+			return false;
+		}
 		// This based on the fact that the conclusion is always added
 		// after the shared result so if there is a result with a larger id
 		// then this is not a conclusion
-		for (Result result : results) {
-			if (Long.parseLong(result.getId()) > testResultId) {
-				return false;
-			}
-		}
 
 		return true;
 	}

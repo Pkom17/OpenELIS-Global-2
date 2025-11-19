@@ -149,50 +149,55 @@ function validateSiteSubjectNumber(field) {
 	}
 }
 
-function validateReceivedAndCollectionDate(receivedDateFieldId, interviewDateFieldId){
-    var interviewDateField = document.getElementById(interviewDateFieldId);
-    var receivedDateField = document.getElementById(receivedDateFieldId);
+function validateReceivedAndCollectionDate(receivedDateFieldId, interviewDateFieldId) {
+	var interviewDateField = document.getElementById(interviewDateFieldId);
+	var receivedDateField = document.getElementById(receivedDateFieldId);
 
-    // Function to parse a date string in dd/mm/yyyy format to a Date object
-    function parseDate(dateStr) {
-        var parts = dateStr.split("/");
-        if (parts.length !== 3) {
-            return null; // Invalid format
-        }
-        var day = parseInt(parts[0], 10);
-        var month = parseInt(parts[1], 10) - 1;
-        var year = parseInt(parts[2], 10);
-        return new Date(year, month, day);
-    }
+	// Function to parse a date string in dd/mm/yyyy format to a Date object
+	function parseDate(dateStr) {
+		var parts = dateStr.split("/");
+		if (parts.length !== 3) {
+			return null; // Invalid format
+		}
+		var day = parseInt(parts[0], 10);
+		var month = parseInt(parts[1], 10) - 1;
+		var year = parseInt(parts[2], 10);
+		return new Date(year, month, day);
+	}
 
-    // Convert the date strings to Date objects
-    var interviewDateObj = parseDate(interviewDateField.value);
-    var receivedDateObj = parseDate(receivedDateField.value);
+	// Convert the date strings to Date objects
+	var interviewDateObj = parseDate(interviewDateField.value);
+	var receivedDateObj = parseDate(receivedDateField.value);
 
-    if (!interviewDateObj || isNaN(interviewDateObj.getTime())) {
+	if (!interviewDateObj || isNaN(interviewDateObj.getTime())) {
 		interviewDateField.classList.add("error");
-        return false;
-    }
-	else{
+		return false;
+	}
+	else {
 		interviewDateField.classList.remove("error");
 	}
 	if (!receivedDateObj || isNaN(receivedDateObj.getTime())) {
 		receivedDateField.classList.add("error");
-	    return false;
+		return false;
 	}
-	else{
+	else {
 		receivedDateField.classList.remove("error");
 	}
-    if (interviewDateObj > receivedDateObj) {
+	
+	// Check if receivedDate is not more than 1 month after interviewDate
+	const interviewDateoneMonthLater = new Date(interviewDateObj);
+	interviewDateoneMonthLater.setMonth(interviewDateoneMonthLater.getMonth() + 1);
+
+	if (receivedDateObj > interviewDateoneMonthLater) {
 		interviewDateField.classList.add("error");
 		receivedDateField.classList.add("error");
-        return false;
-    }
-	else{
+	    return false;
+	} 
+	else {
 		interviewDateField.classList.remove("error");
 		receivedDateField.classList.remove("error");
 	}
-    return true;
+	return true;
 }
 
 
@@ -980,15 +985,10 @@ function BaseProjectChecker() {
 		comparePatientField(this.idPre + "patientFirstNames", false, blanksAllowed, "firstName");
 	}
 
-	this.checkGenderForVlPregnancyOrSuckle = function() {
-		//Observation[YES_NO] set No option selected by default when selected gender = "F"
-		if ($(this.idPre + "gender").value === 'F') {
-			$(this.idPre + "vlPregnancy").value = 1251; //1251 is th dictionary ID for "No" response 
-			$(this.idPre + "vlSuckle").value = 1251;
-		}
-	}
+
 
 	this.checkGender = function(blanksAllowed) {
+
 		makeDirty();
 		if (this.idPre === 'hpv.') {
 			return; //don't check gender for HPV project
@@ -1000,14 +1000,40 @@ function BaseProjectChecker() {
 			if (selectedValue === 'F') {
 				$(this.idPre + "vlPregnancyRow").show();
 				$(this.idPre + "vlSuckleRow").show();
+				fieldValidator.addRequiredField(this.idPre +"vlPregnancy");
+				fieldValidator.addRequiredField(this.idPre +"vlSuckle");
+				this.checkVlPregnancy(false);
+				this.checkVlSuckle(false);
 			}
 			else {
+				fieldValidator.removeRequiredField(this.idPre +"vlPregnancy");
+				fieldValidator.removeRequiredField(this.idPre +"vlSuckle");
 				$(this.idPre + "vlPregnancyRow").hide();
 				$(this.idPre + "vlSuckleRow").hide();
 				$(this.idPre + "vlPregnancy").clear();
 				$(this.idPre + "vlSuckle").clear();
+				this.checkVlPregnancy(true);
+				this.checkVlSuckle(true);
 			}
 		}
+	}
+
+	this.checkVlPregnancy = function(blanksAllowed) {
+
+		makeDirty();
+		if (this.idPre === 'hpv.') {
+			return; //don't check gender for HPV project
+		}
+		checkRequiredField($(this.idPre + "vlPregnancy"), blanksAllowed);
+	}
+
+	this.checkVlSuckle = function(blanksAllowed) {
+
+		makeDirty();
+		if (this.idPre === 'hpv.') {
+			return; //don't check gender for HPV project
+		}
+		checkRequiredField($(this.idPre + "vlSuckle"), blanksAllowed);
 	}
 
 	/**

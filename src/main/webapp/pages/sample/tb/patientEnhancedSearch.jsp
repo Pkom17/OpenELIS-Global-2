@@ -1,3 +1,4 @@
+
 <%@ page language="java" contentType="text/html; charset=UTF-8" %>
 <%@ page import="org.openelisglobal.common.action.IActionConstants,
 			     org.openelisglobal.common.formfields.FormFields,
@@ -14,7 +15,7 @@
 
 <c:set var="formName" value="${form.formName}"/>
 <c:set var="localDBOnly" value='<%=Boolean.toString(ConfigurationProperties.getInstance().getPropertyValueLowerCase(Property.UseExternalPatientInfo).equals("false"))%>'/>
-<c:set var="patientSearch" value="${form.patientSearch}"/>
+<c:set var="patientEnhancedSearch" value="${form.patientSearch}"/>
 
  <%
  	boolean supportSTNumber = FormFields.getInstance().useField(Field.StNumber);
@@ -35,18 +36,17 @@ var supportLabNumber = <%= supportLabNumber %>;
 var patientSelectID;
 var patientInfoHash = [];
 var patientChangeListeners = [];
-var localDB = <c:out value="${localDBOnly}" />;
 var newSearchInfo = false;
 
 function searchPatients()
 {
-	jQuery("#loading").show();
     var criteria = jQuery("#searchCriteria").val();
+    var genders = jQuery("#genders").val();
     var value = jQuery("#searchValue").val();
     var splitName;
     var lastName = "";
     var firstName = "";
-    var STNumber = "";
+//     var STNumber = "";
     var subjectNumber = "";
     var nationalID = "";
     var labNumber = "";
@@ -55,7 +55,6 @@ function searchPatients()
 	newSearchInfo = false;
     jQuery("#resultsDiv").hide();
     jQuery("#searchLabNumber").val('');
-	jQuery("#loading").show();
     if( criteria == 1){
         firstName =  value.trim();
     }else if(criteria == 2){
@@ -72,20 +71,72 @@ function searchPatients()
         labNumber = value;
         jQuery("#searchLabNumber").val(value);
     }
-	jQuery("#loading").show();
 	patientSearch(lastName, firstName, STNumber, subjectNumber, nationalID, labNumber, "", "", "", false, processSearchSuccess);
 }
 
-function processSearchFailure(xhr)
-{
+function enhancedSearchPatients(localSearch) {
+    var criteria = jQuery("#searchCriteria").val();
+    var genders = jQuery("#genders").val();
+    var value = jQuery("#firstNameSearchValue").val().trim();
+    var splitName;
+    var lastName = "";
+    var firstName = "";
+    var STNumber = "";
+    var subjectNumber = "";
+    var nationalID = "";
+    var labNumber = "";
+    
+    var dateOfBirth = "";
+    var age = "";
+    var gender = "";
+
+	newSearchInfo = false;
+    jQuery("#resultsDiv").hide();
+    jQuery("#searchLabNumber").val('');
+    
+    firstName = jQuery("#firstNameSearchValue").val().trim();
+    lastName = jQuery("#lastNameSearchValue").val().trim();
+    
+    subjectNumber = jQuery("#patientIdNumberSearchValue").val().trim();
+    nationalID = jQuery("#patientIdNumberSearchValue").val().trim(); // facilitates "or"
+    STNumber = jQuery("#patientIdNumberSearchValue").val().trim();
+    
+    dateOfBirth = jQuery("#dateOfBirthSearchValue").val().trim();
+    gender = jQuery("#searchGendersSearchValues").val().trim();
+    
+    labNumber = jQuery("#patientLabNoSearchValue").val().trim();
+    
+	if (typeof altAccessionSearchFunction === "function" && labNumber !== "") {
+		altAccessionSearchFunction(labNumber);
+		return;
+	}
+	var table = $("searchResultTable");
+	$("searchResultsDiv").hide();
+	clearTable(table);
+	clearPatientInfoCache();
+	if (localSearch) {
+		jQuery("#loading").addClass('local-search');
+		jQuery("#loading").removeClass('external-search');
+		jQuery("#enhancedExternalSearchButton").hide();
+	} else {
+		jQuery("#loading").removeClass('local-search');
+		jQuery("#loading").addClass('external-search');
+	}
+	jQuery("#loading").show();
+
+	patientSearch(lastName, firstName, STNumber, subjectNumber, nationalID, labNumber, "", dateOfBirth, gender, localSearch, processSearchSuccess, processSearchFailure, localSearch);
+}
+
+function processSearchFailure(xhr) {
 	//alert( xhr.responseText );
 	jQuery("#loading").hide();
+	jQuery(".patientFinishSearchShow").show();
 	alert("<spring:message code="error.system"/>");
 }
 
-function processSearchSuccess(xhr)
-{
+function processSearchSuccess(xhr, localSearch) {
 	jQuery("#loading").hide();
+	jQuery(".patientFinishSearchShow").show();
 	//alert( xhr.responseText );
 	var formField = xhr.responseXML.getElementsByTagName("formfield").item(0);
 	var message = xhr.responseXML.getElementsByTagName("message").item(0);
@@ -93,7 +144,7 @@ function processSearchSuccess(xhr)
 
 	clearTable(table);
 	clearPatientInfoCache();
-	
+
 	if( message.firstChild.nodeValue == "valid" )
 	{
 		$("noPatientFound").hide();
@@ -105,24 +156,30 @@ function processSearchSuccess(xhr)
 		{
 			addPatientToSearch( table, resultNodes.item(i) );
 		}
-		<c:if test="${patientSearch.loadFromServerWithPatient}" >
+		<c:if test="${patientEnhancedSearch.loadFromServerWithPatient}" >
 		if( resultNodes.length == 1 ){
 			handleSelectedPatient();
 		}
 		</c:if>
-	}else
-	{
+		showExternalSearchButton();
+	} else if (localSearch){
+		showExternalSearchButton();
+		enhancedSearchPatients(false);
+	} else {
 		$("searchResultsDiv").hide();
 		$("noPatientFound").show();
 		selectPatient( null );
 	}
 }
 
+function showExternalSearchButton() {
+	jQuery("#enhancedExternalSearchButton").show();
+}
+
 function clearSearchResultTable() {
 	var table = $("searchResultTable");
 	clearTable(table);
 	clearPatientInfoCache();
-	
 }
 
 function clearTable(table){
@@ -282,6 +339,7 @@ function checkIndex(select) {
 function enableSearchButton(eventCode){
     var valueElem = jQuery("#searchValue");
     var criteriaElem  = jQuery('#searchCriteria');
+    var gendersElem  = jQuery('#genders');
     var searchButton = jQuery("#searchButton");
     if( valueElem.val() && criteriaElem.val() != "0" && criteriaElem.val() != "5"){
         searchButton.removeAttr("disabled");
@@ -302,63 +360,166 @@ function enableSearchButton(eventCode){
     }
 }
 
+function enableEnhancedSearchButton(eventCode){
+	var enhancedSearchButton = jQuery("#enhancedSearchButton");
+	enhancedSearchButton.removeAttr("disabled");
+	
+	var patientIdNumberSearch = document.getElementById("patientIdNumberSearchValue");
+	patientIdNumberSearch.addEventListener("keyup", function(event) {
+		if(event.keyCode === 13) {
+			event.preventDefault();
+			document.getElementById("enhancedSearchButton").click();
+		}
+	});
+	var lastNameSearch = document.getElementById("lastNameSearchValue");
+	lastNameSearch.addEventListener("keyup", function(event) {
+		if(event.keyCode === 13) {
+			event.preventDefault();
+			document.getElementById("enhancedSearchButton").click();
+		}
+	});
+	var firstNameSearch = document.getElementById("firstNameSearchValue");
+	firstNameSearch.addEventListener("keyup", function(event) {
+		if(event.keyCode === 13) {
+			event.preventDefault();
+			document.getElementById("enhancedSearchButton").click();
+		}
+	});
+	var dateOfBirthSearch = document.getElementById("dateOfBirthSearchValue");
+	dateOfBirthSearch.addEventListener("keyup", function(event) {
+		if(event.keyCode === 13) {
+			event.preventDefault();
+			document.getElementById("enhancedSearchButton").click();
+		}
+	});
+	var genderSearch = document.getElementById("searchGendersSearchValues");
+	genderSearch.addEventListener("change", function(event) {
+			document.getElementById("enhancedSearchButton").click();
+	});
+}
+
 function handleSelectedPatient(){
+	if (typeof(handleSelectedPatientAlt) === 'function') {
+		handleSelectedPatientAlt();
+		return;
+	}
     var accessionNumber = "";
     if(jQuery("#searchCriteria").val() == 5){//lab number
         accessionNumber = jQuery("#searchValue").val();
     }
 
-    console.log("patientSelectID: "+patientSelectID)
-    
     $("searchResultsDiv").style.display = "none";
-   /*  var form = document.getElementById("mainForm");
-    form.method = "get";
-    form.action = '${form.formAction}'.sub('Form','') + "?accessionNumber=" + accessionNumber + "&patientID=" + patientSelectID;
-    if( !(typeof requestType === 'undefined') ){
-        form.action += "&type=" + requestType;
-    }
-    form.submit(); */
+
     var searchUrl = '${form.formAction}'.sub('Form','') + "?accessionNumber=" + accessionNumber + "&patientID=" + patientSelectID;
     if( !(typeof requestType === 'undefined') ){
     	searchUrl += "&type=" + requestType;
     }
     window.onbeforeunload = null;
     window.location = searchUrl;
+
 }
 </script>
 
 <input type="hidden" id="searchLabNumber">
 
-<div id="PatientPage" class="colorFill patientSearch" style="display:inline;" >
+<div id="PatientPage" class="colorFill patientEnhancedSearch" style="display:inline;" >
 
-	<h2><spring:message code="sample.entry.search"/></h2>
-    <c:if test="${form.warning}">
-        <h3 class="important-text"><spring:message code="order.modify.search.warning" /></h3>
-    </c:if>
-    <select id="searchCriteria"  style="float:left" onchange="checkIndex(this)" tabindex="1" class="patientSearch">
-    <c:forEach var="pair" items="${patientSearch.searchCriteria}">
-    	<option value="${pair.id}"> ${pair.value} </option>
-    </c:forEach>
-    </select>
-
-    <input size="35"
-           maxlength="120"
+<div id="PatientPage" class="patientEnhancedSearch"
+	style="text-align: left;">
+	    <input
            id="searchValue"
-           class="text patientSearch"
-           placeholder='<%=MessageUtil.getMessage("label.select.search.here")%>'
-           type="text"
-           oninput="enableSearchButton(event.which);"
-           tabindex="2"/>
-
-    <input type="button"
-           name="searchButton"
-           class="patientSearch"
-           value="<%= MessageUtil.getMessage("label.patient.search")%>"
-           id="searchButton"
-           onclick="searchPatients()"
-           disabled="disabled" >
+           type="hidden"/>
+    <c:if test="${patientEnhancedSearch.defaultHeader}">
+	<h2><spring:message code="sample.entry.search" /></h2>
+	</c:if>
+	<table>
+		<tr>
+			<td style="text-align: left;"><spring:message
+					code="patient.labno.search" /> :</td>
+			<td><input
+					id="patientLabNoSearchValue" 
+					size="40"
+					maxlength="<%= Integer.toString(AccessionNumberUtil.getMaxAccessionLength()) %>"
+					oninput="enableEnhancedSearchButton(event.which);"
+					placeholder='<%=MessageUtil.getMessage("label.select.search.here")%>' />
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: left;"><spring:message
+					code="patient.id.number.search" /> :</td>
+			<td><input
+					id="patientIdNumberSearchValue" 
+					size="40" 
+					oninput="enableEnhancedSearchButton(event.which);"
+					placeholder='<%=MessageUtil.getMessage("label.select.search.here")%>' />
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: left;"><spring:message
+					code="patient.epiLastName" /> :</td>
+			<td><input 
+					id="lastNameSearchValue" 
+					size="40" 
+					oninput="enableEnhancedSearchButton(event.which);"
+					placeholder='<%=MessageUtil.getMessage("label.select.search.here")%>' />
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: left;"><spring:message
+					code="patient.epiFirstName" /> :</td>
+			<td><input
+				id="firstNameSearchValue"
+				size="40"
+				oninput="enableEnhancedSearchButton(event.which);"
+				placeholder='<%=MessageUtil.getMessage("label.select.search.here")%>' />
+			</td>
+		</tr>
+		</table>
+		<table>
+		<tr>
+			<td style="text-align: right;"><spring:message
+					code="patient.birthDate" />&nbsp;<%=DateUtil.getDateUserPrompt()%>:	</td>
+			<td><input
+				id="dateOfBirthSearchValue"
+				name="dateOfBirthSearchValue"
+				size="20"
+				onkeyup="addDateSlashes(this,event); "
+                onchange="checkValidAgeDate( this );"
+				oninput="enableEnhancedSearchButton(event.which);"
+				placeholder='<%=MessageUtil.getMessage("label.select.search.here")%>' />
+				<div id="dateOfBirthSearchValueMessage" class="blank"
+					style="text-align: left;"></div></td>
+<%-- 			<td style="text-align: left;"><spring:message code="patient.age" />:</td> --%>
+			<td style="text-align: left;"><spring:message code="patient.gender" />:</td>
+			<td><select id="searchGendersSearchValues" style="float: left"
+				onchange="enableEnhancedSearchButton(event.which); checkIndex(this)" tabindex="1"
+				class="patientEnhancedSearch">
+					<option value=" "></option>
+					<c:forEach var="pair" items="${patientEnhancedSearch.genders}">
+						<option value="${pair.id}">${pair.value}</option>
+					</c:forEach>
+			</select></td>
+			<td><input type="button" name="enhancedSearchButton"
+				class="patientEnhancedSearch"
+				value="<%=MessageUtil.getMessage("label.patient.search")%>"
+				id="enhancedSearchButton" onclick="enhancedSearchPatients(true);"
+				disabled="disabled">
+				<input type="button" name="enhancedExternalSearchButton"
+				class="patientEnhancedSearch"
+				value="<%=MessageUtil.getMessage("label.patient.search.external")%>"
+				id="enhancedExternalSearchButton" onclick="enhancedSearchPatients(false);"
+				style="display:none"></td>
+		</tr>
+		<tr>
+			<td>
 			<span id="loading" class="fa-2x" hidden="hidden"><i class="fas fa-spinner fa-pulse"></i></span>
-  	<span id="scanInstruction" style="display: none;"><spring:message code="sample.search.scanner.instructions"/> </span>
+			</td>
+		</tr>
+	</table>
+</div>
+
+<span id="scanInstruction" style="display: none;"><spring:message code="sample.search.scanner.instructions"/> </span>
+
 	<div id="noPatientFound" align="center" style="display: none" >
 		<h1><spring:message code="patient.search.not.found"/></h1>
 	</div>
@@ -412,9 +573,9 @@ function handleSelectedPatient(){
 			</tr>
 		</table>
 		<br/>
-		 <c:if test="${!empty patientSearch.selectedPatientActionButtonText}">
+		 <c:if test="${!empty patientEnhancedSearch.selectedPatientActionButtonText}">
             <input type="button"
-                   value="${patientSearch.selectedPatientActionButtonText}"
+                   value="${patientEnhancedSearch.selectedPatientActionButtonText}"
                    id="selectPatientButtonID"
                    onclick="handleSelectedPatient()" />
         </c:if> 

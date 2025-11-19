@@ -32,6 +32,8 @@ public interface SampleDAO extends BaseDAO<Sample, String> {
 //	public void deleteData(List samples) throws LIMSRuntimeException;
 
     List<Sample> getPageOfSamples(int startingRecNo) throws LIMSRuntimeException;
+    
+    Sample getById(String id);
 
     void getData(Sample sample) throws LIMSRuntimeException;
 

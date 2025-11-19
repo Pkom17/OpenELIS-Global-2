@@ -96,7 +96,7 @@ function /*void*/setSaveButton() {
 
 	function toggleField(toShow, targetId) {
 		if (toShow) {
-			jQuery("#" + targetId).show();
+ 			jQuery("#" + targetId).show();
 			fieldValidator.addRequiredField(targetId.replace('Row', ''));
 		} else {
 			jQuery("#" + targetId.replace('Row', '')).val(null).trigger(
@@ -124,7 +124,15 @@ function /*void*/setSaveButton() {
 	function toggleTBSampleAspects(index) {
 		var elm = jQuery("#tbDiagnosticMethodsRow_"+index);
 		var selectedIndices = jQuery("#tbDiagnosticMethodsRow_"+index+" :selected").map((_, e) => e.index).get();
-		toggleField(selectedIndices.includes(2), "tbAspectsRow_"+index);
+				
+ 		toggleField(selectedIndices.includes(2), "tbAspectsRow_"+index);
+
+		if (jQuery(".tbAspectsClass_"+index).hasClass("select2-hidden-accessible")) {
+			jQuery(".tbAspectsClass_"+index).select2("destroy");
+		}else{
+			jQuery(".tbAspectsClass_"+index).select2();
+		}
+ 		
 		setOrderModified();
 	}
 	
@@ -433,6 +441,546 @@ function /*void*/setSaveButton() {
 			}
 		}
 	}
+	
+	
+	//var pt_invalidElements = [];
+	var patientSelectID;
+	var patientInfoHash = [];
+	var patientChangeListeners = [];
+	var newSearchInfo = false;
+	
+	var patientInfoChangeListeners = [];
+	var dirty = false;
+	
+	
+	function enableEnhancedSearchButton(eventCode){
+		var enhancedSearchButton = jQuery("#enhancedSearchButton");
+		enhancedSearchButton.removeAttr("disabled");
+		
+		var patientIdNumberSearch = document.getElementById("patientIdNumberSearchValue");
+		patientIdNumberSearch.addEventListener("keyup", function(event) {
+			if(event.keyCode === 13) {
+				event.preventDefault();
+				document.getElementById("enhancedSearchButton").click();
+			}
+		});
+		var lastNameSearch = document.getElementById("lastNameSearchValue");
+		lastNameSearch.addEventListener("keyup", function(event) {
+			if(event.keyCode === 13) {
+				event.preventDefault();
+				document.getElementById("enhancedSearchButton").click();
+			}
+		});
+		var firstNameSearch = document.getElementById("firstNameSearchValue");
+		firstNameSearch.addEventListener("keyup", function(event) {
+			if(event.keyCode === 13) {
+				event.preventDefault();
+				document.getElementById("enhancedSearchButton").click();
+			}
+		});
+		var dateOfBirthSearch = document.getElementById("dateOfBirthSearchValue");
+		dateOfBirthSearch.addEventListener("keyup", function(event) {
+			if(event.keyCode === 13) {
+				event.preventDefault();
+				document.getElementById("enhancedSearchButton").click();
+			}
+		});
+		var genderSearch = document.getElementById("searchGendersSearchValues");
+		genderSearch.addEventListener("change", function(event) {
+				document.getElementById("enhancedSearchButton").click();
+		});
+	}
+	
+
+	function addPatientToSearch(table, result ){
+
+		var patient = result.getElementsByTagName("patient")[0];
+
+		var firstName = getValueFromXmlElement( patient, "first");
+		var lastName = getValueFromXmlElement( patient, "last");
+		var gender = getValueFromXmlElement( patient, "gender");
+		var DOB = getValueFromXmlElement( patient, "dob");
+		var stNumber = getValueFromXmlElement( patient, "ST");
+		var subjectNumber = getValueFromXmlElement( patient, "subjectNumber");
+		var nationalID = getValueFromXmlElement( patient, "nationalID");
+		var mother = getValueFromXmlElement( patient, "mother");
+		var pk = getValueFromXmlElement( result, "id");
+		var dataSourceName = getValueFromXmlElement( result, "dataSourceName");
+
+		var row = createRow( table, firstName, lastName, gender, DOB, subjectNumber, nationalID, pk, dataSourceName );
+		addToPatientInfo( firstName, lastName, gender, DOB, subjectNumber, nationalID, pk );
+
+		if( row == 1 ){
+			patientSelectID = pk;
+			$("sel_1").checked = "true";
+			selectPatient( pk );
+		}
+	}
+
+	function getValueFromXmlElement( parent, tag ){
+		var element = parent.getElementsByTagName( tag ).item(0);
+
+		return element ? element.firstChild.nodeValue : "";
+	}
+
+	function createRow(table, firstName, lastName, gender, DOB, subjectNumber, nationalID, pk,  dataSourceName){
+
+			var row = table.rows.length;
+
+			var newRow = table.insertRow(row);
+
+			newRow.id = "_" + row;
+
+			var cellCounter = -1;
+
+			var selectionCell = newRow.insertCell(++cellCounter);
+			var lastNameCell = newRow.insertCell(++cellCounter);
+			var firstNameCell = newRow.insertCell(++cellCounter);
+			var genderCell = newRow.insertCell(++cellCounter);
+			var dobCell = newRow.insertCell(++cellCounter);
+			var subjectNumberCell = newRow.insertCell(++cellCounter) ;
+			var nationalCell = newRow.insertCell(++cellCounter);			
+			selectionCell.innerHTML = getSelectionHtml( row, pk );
+			lastNameCell.innerHTML = nonNullString( lastName );
+			firstNameCell.innerHTML = nonNullString( firstName );
+			genderCell.innerHTML = nonNullString( gender );
+			subjectNumberCell.innerHTML = nonNullString( subjectNumber );
+			nationalCell.innerHTML = nonNullString( nationalID );
+
+			
+			
+			dobCell.innerHTML = nonNullString( DOB );
+
+			return row;
+	}
+
+	function getSelectionHtml( row, key){
+		return "<input name='selPatient' id='sel_" + row + "' value='" + key + "' onclick='selectPatient(this.value)' type='radio'>";
+	}
+
+	function /*String*/ nonNullString( target ){
+		return target == "null" ? "" : target;
+	}
+
+	function addToPatientInfo( firstName, lastName, gender, DOB, subjectNumber, nationalID, pk ){
+		var info = [];
+		info["first"] = nonNullString( firstName );
+		info["last"] = nonNullString( lastName );
+		info["gender"] = nonNullString( gender );
+		info["DOB"] = nonNullString( DOB );
+		info["subjectNumber"] = nonNullString( subjectNumber );
+		info["national"] = nonNullString( nationalID );
+
+		patientInfoHash[pk] = info;
+	}
+
+
+	function selectPatient( patientID ){
+	    var i;
+		if( patientID ){
+			patientSelectID = patientID;
+
+			var info = patientInfoHash[patientID];
+
+			for(i = 0; i < patientChangeListeners.length; i++){
+				patientChangeListeners[i](info["first"],info["last"],info["gender"],info["DOB"],info["subjectNumber"],info["national"], patientID);
+			}
+		
+		}else{
+			for(i = 0; i < patientChangeListeners.length; i++){
+				patientChangeListeners[i]("","","","","","", null);
+			}
+		}
+	}
+ 
+	function /*void*/ addPatientChangedListener( listener ){
+		patientChangeListeners.push( listener );
+	}
+	
+	
+	function selectedPatientChangedForManagement(firstName, lastName, gender, DOB,subjectNumber, nationalID, pk ){
+		if( pk ){
+			getDetailedPatientInfo();
+			$("patientPK_ID").value = pk;
+		}else{
+			clearPatientInfo();
+			//setUpdateStatus("ADD");
+		}
+	}
+
+	var registered = false;
+
+	function registerPatientChangedForManagement() {
+		if (!registered) {
+			if (typeof addPatientChangedListener === 'function') {
+				addPatientChangedListener(selectedPatientChangedForManagement);
+			}
+			registered = true;
+		}
+	}
+
+	registerPatientChangedForManagement();
+	
+	
+	
+	function  /*void*/ getDetailedPatientInfo()
+	{
+		$("patientPK_ID").value = patientSelectID;
+		
+		new Ajax.Request (
+	                       'ajaxQueryXML',  //url
+	                        {//options
+	                          method: 'get', //http method
+	                          parameters: "provider=PatientSearchPopulateProvider&personKey=" + patientSelectID,
+	          				  requestHeaders : {
+	        					 "X-CSRF-Token" : getCsrfToken()
+	        				  },
+	                          onSuccess:  processSearchPopulateSuccess,
+	                          onFailure:  processSearchPopulateFailure
+	                         }
+	                          );
+	}
+	
+	
+	function  /*void*/ setUpdateStatus( newStatus )
+	{
+		if( updateStatus != newStatus )
+		{
+			updateStatus = newStatus;
+			document.getElementById("processingStatus").value = newStatus;
+		}
+	}
+
+	function  /*void*/ processSearchPopulateSuccess(xhr)
+	{
+	    //alert(xhr.responseText);
+		var response = xhr.responseXML.getElementsByTagName("formfield").item(0);
+		var fhirUuidValue = getXMLValue(response, "fhirUuid");
+		var nationalIDValue = getXMLValue(response, "nationalID");
+		var subjectNumberValue = getXMLValue(response, "subjectNumber");
+		var lastNameValue = getXMLValue(response, "lastName");
+		var firstNameValue = getXMLValue(response, "firstName");
+		var streetValue = getXMLValue(response, "street");
+		var dobValue = getXMLValue(response, "dob");
+		var genderValue = getSelectIndexFor( "genderID", getXMLValue(response, "gender"));
+		var patientUpdatedValue = getXMLValue(response, "patientUpdated");
+		var personUpdatedValue = getXMLValue(response, "personUpdated");
+		var guid = getXMLValue( response, "guid");
+		var phoneNumber = getXMLValue(response, "phoneNumber");	
+		var email = getXMLValue(response, "email");	
+		
+
+		setPatientInfo( nationalIDValue,
+						subjectNumberValue,
+						lastNameValue,
+						firstNameValue,
+						streetValue,
+						dobValue,
+						genderValue,
+						patientUpdatedValue,
+						personUpdatedValue,
+						guid,
+						phoneNumber,
+						fhirUuidValue);
+
+		<c:if test="${param.attemptAutoSave}">
+			var validToSave =  patientFormValid() && sampleEntryTopValid();
+			if (validToSave) {
+				savePage();
+			}
+		</c:if>
+
+	}
+	
+	function /*string*/ getXMLValue( response, key )
+	{
+		var field = response.getElementsByTagName(key).item(0);
+
+		if( field != null )
+		{
+			 return field.firstChild.nodeValue;
+		}
+		else
+		{
+			return undefined;
+		}
+	}
+	
+	function  /*void*/ processSearchPopulateFailure(xhr) {
+		//console.log(xhr.responseText);
+	}
+	
+
+	function  /*void*/ clearPatientInfo(){
+		setPatientInfo();
+	}
+
+	function /*void*/ clearErrors(){
+
+		for( var i = 0; i < pt_invalidElements.length; ++i ){
+			setValidIndicaterOnField( true, $(pt_invalidElements[i]).name );
+		}
+
+		pt_invalidElements = [];
+
+	}
+
+	function  /*void*/ setPatientInfo(nationalID, subjectNumber, lastName, firstName, street,  dob, gender,
+			patientUpdated, personUpdated, guid, phoneNumber, fhirUuidValue ) {
+
+		//clearErrors();
+
+		//$("tbSubjectNumber").value = nationalID == undefined ? "" : nationalID;
+		//$("subjectNumberID").value = subjectNumber == undefined ? "" : subjectNumber; 
+		$("lastNameID").value = lastName == undefined ? "" : lastName;
+		$("firstNameID").value = firstName == undefined ? "" : firstName;
+		$("patientAddress").value = street == undefined ? "" : street;
+		$("patientGUID_ID").value = guid == undefined ? "" : guid;
+		$("patientPhone").value = phoneNumber == undefined ? "" : phoneNumber;
+		$("genderID").selectedIndex = gender == undefined ? 0 : gender;
+
+		
+		if (dob == undefined) {
+			document.getElementById("dateOfBirthID").value = "";
+			document.getElementById("ageYears").value = "";
+		} else {
+			var dobElement = document.getElementById("dateOfBirthID").value = dob;
+			updatePatientAge( $("dateOfBirthID") );
+		}
+
+		// run this b/c dynamically populating the fields does not constitute an onchange event to populate the patmgmt tile
+		// this is the fx called by the onchange event if manually changing the fields
+		updatePatientEditStatus();
+
+	}
+	
+
+	function  /*void*/ updatePatientEditStatus() {
+// 		if (updateStatus == "NO_ACTION") {
+// 			setUpdateStatus("UPDATE");
+// 		}
+		
+		for(var i = 0; i < patientInfoChangeListeners.length; i++){
+				patientInfoChangeListeners[i]($("firstNameID").value,
+											  $("lastNameID").value,
+											  $("genderID").value,
+											  $("dateOfBirthID").value,
+											  $("subjectNumberID").value,
+											  $("nationalID").value,
+											  $("patientPK_ID").value);
+
+			}
+
+		makeDirty();
+
+		//pt_setSave();
+	}
+
+	function /*void*/ makeDirty(){
+		dirty=true;
+		if( typeof(showSuccessMessage) === 'function' ){
+			showSuccessMessage(false); //refers to last save
+		}
+		// Adds warning when leaving page if content has been entered into makeDirty form fields
+		function formWarning(){ 
+	    return "<spring:message code="banner.menu.dataLossWarning"/>";
+		}
+		window.onbeforeunload = formWarning;
+	}
+
+	function  /*void*/  addPatient(){
+		clearPatientInfo();
+		//clearErrors();
+		$("subjectNumberID").disabled = false;
+		$("nationalID").disabled = false;
+		//setUpdateStatus( "ADD" );
+		jQuery("#PatientDetail").show();
+		
+		for(var i = 0; i < patientInfoChangeListeners.length; i++){
+				patientInfoChangeListeners[i]("", "", "", "", "", "", "");
+			}
+	}
+	
+
+	function /*void*/ addPatientInfoChangedListener( listener ){
+		patientInfoChangeListeners.push( listener );
+	}
+	
+	function /*void*/ handleEnterEvent( ){
+			
+			if( newSearchInfo ){
+				searchPatients();
+			}
+			return false;
+	}
+
+	function /*void*/ dirtySearchInfo(e){ 
+		var code = e ? e.which : window.event.keyCode;
+		if( code != 13 ){
+			newSearchInfo = true; 
+		}
+	}
+	function /*void*/ doNothing(){ 
+		
+	}
+	
+
+	function checkIndex(select) {
+		var indexVal = select.options[select.selectedIndex].value;
+	    var valueElem = jQuery("#searchValue");
+		if (indexVal == "5") {
+			jQuery("#scanInstruction").show();
+	        valueElem.attr("maxlength","<%= Integer.toString(AccessionNumberUtil.getMaxAccessionLength()) %>");
+		} else {
+			jQuery("#scanInstruction").hide();
+	        valueElem.attr("maxlength","120");
+		}
+	}
+	
+	function enableSearchButton(eventCode){
+	    var valueElem = jQuery("#searchValue");
+	    var criteriaElem  = jQuery('#searchCriteria');
+	    var gendersElem  = jQuery('#genders');
+	    var searchButton = jQuery("#searchButton");
+	    if( valueElem.val() && criteriaElem.val() != "0" && criteriaElem.val() != "5"){
+	        searchButton.removeAttr("disabled");
+	        if( eventCode == 13 ){
+	            searchButton.click();
+	        }
+	    }else if(criteriaElem.val() == "5"){
+	    	if (valueElem.val().length >= <%= Integer.toString(AccessionNumberUtil.getMinAccessionLength()) %>) {
+	        	searchButton.removeAttr("disabled");
+	            if( eventCode == 13 ){
+	                searchButton.click();
+	            }
+	    	} else {
+	            searchButton.attr("disabled", "disabled");
+	    	}
+	    }else{
+	        searchButton.attr("disabled", "disabled");
+	    }
+	}
+	
+	function enhancedSearchPatients(localSearch) {
+	    var criteria = jQuery("#searchCriteria").val();
+	    var genders = jQuery("#genders").val();
+	    var value = jQuery("#firstNameSearchValue").val().trim();
+	    var splitName;
+	    var lastName = "";
+	    var firstName = "";
+	    var STNumber = "";
+	    var subjectNumber = "";
+	    var nationalID = "";
+	    var labNumber = "";
+	    
+	    var dateOfBirth = "";
+	    var age = "";
+	    var gender = "";
+
+		newSearchInfo = false;
+	    jQuery("#resultsDiv").hide();
+	    jQuery("#searchLabNumber").val('');
+	    
+	    firstName = jQuery("#firstNameSearchValue").val().trim();
+	    lastName = jQuery("#lastNameSearchValue").val().trim();
+	    
+	    subjectNumber = jQuery("#patientIdNumberSearchValue").val().trim();
+	    nationalID = jQuery("#patientIdNumberSearchValue").val().trim(); // facilitates "or"
+	    STNumber = jQuery("#patientIdNumberSearchValue").val().trim();
+	    
+	    dateOfBirth = jQuery("#dateOfBirthSearchValue").val().trim();
+	    gender = jQuery("#searchGendersSearchValues").val().trim();
+	    
+	    labNumber = jQuery("#patientLabNoSearchValue").val().trim();
+	    
+		if (typeof altAccessionSearchFunction === "function" && labNumber !== "") {
+			altAccessionSearchFunction(labNumber);
+			return;
+		}
+		var table = $("searchResultTable");
+		$("searchResultsDiv").hide();
+		clearTable(table);
+		clearPatientInfoCache();
+		if (localSearch) {
+			jQuery("#loading").addClass('local-search');
+			jQuery("#loading").removeClass('external-search');
+			jQuery("#enhancedExternalSearchButton").hide();
+		} else {
+			jQuery("#loading").removeClass('local-search');
+			jQuery("#loading").addClass('external-search');
+		}
+		jQuery("#loading").show();
+
+		patientSearch(lastName, firstName, STNumber, subjectNumber, nationalID, labNumber, "", dateOfBirth, gender, localSearch, processSearchSuccess, processSearchFailure, localSearch);
+	}
+	
+	function processSearchFailure(xhr) {
+		//alert( xhr.responseText );
+		jQuery("#loading").hide();
+		jQuery(".patientFinishSearchShow").show();
+		alert("<spring:message code="error.system"/>");
+	}
+
+	function processSearchSuccess(xhr, localSearch) {
+		jQuery("#loading").hide();
+		jQuery(".patientFinishSearchShow").show();
+		//alert( xhr.responseText );
+		var formField = xhr.responseXML.getElementsByTagName("formfield").item(0);
+		var message = xhr.responseXML.getElementsByTagName("message").item(0);
+		var table = $("searchResultTable");
+
+		clearTable(table);
+		clearPatientInfoCache();
+
+		if( message.firstChild.nodeValue == "valid" )
+		{
+			$("noPatientFound").hide();
+			$("searchResultsDiv").show();
+
+			var resultNodes = formField.getElementsByTagName("result");
+
+			for( var i = 0; i < resultNodes.length; i++ )
+			{
+				addPatientToSearch( table, resultNodes.item(i) );
+			}
+			<c:if test="${patientEnhancedSearch.loadFromServerWithPatient}" >
+			if( resultNodes.length == 1 ){
+				handleSelectedPatient();
+			}
+			</c:if>
+			showExternalSearchButton();
+		} else if (localSearch){
+			showExternalSearchButton();
+			enhancedSearchPatients(false);
+		} else {
+			$("searchResultsDiv").hide();
+			$("noPatientFound").show();
+			selectPatient( null );
+		}
+	}
+
+	function showExternalSearchButton() {
+		jQuery("#enhancedExternalSearchButton").show();
+	}
+	
+	function clearSearchResultTable() {
+		var table = $("searchResultTable");
+		clearTable(table);
+		clearPatientInfoCache();
+	}
+
+	function clearTable(table){
+		var rows = table.rows.length - 1;
+		while( rows > 0 ){
+			table.deleteRow( rows-- );
+		}
+	}
+
+	function clearPatientInfoCache(){
+		patientInfoHash = [];
+	}
+	
+	
 </script>
 
 
@@ -444,7 +992,8 @@ function /*void*/setSaveButton() {
 		value="${empty form.tbSampleTests ? 0 : form.tbSampleTests.size()-1}"
 		id="sampleItemCount">
 
-	<!--  -->
+	 
+<!-- <%-- 	maxlength='<%=Integer.toString(AccessionNumberUtil.getMaxAccessionLength())%>' --%>  -->
 	<div id=orderSearchSection>
 		<input type="button" name="showHide" value='-'
 			onclick="showHideSection(this, 'orderSearch');" id="orderSearchId">
@@ -454,7 +1003,6 @@ function /*void*/setSaveButton() {
 				<td style="width: 35%"><spring:message
 						code="quick.entry.accession.number" /> :</td>
 				<td style="width: 65%"><form:input path="labnoForSearch"
-						maxlength='<%=Integer.toString(AccessionNumberUtil.getMaxAccessionLength())%>'
 						onchange="" cssClass="text" id="searchByLabNo" /> <input
 					type="button" name="searchButton" class="patientSearch"
 					value="<%=MessageUtil.getMessage("label.patient.search")%>"
@@ -539,61 +1087,210 @@ function /*void*/setSaveButton() {
 		<hr style="width: 100%; height: 2px" />
 	</div>
 	<br />
+	
 	<div id=patientEntrySection>
 		<input type="button" name="showHide" value='-'
 			onclick="showHideSection(this, 'patientDisplay');"
 			id="patientSectionId">
 		<%=MessageUtil.getContextualMessage("sample.entry.patient")%>
 		<span class="requiredlabel">*</span>
-		<table id="patientDisplayshowHide">
-			<tr>
-				<td style=""><spring:message code="patient.epiLastName" /> : <span
-					class="requiredlabel">*</span></td>
-				<td><form:input path="patientLastName" id="lastNameID"
-						onchange="setOrderModified();" /></td>
-				<td style=""><spring:message code="patient.epiFirstName" /> :<span
-					class="requiredlabel"></span></td>
-				<td><form:input path="patientFirstName" id="firstNameID"
-						onchange="" size="25" /></td>
-			</tr>
-			<tr>
-				<td style=""><spring:message code="person.phone" /> : <%=PhoneNumberService.getPhoneFormat()%>:</td>
-				<td><form:input path="patientPhone" cssClass="text"
-						onchange="validatePhoneNumber(this)" id="patientPhone" /></td>
-				<td style=""><spring:message code="person.streetAddress" />:</td>
-				<td><form:input path="patientAddress" cssClass="text" size="25"
-						onchange="" id="patientAddress" /></td>
-			</tr>
-			<tr>
-				<td style=""><spring:message code="patient.birthDate" />&nbsp;<%=DateUtil.getDateUserPrompt()%>:
-					<span class="requiredlabel">*</span></td>
-				<td><form:input path="patientBirthDate"
-						onkeyup="addDateSlashes(this,event);" autocomplete="off"
-						onchange="checkValidEntryDate(this, 'past');convertToAge(this,'ageYears');"
-						id="dateOfBirthID" cssClass="text" size="20" maxlength="10" />
-					<div id="patientbirthDateMessage" class="blank"></div></td>
-				<td style=""><spring:message code="patient.age" />:</td>
-				<td><form:input path="patientAge" onchange="handleAgeChange();"
-						id="ageYears" cssClass="text" size="3" maxlength="3"
-						placeholder="years" />
-					<div class="blank">
-						<spring:message code="years.label" />
-					</div>
-					<div id="ageYearsMessage" class="blank"></div></td>
-				<td style=""><spring:message code="patient.gender" />: <span
-					class="requiredlabel">*</span></td>
-				<td><form:select path="patientGender" id="genderID"
-						onchange="setOrderModified();">
 
-						<option value=" "></option>
-						<form:options items="${form.genders}" itemLabel="value"
-							itemValue="id" />
-					</form:select></td>
-			</tr>
-			<tr class="spacerRow">
-				<td>&nbsp;</td>
+		<div id="patientDisplayshowHide">
+		
+		<h2><spring:message code="sample.entry.search" /></h2>
+		
+		
+		<table>
+		<tr>
+			<td style="text-align: left;"><spring:message
+					code="patient.labno.search" /> :</td>
+			<td><input
+					id="patientLabNoSearchValue" 
+					size="40"
+					oninput="enableEnhancedSearchButton(event.which);"
+					placeholder='<%=MessageUtil.getMessage("label.select.search.here")%>' />
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: left;"><spring:message
+					code="patient.id.number.search" /> :</td>
+			<td><input
+					id="patientIdNumberSearchValue" 
+					size="40" 
+					oninput="enableEnhancedSearchButton(event.which);"
+					placeholder='<%=MessageUtil.getMessage("label.select.search.here")%>' />
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: left;"><spring:message
+					code="patient.epiLastName" /> :</td>
+			<td><input 
+					id="lastNameSearchValue" 
+					size="40" 
+					oninput="enableEnhancedSearchButton(event.which);"
+					placeholder='<%=MessageUtil.getMessage("label.select.search.here")%>' />
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: left;"><spring:message
+					code="patient.epiFirstName" /> :</td>
+			<td><input
+				id="firstNameSearchValue"
+				size="40"
+				oninput="enableEnhancedSearchButton(event.which);"
+				placeholder='<%=MessageUtil.getMessage("label.select.search.here")%>' />
+			</td>
+		</tr>
+		</table>
+		<table>
+		<tr>
+			<td style="text-align: right;"><spring:message
+					code="patient.birthDate" />&nbsp;<%=DateUtil.getDateUserPrompt()%>:	</td>
+			<td><input
+				id="dateOfBirthSearchValue"
+				name="dateOfBirthSearchValue"
+				size="20"
+				onkeyup="addDateSlashes(this,event); "
+                onchange="checkValidAgeDate( this );"
+				oninput="enableEnhancedSearchButton(event.which);"
+				placeholder='<%=MessageUtil.getMessage("label.select.search.here")%>' />
+				<div id="dateOfBirthSearchValueMessage" class="blank"
+					style="text-align: left;"></div></td>
+			<td style="text-align: left;"><spring:message code="patient.gender" />:</td>
+			<td><select id="searchGendersSearchValues" style="float: left"
+				onchange="enableEnhancedSearchButton(event.which); checkIndex(this)" tabindex="1"
+				class="patientEnhancedSearch">
+					<option value=" "></option>
+					<c:forEach var="pair" items="${form.genders}">
+						<option value="${pair.id}">${pair.value}</option>
+					</c:forEach>
+			</select></td>
+			<td><input type="button" name="enhancedSearchButton"
+				class="patientEnhancedSearch"
+				value="<%=MessageUtil.getMessage("label.patient.search")%>"
+				id="enhancedSearchButton" onclick="enhancedSearchPatients(true);"
+				disabled="disabled">
+				<input type="button" name="enhancedExternalSearchButton"
+				class="patientEnhancedSearch"
+				value="<%=MessageUtil.getMessage("label.patient.search.external")%>"
+				id="enhancedExternalSearchButton" onclick="enhancedSearchPatients(false);"
+				style="display:none"></td>
+		</tr>
+		<tr>
+			<td>
+			<span id="loading" class="fa-2x" hidden="hidden"><i class="fas fa-spinner fa-pulse"></i></span>
+			</td>
+		</tr>
+	</table>
+	
+	
+	
+	
+	
+	
+	
+	<div id="noPatientFound" align="center" style="display: none" >
+		<h1><spring:message code="patient.search.not.found"/></h1>
+	</div>
+	<div id="searchResultsDiv" class="colorFill" style="display: none;" >
+
+		<table id="searchResultTable" width="70%">
+			<tr>
+				<th width="2%"></th>
+				<th width="18%">
+					<spring:message code="patient.epiLastName"/>
+				</th>
+				<th width="15%">
+					<spring:message code="patient.epiFirstName"/>
+				</th>
+				<th width="5%">
+					<spring:message code="patient.gender"/>
+				</th>
+				<th width="11%">
+					<spring:message code="patient.birthDate"/>
+				</th>
+				<th width="12%">
+					<spring:message code="patient.subject.number"/>
+				</th>
+				<th width="12%">
+                    <%=MessageUtil.getContextualMessage("patient.NationalID") %>
+                </th>
 			</tr>
 		</table>
+		<br/>
+		 <c:if test="${!empty patientEnhancedSearch.selectedPatientActionButtonText}">
+            <input type="button"
+                   value="${patientEnhancedSearch.selectedPatientActionButtonText}"
+                   id="selectPatientButtonID"
+                   onclick="handleSelectedPatient()" />
+        </c:if> 
+		</div>
+	
+	
+	
+	
+	
+	
+	
+	
+	<form:hidden path="patientPK" id="patientPK_ID"/>
+	<form:hidden path="guid" id="patientGUID_ID"/>	
+	<br/>
+	<div class="patientSearch">
+		<hr style="width:100%" />
+        <input type="button" value='<%= MessageUtil.getMessage("patient.new")%>' onclick="addPatient()">
+	</div>
+	<br />
+	<table>
+		<tr>
+			<td style=""><spring:message code="patient.epiLastName" /> : <span
+				class="requiredlabel">*</span></td>
+			<td><form:input path="patientLastName" id="lastNameID"
+					onchange="setOrderModified();" /></td>
+			<td style=""><spring:message code="patient.epiFirstName" /> :<span
+				class="requiredlabel"></span></td>
+			<td><form:input path="patientFirstName" id="firstNameID"
+					onchange="" size="25" /></td>
+		</tr>
+		<tr>
+			<td style=""><spring:message code="person.phone" /> : <%=PhoneNumberService.getPhoneFormat()%>:</td>
+			<td><form:input path="patientPhone" cssClass="text"
+					onchange="validatePhoneNumber(this)" id="patientPhone" /></td>
+			<td style=""><spring:message code="person.streetAddress" />:</td>
+			<td><form:input path="patientAddress" cssClass="text" size="25"
+					onchange="" id="patientAddress" /></td>
+		</tr>
+		<tr>
+			<td style=""><spring:message code="patient.birthDate" />&nbsp;<%=DateUtil.getDateUserPrompt()%>:
+				<span class="requiredlabel">*</span></td>
+			<td><form:input path="patientBirthDate"
+					onkeyup="addDateSlashes(this,event);" autocomplete="off"
+					onchange="checkValidEntryDate(this, 'past');convertToAge(this,'ageYears');"
+					id="dateOfBirthID" cssClass="text" size="20" maxlength="10" />
+				<div id="patientbirthDateMessage" class="blank"></div></td>
+			<td style=""><spring:message code="patient.age" />:</td>
+			<td><form:input path="patientAge" onchange="handleAgeChange();"
+					id="ageYears" cssClass="text" size="3" maxlength="3"
+					placeholder="years" />
+				<div class="blank">
+					<spring:message code="years.label" />
+				</div>
+				<div id="ageYearsMessage" class="blank"></div></td>
+			<td style=""><spring:message code="patient.gender" />: <span
+				class="requiredlabel">*</span></td>
+			<td><form:select path="patientGender" id="genderID"
+					onchange="setOrderModified();">
+
+					<option value=" "></option>
+					<form:options items="${form.genders}" itemLabel="value"
+						itemValue="id" />
+				</form:select></td>
+		</tr>
+		<tr class="spacerRow">
+			<td>&nbsp;</td>
+		</tr>
+	</table>
+		</div>
 		<hr style="width: 100%; height: 2px" />
 	</div>
 	<br />
@@ -933,7 +1630,7 @@ function /*void*/setSaveButton() {
       	  jQuery('.tbSpecimenNatureClass_${status.index}').eq(${status.index}).val('${test.tbSpecimenNature}');
   		  toggleTBSampleAspects(${status.index});
   		  
-  		jQuery('.tbAspectsClass_${status.index}').select2({width: 'resolve'});
+    	jQuery('.tbAspectsClass_${status.index}').select2({width: 'resolve'});
 		jQuery('.tbDiagnosticMethodsClass_${status.index}').select2();
 		
 		showPanelAndTests($('tbDiagnosticMethods_${status.index}'), ${status.index});
@@ -947,7 +1644,7 @@ function /*void*/setSaveButton() {
 
  		jQuery('.tbSpecimenNatureClass_0').select2();
 		jQuery('.tbDiagnosticMethodsClass_0').select2();
-		jQuery('.tbAspectsClass_0').select2({width: 'resolve'});
+  		jQuery('.tbAspectsClass_0').select2({width: 'resolve'});
 		toggleTBSampleAspects(0);
 		
 		

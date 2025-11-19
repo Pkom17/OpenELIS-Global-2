@@ -115,12 +115,13 @@ public class ResultsPaging {
 
         @Override
         public void updateCache(List<TestResultItem> cacheItems, List<TestResultItem> clientItems) {
+        	
             for (int i = 0; i < clientItems.size(); i++) {
                 if (clientItems.get(i).getIsModified()) {
                     cacheItems.set(i, clientItems.get(i));
                 }
             }
-
+            
         }
 
         @Override

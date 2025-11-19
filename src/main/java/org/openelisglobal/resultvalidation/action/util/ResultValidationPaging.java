@@ -117,6 +117,7 @@ public class ResultValidationPaging {
 
         @Override
         public void updateCache(List<AnalysisItem> cacheItems, List<AnalysisItem> clientItems) {
+
             for (int i = 0; i < clientItems.size(); i++) {
                 cacheItems.set(i, clientItems.get(i));
             }

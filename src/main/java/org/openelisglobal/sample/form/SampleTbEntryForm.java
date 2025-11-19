@@ -11,6 +11,8 @@ import org.openelisglobal.common.form.BaseForm;
 import org.openelisglobal.common.util.IdValuePair;
 import org.openelisglobal.common.util.validator.CustomDateValidator.DateRelation;
 import org.openelisglobal.common.validator.ValidationHelper;
+import org.openelisglobal.patient.action.bean.PatientEnhancedSearch;
+import org.openelisglobal.patient.action.bean.PatientSearch;
 import org.openelisglobal.validation.annotations.SafeHtml;
 import org.openelisglobal.validation.annotations.SafeHtml.SafeListLevel;
 import org.openelisglobal.validation.annotations.ValidAccessionNumber;
@@ -22,6 +24,12 @@ import org.openelisglobal.validation.constraintvalidator.NameValidator.NameType;
 public class SampleTbEntryForm extends BaseForm {
 
     private static final long serialVersionUID = 1L;
+    
+    // for display
+    private PatientSearch patientSearch;
+
+    // for display
+    private PatientEnhancedSearch patientEnhancedSearch;
 
 	private Boolean rememberSiteAndRequester;
 	
@@ -588,4 +596,21 @@ public class SampleTbEntryForm extends BaseForm {
 	public void setNewTbSampleTests(List<TbSampleTest> newTbSampleTests) {
 		this.newTbSampleTests = newTbSampleTests;
 	}
+
+	public PatientSearch getPatientSearch() {
+		return patientSearch;
+	}
+
+	public void setPatientSearch(PatientSearch patientSearch) {
+		this.patientSearch = patientSearch;
+	}
+
+	public PatientEnhancedSearch getPatientEnhancedSearch() {
+		return patientEnhancedSearch;
+	}
+
+	public void setPatientEnhancedSearch(PatientEnhancedSearch patientEnhancedSearch) {
+		this.patientEnhancedSearch = patientEnhancedSearch;
+	}
+
 }

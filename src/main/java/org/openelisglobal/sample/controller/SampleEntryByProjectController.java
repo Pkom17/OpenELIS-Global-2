@@ -389,6 +389,7 @@ public class SampleEntryByProjectController extends BaseSampleEntryController {
 						Dictionary dict = null;
 						switch (vlReasonType.getValue().trim()) {
 						case "Charge Virale de controle":
+						case "Charge virale sous contrôle ARV":
 							dict = dictionaryService.getDictionaryByDictEntry("VL under ARV control");
 							break;
 						case "Echec Virologique":

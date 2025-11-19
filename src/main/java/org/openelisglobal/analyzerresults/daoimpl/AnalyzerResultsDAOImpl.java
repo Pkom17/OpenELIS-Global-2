@@ -51,6 +51,7 @@ public class AnalyzerResultsDAOImpl extends BaseDAOImpl<AnalyzerResults, String>
             query.setParameter("analyzerId", Integer.parseInt(result.getAnalyzerId()));
             query.setParameter("assessionNumber", result.getAccessionNumber());
             query.setParameter("testName", result.getTestName());
+            
 
             list = query.list();
 

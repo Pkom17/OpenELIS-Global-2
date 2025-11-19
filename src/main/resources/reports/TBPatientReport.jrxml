@@ -3,8 +3,8 @@
 	<property name="ireport.scriptlethandling" value="0"/>
 	<property name="ireport.encoding" value="UTF-8"/>
 	<property name="ireport.zoom" value="3.0"/>
-	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.x" value="455"/>
+	<property name="ireport.y" value="554"/>
 	<import value="net.sf.jasperreports.engine.*"/>
 	<import value="java.util.*"/>
 	<import value="net.sf.jasperreports.engine.data.*"/>
@@ -464,6 +464,9 @@
 					<textField isBlankWhenNull="true">
 						<reportElement x="434" y="70" width="119" height="14" uuid="d3844e5e-0423-47ba-b85b-4382c3d195ef"/>
 						<box leftPadding="4">
+							<pen lineWidth="0.5"/>
+							<topPen lineWidth="0.5"/>
+							<leftPen lineWidth="0.5"/>
 							<bottomPen lineWidth="0.5"/>
 							<rightPen lineWidth="0.5"/>
 						</box>
@@ -586,10 +589,10 @@
 					<textFieldExpression><![CDATA[$R{report.tb.orderReason}]]></textFieldExpression>
 				</textField>
 				<rectangle>
-					<reportElement x="388" y="22" width="163" height="20" uuid="d1cfe420-4337-4808-aae4-2bbb60d23cc4"/>
+					<reportElement x="388" y="22" width="164" height="20" uuid="d1cfe420-4337-4808-aae4-2bbb60d23cc4"/>
 				</rectangle>
 				<rectangle>
-					<reportElement x="388" y="2" width="163" height="20" backcolor="#EAEAEA" uuid="a0bbcd72-eed4-4e9c-9624-164b49443d77"/>
+					<reportElement x="388" y="2" width="164" height="20" backcolor="#EAEAEA" uuid="a0bbcd72-eed4-4e9c-9624-164b49443d77"/>
 				</rectangle>
 				<textField>
 					<reportElement mode="Transparent" x="389" y="2" width="156" height="20" backcolor="#FFFFFF" uuid="f1de659a-fbfc-4f2e-a87a-7efc8e7ca83a"/>
@@ -610,7 +613,7 @@
 					<reportElement x="201" y="62" width="187" height="20" uuid="4ddd0a84-bba2-40e1-898f-bea6135eacc9"/>
 				</rectangle>
 				<rectangle>
-					<reportElement x="388" y="42" width="163" height="20" backcolor="#EAEAEA" uuid="93839e7e-4dd7-4840-a073-f654e0eabce2"/>
+					<reportElement x="388" y="42" width="164" height="20" backcolor="#EAEAEA" uuid="93839e7e-4dd7-4840-a073-f654e0eabce2"/>
 				</rectangle>
 				<rectangle>
 					<reportElement x="201" y="42" width="187" height="20" backcolor="#EAEAEA" uuid="a005374a-d1db-4e73-a2eb-ae919a1ce3f2"/>
@@ -619,7 +622,7 @@
 					<reportElement x="1" y="42" width="200" height="20" backcolor="#EAEAEA" uuid="32d6e8e1-c5c3-4c77-955c-562bf5fd7f7b"/>
 				</rectangle>
 				<rectangle>
-					<reportElement x="388" y="62" width="163" height="20" uuid="9030aef8-01d8-4263-8ebe-c511e615175c"/>
+					<reportElement x="388" y="62" width="164" height="20" uuid="9030aef8-01d8-4263-8ebe-c511e615175c"/>
 				</rectangle>
 				<textField>
 					<reportElement mode="Transparent" x="8" y="43" width="185" height="18" backcolor="#FFFFFF" uuid="0d6f73f8-f221-437d-be5d-c52c0263f7b3">
@@ -639,7 +642,7 @@
 				</textField>
 				<textField>
 					<reportElement mode="Transparent" x="214" y="43" width="166" height="18" backcolor="#FFFFFF" uuid="89e308f1-8a81-4972-b91c-4501a8f8f8b5">
-						<printWhenExpression><![CDATA[$F{tbFollowupPeriodLine2} != null]]></printWhenExpression>
+						<printWhenExpression><![CDATA[$F{tbFollowupPeriodLine2} != null || $F{tbFollowupPeriodLine2} != ""]]></printWhenExpression>
 					</reportElement>
 					<textElement verticalAlignment="Middle">
 						<font size="10" isBold="true"/>
@@ -848,7 +851,7 @@
 						<rightPen lineWidth="0.5"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle" markup="styled">
-						<font fontName="SansSerif" size="9" isBold="false" isItalic="false" isUnderline="false" pdfFontName="Helvetica" isPdfEmbedded="true"/>
+						<font fontName="SansSerif" size="11" isBold="true" isItalic="false" isUnderline="false" pdfFontName="Helvetica" isPdfEmbedded="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{result}]]></textFieldExpression>
 				</textField>

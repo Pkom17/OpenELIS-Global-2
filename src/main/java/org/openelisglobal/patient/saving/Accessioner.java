@@ -151,8 +151,8 @@ import org.springframework.validation.Errors;
  */
 
 public abstract class Accessioner implements IAccessioner {
-    @Autowired
-    private FhirTransformService fhirTransformService;
+	@Autowired
+	private FhirTransformService fhirTransformService;
 
 	/**
 	 * a set of possible analysis status that means an analysis is done
@@ -360,8 +360,9 @@ public abstract class Accessioner implements IAccessioner {
 			persistRecordStatus();
 			deleteOldPatient();
 			populateAndPersistUnderInvestigationNote();
-			
-			//update fhir resources
+
+         /*   			
+			// update fhir resources
 			SamplePatientUpdateData updateData = new SamplePatientUpdateData(sysUserId);
 			updateData.setSample(sample);
 			updateData.setAccessionNumber(accessionNumber);
@@ -370,16 +371,17 @@ public abstract class Accessioner implements IAccessioner {
 			updateData.setSampleItemsTests(sampleItemTests);
 			PatientManagementInfo patientInfo = new PatientManagementInfo();
 			patientInfo.setPatientPK(patientInDB.getId());
-            try {
-            	if(ObjectUtils.isEmpty(fhirTransformService)) {
-            		fhirTransformService = SpringContext.getBean(FhirTransformService.class);
-            	}
-                fhirTransformService.transformPersistOrderEntryFhirObjects(updateData, patientInfo, false, null);
-            } catch (Exception  e) {
-                LogEvent.logError(e);
-            }
-            //end update fhir resources
-			
+			try {
+				if (ObjectUtils.isEmpty(fhirTransformService)) {
+					fhirTransformService = SpringContext.getBean(FhirTransformService.class);
+				}
+				fhirTransformService.transformPersistOrderEntryFhirObjects(updateData, patientInfo, false, null);
+			} catch (Exception e) {
+				LogEvent.logError(e);
+			}
+			// end update fhir resources
+*/			
+
 			return IActionConstants.FWD_SUCCESS_INSERT;
 		} catch (IllegalAccessException e) {
 			logAndAddMessage("save()", "errors.InsertException", e);
@@ -802,6 +804,7 @@ public abstract class Accessioner implements IAccessioner {
 				oldSampleOrg.setSysUserId(sysUserId);
 				oldSampleOrg.setOrganization(org);
 				sampleOrganizations.add(oldSampleOrg);
+				return;
 			}
 		}
 		SampleOrganization so = new SampleOrganization();
@@ -954,7 +957,6 @@ public abstract class Accessioner implements IAccessioner {
 		String analysisRevision = SystemConfiguration.getInstance().getAnalysisDefaultRevision();
 		boolean newAnalysis = false;
 		for (SampleItemAnalysisCollection sampleTestPair : sampleItemsAnalysis) {
-
 			// create new or find existing sample item for testing.
 			SampleItem item = sampleTestPair.item;
 			SampleItem existingSampleItem = itemsByType.get(item.getTypeOfSampleId());
@@ -962,10 +964,10 @@ public abstract class Accessioner implements IAccessioner {
 				item.setSample(sample);
 				item.setSortOrder(Integer.toString(nextSortOrder++));
 				item.setSysUserId(sysUserId);
-
 				sampleItemService.insert(item);
 			} else {
 				sampleTestPair.item = item = existingSampleItem;
+				sampleItemService.update(item);
 			}
 
 			List<String> existingTests = findDefinedTestsForItem(item);

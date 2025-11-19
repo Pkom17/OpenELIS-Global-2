@@ -33,7 +33,7 @@ public class SampleBatchEntryByProjectController extends BaseSampleEntryControll
     private static final String[] ALLOWED_FIELDS = new String[] { "labNo"
             //
             , "sampleOrderItems.newRequesterName", "observations.projectFormName", "ProjectData.viralLoadTest",
-            "ProjectData.edtaTubeTaken", "ProjectData.dryTubeTaken", "ProjectData.dbsTaken", "ProjectData.dnaPCR",
+            "ProjectData.edtaTubeTaken", "ProjectData.dryTubeTaken", "ProjectData.dbsTaken", "ProjectData.pscvlTaken", "ProjectData.dnaPCR",
             "ProjectData.ARVcenterName", "ProjectData.ARVcenterCode", "ProjectData.EIDSiteName",
             "ProjectData.EIDsiteCode", "currentDate", "currentTime", "sampleOrderItems.receivedDateForDisplay",
             "sampleOrderItems.receivedTime", "sampleXML", "sampleOrderItems.referringSiteId", "method" };

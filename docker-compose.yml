@@ -1,8 +1,9 @@
-version: '3.3'
+#version: '3.3'
 services:
     certs:
         container_name: oe-certs 
         image: itechuw/certgen:main
+        platform: linux/amd64
         restart: always
         environment:
             - KEYSTORE_PW="kspass"
@@ -14,6 +15,7 @@ services:
     database:
         container_name: openelisglobal-database 
         image: postgres:14.4
+        platform: linux/amd64
         ports:
             - "15432:5432"
         restart: always
@@ -34,7 +36,9 @@ services:
             
     oe.openelis.org:
         container_name: openelisglobal-webapp 
-        image: itechuw/openelis-global-2:develop     
+        # image: itechuw/openelis-global-2:develop
+        image: openelisglobal:latest
+        platform: linux/amd64     
         depends_on:
             - database
             - certs
@@ -48,7 +52,7 @@ services:
 
         environment:
             - DEFAULT_PW=adminADMIN! 
-            - TZ=Africa/Nairobi
+            - TZ=Africa/Abidjan
               # context.xml doesn't seem to be able to pick up environment variables directly, so we are passing them in as CATALINA_OPTS
             - CATALINA_OPTS= -Ddatasource.url=jdbc:postgresql://database:5432/clinlims -Ddatasource.username=clinlims
         volumes:
@@ -63,7 +67,9 @@ services:
             
     fhir.openelis.org:
         container_name: external-fhir-api
-        image: hapiproject/hapi:v6.6.0-tomcat
+        #image: hapiproject/hapi:v6.6.0-tomcat
+        image: hapiproject/hapi:latest
+        platform: linux/amd64
         depends_on:
             - database
             - certs
@@ -75,14 +81,14 @@ services:
         restart: always
         environment:
           SPRING_CONFIG_LOCATION: file:///run/secrets/hapi_application.yaml
-          TZ: Africa/Nairobi
+          TZ: Africa/Abidjan
 
-          JAVA_OPTS: "-Djavax.net.ssl.trustStore=/etc/openelis-global/truststore 
-                      -Djavax.net.ssl.trustStorePassword=tspass
-                      -Djavax.net.ssl.trustStoreType=pkcs12 
-                      -Djavax.net.ssl.keyStore=/etc/openelis-global/keystore 
-                      -Djavax.net.ssl.keyStorePassword=kspass 
-                      -Djavax.net.ssl.keyStoreType=pkcs12"            
+#          JAVA_OPTS: "-Djavax.net.ssl.trustStore=/etc/openelis-global/truststore 
+#                      -Djavax.net.ssl.trustStorePassword=tspass
+#                      -Djavax.net.ssl.trustStoreType=pkcs12 
+#                      -Djavax.net.ssl.keyStore=/etc/openelis-global/keystore 
+#                      -Djavax.net.ssl.keyStorePassword=kspass 
+#                      -Djavax.net.ssl.keyStoreType=pkcs12"            
         
         volumes:
             -  key_trust-store-volume:/etc/openelis-global

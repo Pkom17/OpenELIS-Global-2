@@ -760,4 +760,14 @@ public class TestServiceImpl extends BaseObjectServiceImpl<Test, String> impleme
 		return getBaseObjectDAO().getTbMicroscopyTestCountByResult(startDate, endDate);
 	}
 
+	@Override
+	public Integer getReceivedTbPresumedMicroscopyTestCount(Date startDate, Date endDate) throws LIMSRuntimeException {
+		return getBaseObjectDAO().getReceivedTbPresumedMicroscopyTestCount(startDate, endDate);
+	}
+
+	@Override
+	public Integer getPositiveTbMicroscopyTestCount(Date startDate, Date endDate) throws LIMSRuntimeException {
+		return getBaseObjectDAO().getPositiveTbMicroscopyTestCount(startDate, endDate);
+	}
+
 }

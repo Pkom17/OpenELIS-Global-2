@@ -195,7 +195,7 @@ public class ResultsValidationRetroCIUtility {
 					// Immunology and Hematology are together
 					// Not sure if this is the correct way to judge this business rule
 					if (ConfigurationProperties.getInstance().isCaseInsensitivePropertyValueEqual(
-							Property.configurationName, "CI_GENERAL") && testSectionName.equals("Immunology")) {
+							Property.configurationName, "RETROCI") && testSectionName.equals("Immunology")) {
 						sw.setMark("Immuno time");
 						// add Hematology tests to list
 						totalTestName = MessageUtil.getMessage("test.validation.total.percent");
@@ -453,9 +453,11 @@ public class ResultsValidationRetroCIUtility {
 		// The result list are results associated with the analysis, if there is
 		// none we want
 		// to present the user with a blank one
-		if (resultList.isEmpty()) {
-			resultList.add(null);
-		}
+		
+		//cause NotNull Exception
+//		if (resultList.isEmpty()) {
+//			resultList.add(null);
+//		}
 
 		ResultValidationItem parentItem = null;
 		for (Result result : resultList) {
@@ -491,7 +493,7 @@ public class ResultsValidationRetroCIUtility {
 //		displayTestName = augmentTestNameWithRange(displayTestName, result);
 
 		ResultValidationItem testItem = new ResultValidationItem();
-
+		
 		testItem.setAccessionNumber(accessionNumber);
 		testItem.setAnalysis(analysis);
 		testItem.setSequenceNumber(sequenceNumber);

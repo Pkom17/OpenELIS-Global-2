@@ -19,6 +19,8 @@ import org.openelisglobal.common.services.IStatusService;
 import org.openelisglobal.common.services.StatusService.AnalysisStatus;
 import org.openelisglobal.common.services.StatusService.ExternalOrderStatus;
 import org.openelisglobal.common.services.StatusService.OrderStatus;
+import org.openelisglobal.common.util.ConfigurationProperties;
+import org.openelisglobal.common.util.ConfigurationProperties.Property;
 import org.openelisglobal.common.util.DateUtil;
 import org.openelisglobal.dataexchange.fhir.FhirUtil;
 import org.openelisglobal.dataexchange.order.action.IOrderExistanceChecker;
@@ -44,8 +46,8 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 public class TaskWorker {
 
 	public enum TaskResult {
-		OK, DUPLICATE_ORDER, NON_CANCELABLE_ORDER, MESSAGE_ERROR, ORDER_IN_PROGRESS,
-		ORDER_REJECTED,ORDER_COMPLETED,ORDER_CANCELED
+		OK, DUPLICATE_ORDER, NON_CANCELABLE_ORDER, MESSAGE_ERROR, ORDER_IN_PROGRESS, ORDER_REJECTED, ORDER_COMPLETED,
+		ORDER_CANCELED
 	}
 
 	private String message = "";
@@ -128,6 +130,22 @@ public class TaskWorker {
 		MessagePatient patient = interpreter.getMessagePatient();
 		checkResult = existanceChecker.check(referringOrderNumber);
 		Test test = interpreter.getTest();
+		boolean shouldAnonymize = false;
+		if ((ConfigurationProperties.getInstance().isPropertyValueEqual(Property.configurationName, "CI RetroCI")
+				|| ConfigurationProperties.getInstance().isCaseInsensitivePropertyValueEqual(Property.configurationName,
+						"CI LNSP")
+				|| ConfigurationProperties.getInstance().isCaseInsensitivePropertyValueEqual(Property.configurationName,
+						"CI IPCI")
+				|| ConfigurationProperties.getInstance().isCaseInsensitivePropertyValueEqual(Property.configurationName,
+						"CI_REGIONAL")
+				|| ConfigurationProperties.getInstance().isCaseInsensitivePropertyValueEqual(Property.configurationName,
+						"RETROCI")
+				|| ConfigurationProperties.getInstance().isCaseInsensitivePropertyValueEqual(Property.configurationName,
+						"CI_GENERAL"))
+				&& test.getLoinc().equals("25836-8"))// LOINC for viralload
+		{
+			shouldAnonymize = true;
+		}
 		// getEncounter to get collectionDate
 		IGenericClient localFhirClient = fhirUtil.getLocalFhirClient();
 		Encounter encounter = localFhirClient.read().resource(Encounter.class)
@@ -185,7 +203,8 @@ public class TaskWorker {
 			}
 		}
 
-		// Get existing sample for this eorder, to check if order has already been entered
+		// Get existing sample for this eorder, to check if order has already been
+		// entered
 		// manually
 		List<Sample> sampleListForEOrder = sampleService.getSampleByPatientAndTestAndCollectionDate(
 				patient.getNationalId(), test, DateUtil.convertDateTimeToSqlDate(collectionDate));
@@ -205,11 +224,14 @@ public class TaskWorker {
 						|| sample.getStatusId().equals(statusService.getStatusID(AnalysisStatus.TechnicalAcceptance))) {
 					newEorderStatus = ExternalOrderStatus.InProgress;
 					result = TaskResult.ORDER_IN_PROGRESS;
-				} else if (sample.getStatusId().equals(getStatusService().getStatusID(AnalysisStatus.TechnicalRejected))) {
+				} else if (sample.getStatusId()
+						.equals(getStatusService().getStatusID(AnalysisStatus.TechnicalRejected))) {
 					newEorderStatus = ExternalOrderStatus.NonConforming;
 					result = TaskResult.ORDER_REJECTED;
-				} else if (sample.getStatusId().equals(getStatusService().getStatusID(OrderStatus.NonConforming_depricated))
-						|| sample.getStatusId().equals(getStatusService().getStatusID(AnalysisStatus.BiologistRejected))) {
+				} else if (sample.getStatusId()
+						.equals(getStatusService().getStatusID(OrderStatus.NonConforming_depricated))
+						|| sample.getStatusId()
+								.equals(getStatusService().getStatusID(AnalysisStatus.BiologistRejected))) {
 					newEorderStatus = ExternalOrderStatus.NonConforming;
 					result = TaskResult.ORDER_REJECTED;
 				} else if (sample.getStatusId().equals(getStatusService().getStatusID(OrderStatus.Finished))) {
@@ -218,7 +240,8 @@ public class TaskWorker {
 				}
 			}
 
-			insertNewOrder(referringOrderNumber, message, patient, priority, newEorderStatus, referringFacility);
+			insertNewOrder(referringOrderNumber, message, patient, priority, newEorderStatus, referringFacility,
+					shouldAnonymize);
 			return result;
 		}
 
@@ -249,7 +272,7 @@ public class TaskWorker {
 					LogEvent.logDebug(this.getClass().getName(), "handleOrderRequest",
 							"no order found, entering order: " + referringOrderNumber);
 					insertNewOrder(referringOrderNumber, message, patient, priority, ExternalOrderStatus.Entered,
-							referringFacility);
+							referringFacility, shouldAnonymize);
 					return TaskResult.OK;
 				}
 			case ORDER_FOUND_CANCELED:
@@ -261,7 +284,7 @@ public class TaskWorker {
 					LogEvent.logDebug(this.getClass().getName(), "handleOrderRequest",
 							"order found cancelled, entering order: " + referringOrderNumber);
 					insertNewOrder(referringOrderNumber, message, patient, priority, ExternalOrderStatus.Entered,
-							referringFacility);
+							referringFacility, shouldAnonymize);
 					return TaskResult.OK;
 				}
 			default:
@@ -270,7 +293,7 @@ public class TaskWorker {
 								+ " check result: " + checkResult + " for: " + referringOrderNumber + " " + orderType
 								+ " ");
 				insertNewOrder(referringOrderNumber, message, patient, priority, ExternalOrderStatus.NonConforming,
-						referringFacility);
+						referringFacility, shouldAnonymize);
 				return TaskResult.MESSAGE_ERROR;
 			}
 
@@ -290,7 +313,7 @@ public class TaskWorker {
 			LogEvent.logDebug(this.getClass().getName(), "handleOrderRequest",
 					"TaskWorker:unsupported tests: " + referringOrderNumber + orderType);
 			insertNewOrder(referringOrderNumber, message, patient, priority, ExternalOrderStatus.NonConforming,
-					referringFacility);
+					referringFacility, shouldAnonymize);
 			return TaskResult.MESSAGE_ERROR;
 		} else if (interpretResults.get(0) == InterpreterResults.MISSING_PATIENT_GUID
 				|| interpretResults.get(0) == InterpreterResults.MISSING_PATIENT_DOB
@@ -299,13 +322,13 @@ public class TaskWorker {
 			LogEvent.logDebug(this.getClass().getName(), "handleOrderRequest", "missing patient info: "
 					+ interpretResults.get(0).toString() + "for" + referringOrderNumber + " " + orderType + " ");
 			insertNewOrder(referringOrderNumber, message, patient, priority, ExternalOrderStatus.NonConforming,
-					referringFacility);
+					referringFacility, shouldAnonymize);
 			return TaskResult.MESSAGE_ERROR;
 		} else {
 			LogEvent.logDebug(this.getClass().getName(), "handleOrderRequest", "undetermined issue: "
 					+ interpretResults.get(0).toString() + " for: " + referringOrderNumber + " " + orderType + " ");
 			insertNewOrder(referringOrderNumber, message, patient, priority, ExternalOrderStatus.NonConforming,
-					referringFacility);
+					referringFacility, shouldAnonymize);
 			return TaskResult.MESSAGE_ERROR;
 		}
 
@@ -317,7 +340,8 @@ public class TaskWorker {
 	}
 
 	private void insertNewOrder(String referringOrderNumber, String message, MessagePatient patient,
-			OrderPriority orderPriority, ExternalOrderStatus eoStatus, Organization referringFacility) {
+			OrderPriority orderPriority, ExternalOrderStatus eoStatus, Organization referringFacility,
+			boolean shouldAnonymize) {
 		LogEvent.logDebug(this.getClass().getName(), "insertNewOrder",
 				"TaskWorker:insertNewOrder: " + referringOrderNumber);
 		ElectronicOrder eOrder = new ElectronicOrder();
@@ -331,6 +355,22 @@ public class TaskWorker {
 		eOrder.setCollectionDate(collectionDate);
 		if (ObjectUtils.isNotEmpty(referringFacility))
 			eOrder.setReferringFacilityId(Integer.parseInt(referringFacility.getId()));
+
+		if (shouldAnonymize) {
+			patient.setLastName("");
+			patient.setFirstName("");
+			patient.setContactPhone("");
+			patient.setAddressCommune("");
+			patient.setAddressStreet("");
+			patient.setAddressVillage("");
+			patient.setMobilePhone("");
+			patient.setWorkPhone("");
+			patient.setMothersFirstName("");
+			patient.setEmail("");
+			patient.setContactEmail("");
+			patient.setContactFirstName("");
+			patient.setContactLastName("");
+		}
 
 		persister.persist(patient, eOrder);
 	}

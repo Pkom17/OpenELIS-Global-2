@@ -102,7 +102,7 @@ public class ResultSaveService {
             Result qualifiedResult = null;
 
             boolean newResult = GenericValidator.isBlankOrNull(serviceBean.getResultId());
-
+            
             if (!newResult) {
                 result.setId(serviceBean.getResultId());
                 resultService.getData(result);

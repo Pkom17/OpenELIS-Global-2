@@ -89,7 +89,6 @@ public class PagingUtility<E> {
 
     private void updateSessionResultCache(List<E> pagedResults, E clientTests, PagingBean paging,
             IPageUpdater<E> updater) {
-
         int currentPage = Integer.parseInt(paging.getCurrentPage()) - 1;
 
         E sessionTests = pagedResults.get(currentPage);

@@ -93,7 +93,7 @@ function processSearchSuccess(xhr)
 
 	clearTable(table);
 	clearPatientInfoCache();
-	
+
 	if( message.firstChild.nodeValue == "valid" )
 	{
 		$("noPatientFound").hide();
@@ -308,8 +308,6 @@ function handleSelectedPatient(){
         accessionNumber = jQuery("#searchValue").val();
     }
 
-    console.log("patientSelectID: "+patientSelectID)
-    
     $("searchResultsDiv").style.display = "none";
    /*  var form = document.getElementById("mainForm");
     form.method = "get";

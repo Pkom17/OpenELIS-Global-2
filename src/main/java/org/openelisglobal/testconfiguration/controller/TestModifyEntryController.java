@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.validator.GenericValidator;
 import org.hibernate.HibernateException;
 import org.json.simple.JSONArray;
@@ -141,7 +142,9 @@ public class TestModifyEntryController extends BaseController {
             bean.setId(test.getId());
             bean.setLocalization(test.getLocalizedTestName());
             bean.setReportLocalization(test.getLocalizedReportingName());
-            bean.setTestSortOrder(Integer.parseInt(test.getSortOrder()));
+            if(ObjectUtils.isNotEmpty(test.getSortOrder())) {
+            	bean.setTestSortOrder(Integer.parseInt(test.getSortOrder()));
+            }
             bean.setTestUnit(testService.getTestSectionName(test));
             bean.setPanel(createPanelList(testService, test));
             bean.setResultType(resultType);

@@ -374,6 +374,6 @@ function onLoad() {
 	studies.initializeProjectChecker();
 	registerPatientSearchChanged();
 	projectChecker == null || projectChecker.refresh();
-	vl.checkGenderForVlPregnancyOrSuckle();
+	//vl.checkGenderForVlPregnancyOrSuckle();
 }
 </script>

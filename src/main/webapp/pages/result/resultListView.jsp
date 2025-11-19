@@ -47,30 +47,30 @@
 </c:if>
 
 <%
-	String searchTerm = request.getParameter("searchTerm");
+String searchTerm = request.getParameter("searchTerm");
 
-	boolean useSTNumber = FormFields.getInstance().useField(Field.StNumber);
-	boolean useNationalID = FormFields.getInstance().useField(Field.NationalID);
-	boolean useSubjectNumber = FormFields.getInstance().useField(Field.SubjectNumber);
-	boolean useTechnicianName = ConfigurationProperties.getInstance()
-			.isPropertyValueEqual(Property.resultTechnicianName, "true");
-	boolean useRejected = ConfigurationProperties.getInstance()
-			.isPropertyValueEqual(Property.allowResultRejection, "true");
+boolean useSTNumber = FormFields.getInstance().useField(Field.StNumber);
+boolean useNationalID = FormFields.getInstance().useField(Field.NationalID);
+boolean useSubjectNumber = FormFields.getInstance().useField(Field.SubjectNumber);
+boolean useTechnicianName = ConfigurationProperties.getInstance().isPropertyValueEqual(Property.resultTechnicianName,
+		"true");
+boolean useRejected = ConfigurationProperties.getInstance().isPropertyValueEqual(Property.allowResultRejection, "true");
 
-	boolean depersonalize = FormFields.getInstance().useField(Field.DepersonalizedResults);
-	boolean ableToRefer = FormFields.getInstance().useField(Field.ResultsReferral);
-	boolean compactHozSpace = FormFields.getInstance().useField(Field.ValueHozSpaceOnResults);
-	boolean useInitialCondition = FormFields.getInstance().useField(Field.InitialSampleCondition);
-	boolean failedValidationMarks = ConfigurationProperties.getInstance()
-			.isPropertyValueEqual(Property.failedValidationMarker, "true");
-	boolean noteRequired = ConfigurationProperties.getInstance()
-			.isPropertyValueEqual(Property.notesRequiredForModifyResults, "true");
-	pageContext.setAttribute("noteRequired", noteRequired);
-	boolean autofillTechBox = ConfigurationProperties.getInstance()
-			.isPropertyValueEqual(Property.autoFillTechNameBox, "true");
-	boolean restrictNewReferringMethodEntries = ConfigurationProperties.getInstance().isPropertyValueEqual(Property.restrictFreeTextMethodEntry, "true");
-	String criticalMessage = ConfigurationProperties.getInstance().getPropertyValue(ConfigurationProperties.Property.customCriticalMessage);
-		
+boolean depersonalize = FormFields.getInstance().useField(Field.DepersonalizedResults);
+boolean ableToRefer = FormFields.getInstance().useField(Field.ResultsReferral);
+boolean compactHozSpace = FormFields.getInstance().useField(Field.ValueHozSpaceOnResults);
+boolean useInitialCondition = FormFields.getInstance().useField(Field.InitialSampleCondition);
+boolean failedValidationMarks = ConfigurationProperties.getInstance()
+		.isPropertyValueEqual(Property.failedValidationMarker, "true");
+boolean noteRequired = ConfigurationProperties.getInstance()
+		.isPropertyValueEqual(Property.notesRequiredForModifyResults, "true");
+pageContext.setAttribute("noteRequired", noteRequired);
+boolean autofillTechBox = ConfigurationProperties.getInstance().isPropertyValueEqual(Property.autoFillTechNameBox,
+		"true");
+boolean restrictNewReferringMethodEntries = ConfigurationProperties.getInstance()
+		.isPropertyValueEqual(Property.restrictFreeTextMethodEntry, "true");
+String criticalMessage = ConfigurationProperties.getInstance()
+		.getPropertyValue(ConfigurationProperties.Property.customCriticalMessage);
 %>
 
 <link rel="stylesheet" type="text/css" href="css/bootstrap_simple.css?" />
@@ -86,15 +86,14 @@
 <script type="text/javascript" src="scripts/multiselectUtils.js?"></script>
 <script src="scripts/customAutocomplete.js?"></script>
 <link rel="stylesheet" href="css/customAutocomplete.css?">
-<script src="scripts/ui/jquery.ui.autocomplete.js?"></script> 
+<script src="scripts/ui/jquery.ui.autocomplete.js?"></script>
 <link rel="stylesheet" type="text/css" href="css/jquery.asmselect.css?" />
 
 
 
 <script type="text/javascript">
 
-<%if (ConfigurationProperties.getInstance().isPropertyValueEqual(Property.ALERT_FOR_INVALID_RESULTS,
-					"true")) {%>
+<%if (ConfigurationProperties.getInstance().isPropertyValueEqual(Property.ALERT_FOR_INVALID_RESULTS, "true")) {%>
        outOfValidRangeMsg = '<%=MessageUtil.getMessage("result.outOfValidRange.msg")%>';
 <%} else {%>
        outOfValidRangeMsg = null;
@@ -275,8 +274,8 @@ function updateReflexChild( group){
  	var reflexGroup = $$(".reflexGroup_" + group);
 	var childReflex = $$(".childReflex_" + group);
  	var i, childId, rowId, resultIds = "", values="", requestString = "";
- 	
- 	if( childReflex ){
+
+ 	if( childReflex && Array.isArray(childReflex) && childReflex.length > 0){
  		childId = childReflex[0].id.split("_")[1];
  		
 		for( i = 0; i < reflexGroup.length; i++ ){
@@ -588,38 +587,33 @@ function /*void*/ handleEnterEvent(  ){
 </c:if>
 
 <c:if test="${form.searchByRange}">
-	<div id="searchDiv" class="colorFill"  >
-	<div id="PatientPage" class="colorFill" style="display:inline" >
-	<h2><spring:message code="sample.entry.search"/></h2>
-		<table width="50%">
-			<tr >
-			<td width="50%" align="right" >
-				<%=MessageUtil.getContextualMessage("quick.entry.accession.range")%>
-			</td>
-			<td width="50%">
-				<input name="accessionNumber"
-				       size="20"
-				       id="searchAccessionID"
-				       maxlength="<%=Integer.toString(AccessionNumberUtil.getMaxAccessionLength())%>"
-				       onkeyup="validateEntrySize( this.value );"
-				       onblur="validateEntrySize( this.value );"
-				       class="text"
-				       type="text">
-				<spring:message code="sample.search.scanner.instructions"/>
-			</td>
-		</tr>
-			
-		</table>
-		<br/>
-		
-		<button type="button" name="retrieveTestsButton" id="retrieveTestsID"  onclick="doShowTests();" disabled="disabled" >
-			<%= MessageUtil.getContextualMessage("validationentry.accession.range") %>
-		</button>
-		
-		<h1>
-			
-		</h1>
-	</div>
+	<div id="searchDiv" class="colorFill">
+		<div id="PatientPage" class="colorFill" style="display: inline">
+			<h2>
+				<spring:message code="sample.entry.search" />
+			</h2>
+			<table width="50%">
+				<tr>
+					<td width="50%" align="right"><%=MessageUtil.getContextualMessage("quick.entry.accession.range")%>
+					</td>
+					<td width="50%"><input name="accessionNumber" size="20"
+						id="searchAccessionID"
+						maxlength="<%=Integer.toString(AccessionNumberUtil.getMaxAccessionLength())%>"
+						onkeyup="validateEntrySize( this.value );"
+						onblur="validateEntrySize( this.value );" class="text" type="text">
+						<spring:message code="sample.search.scanner.instructions" /></td>
+				</tr>
+
+			</table>
+			<br />
+
+			<button type="button" name="retrieveTestsButton" id="retrieveTestsID"
+				onclick="doShowTests();" disabled="disabled">
+				<%=MessageUtil.getContextualMessage("validationentry.accession.range")%>
+			</button>
+
+			<h1></h1>
+		</div>
 	</div>
 </c:if>
 
@@ -657,7 +651,7 @@ function /*void*/ handleEnterEvent(  ){
 		<input type="button" onclick="toggleKitDisplay(this)" value="+">
 		<spring:message code="inventory.testKits" />
 		<div id="kitView" style="display: none;" class="colorFill">
-			<jsp:include page="${testKitInfoFragment}"/>
+			<jsp:include page="${testKitInfoFragment}" />
 			<br />
 			<hr style="width: 100%" />
 		</div>
@@ -665,7 +659,7 @@ function /*void*/ handleEnterEvent(  ){
 
 	<c:if test="${form.singlePatient}">
 		<%
-			if (!depersonalize) {
+		if (!depersonalize) {
 		%>
 		<table style="width: 100%">
 			<tr>
@@ -679,28 +673,28 @@ function /*void*/ handleEnterEvent(  ){
 				<th style="width: 15%"><spring:message code="patient.birthDate" />
 				</th>
 				<%
-					if (useSTNumber) {
+				if (useSTNumber) {
 				%>
 				<th style="width: 15%"><spring:message code="patient.ST.number" />
 				</th>
 				<%
-					}
+				}
 				%>
 				<%
-					if (useNationalID) {
+				if (useNationalID) {
 				%>
 				<th style="width: 20%"><%=MessageUtil.getContextualMessage("patient.NationalID")%>
 				</th>
 				<%
-					}
+				}
 				%>
 				<%
-					if (useSubjectNumber) {
+				if (useSubjectNumber) {
 				%>
 				<th style="width: 20%"><spring:message
 						code="patient.subject.number" /></th>
 				<%
-					}
+				}
 				%>
 			</tr>
 			<tr>
@@ -712,38 +706,38 @@ function /*void*/ handleEnterEvent(  ){
 				</td>
 				<td style="text-align: center"><c:out value="${form.dob}" /></td>
 				<%
-					if (useSTNumber) {
+				if (useSTNumber) {
 				%>
 				<td style="text-align: center"><c:out value="${form.st}" /></td>
 				<%
-					}
+				}
 				%>
 				<%
-					if (useNationalID) {
+				if (useNationalID) {
 				%>
 				<td style="text-align: center"><c:out
 						value="${form.nationalId}" /></td>
 				<%
-					}
+				}
 				%>
 				<%
-					if (useSubjectNumber) {
+				if (useSubjectNumber) {
 				%>
 				<td style="text-align: center"><c:out
 						value="${form.subjectNumber}" /></td>
 				<%
-					}
+				}
 				%>
 			</tr>
 		</table>
 		<%
-			}
+		}
 		%>
 		<br />
 	</c:if>
 
 	<div style="width: 100%">
-	<c:if test="${not (form.paging.totalPages == 0)}">
+		<c:if test="${not (form.paging.totalPages == 0)}">
 			<form:hidden id="currentPageID" path="paging.currentPage" />
 			<c:set var="total" value="${form.paging.totalPages}" />
 			<c:set var="currentPage" value="${form.paging.currentPage}" />
@@ -751,21 +745,21 @@ function /*void*/ handleEnterEvent(  ){
 				1 - ${pageSize} of ${analysisCount}
 			</c:if>
 			<%-- <c:if test="${not empty analysisCount}"> --%>
-				<button type="button" style="width: 100px;"
-					onclick="pager.pageBack();"
-					<c:if test="${currentPage == 1}">disabled="disabled"</c:if>>
-					<spring:message code="label.button.previous" />
-				</button>
-				<button type="button" style="width: 100px;"
-					onclick="pager.pageFoward();"
-					<c:if test="${currentPage == total}">disabled="disabled"</c:if>>
-					<spring:message code="label.button.next" />
-				</button>
+			<button type="button" style="width: 100px;"
+				onclick="pager.pageBack();"
+				<c:if test="${currentPage == 1}">disabled="disabled"</c:if>>
+				<spring:message code="label.button.previous" />
+			</button>
+			<button type="button" style="width: 100px;"
+				onclick="pager.pageFoward();"
+				<c:if test="${currentPage == total}">disabled="disabled"</c:if>>
+				<spring:message code="label.button.next" />
+			</button>
 		&nbsp;
 		<c:out value="${form.paging.currentPage}" />
-				<spring:message code="report.pageNumberOf" />
-				<c:out value="${form.paging.totalPages}" />
-		<%-- 	</c:if> --%>
+			<spring:message code="report.pageNumberOf" />
+			<c:out value="${form.paging.totalPages}" />
+			<%-- 	</c:if> --%>
 			<div class='textcontent' style="float: right">
 				<span style="visibility: hidden" id="searchNotFound"><em><%=MessageUtil.getMessage("search.term.notFound")%></em></span>
 				<%=MessageUtil.getContextualMessage("result.sample.id")%>
@@ -783,42 +777,42 @@ function /*void*/ handleEnterEvent(  ){
 			<spring:message code="result.nonconforming.item" />
 			&nbsp;&nbsp;&nbsp;&nbsp;
 			<%
-				if (failedValidationMarks) {
+			if (failedValidationMarks) {
 			%>
 			<img src="./images/validation-rejected.gif" /> =
 			<spring:message code="result.validation.failed" />
 			&nbsp;&nbsp;&nbsp;&nbsp;
 			<%
-				}
+			}
 			%>
 		</div>
 
 	</div>
 
 	<Table style="width: 100%" border="0" cellspacing="0">
-		<c:set var="numCols" value="7"/>
+		<c:set var="numCols" value="7" />
 		<%-- header --%>
 		<tr>
 			<%
-				if (!compactHozSpace) {
+			if (!compactHozSpace) {
 			%>
-			<c:set var="numCols" value="${numCols + 1}"/>
+			<c:set var="numCols" value="${numCols + 1}" />
 			<th style="text-align: left"><%=MessageUtil.getContextualMessage("result.sample.id")%>
 			</th>
 			<c:if test="${not form.singlePatient}">
-				<c:set var="numCols" value="${numCols + 1}"/>
+				<c:set var="numCols" value="${numCols + 1}" />
 				<th style="text-align: left"><spring:message
 						code="result.sample.patient.summary" /></th>
 			</c:if>
 			<%
-				}
+			}
 			%>
 
 			<th style="text-align: left"><spring:message
 					code="result.test.date" /><br /> <%=DateUtil.getDateUserPrompt()%>
 			</th>
 			<c:if test="${form.displayTestMethod}">
-				<c:set var="numCols" value="${numCols + 1}"/>
+				<c:set var="numCols" value="${numCols + 1}" />
 				<th style="padding-right: 10px; text-align: center"><spring:message
 						code="result.method.auto" /></th>
 			</c:if>
@@ -828,30 +822,29 @@ function /*void*/ handleEnterEvent(  ){
 			<th style="padding-right: 10px; text-align: center"><%=MessageUtil.getContextualMessage("result.forceAccept.header")%></th>
 			<th style="text-align: left"><spring:message
 					code="result.result" /></th>
-		    <th style="text-align: left"><spring:message
+			<th style="text-align: left"><spring:message
 					code="result.curresult" text="Current Result" /></th>
 			<%
-				if (useTechnicianName) {
+			if (useTechnicianName) {
 			%>
-			<c:set var="numCols" value="${numCols + 1}"/>
+			<c:set var="numCols" value="${numCols + 1}" />
 			<th style="text-align: left"><spring:message
 					code="result.technician" /> <br /> <%
- 	if (autofillTechBox) {
- %>
-				Autofill:<input type="text" size='10em' onchange="autofill( this )">
+ if (autofillTechBox) {
+ %> Autofill:<input type="text" size='10em' onchange="autofill( this )">
 				<%
-					}
+				}
 				%></th>
 			<%
-				}
+			}
 			%>
 			<%
-				if (useRejected) {
+			if (useRejected) {
 			%>
 			<th style="text-align: center"><spring:message
 					code="result.rejected" />&nbsp;</th>
 			<%
-				}
+			}
 			%>
 			<th style="text-align: left"><spring:message code="result.notes" />
 			</th>
@@ -879,10 +872,8 @@ function /*void*/ handleEnterEvent(  ){
 					value="${testResult.lowerAbnormalRange}" />
 				<c:set var="upperAbnormalBound"
 					value="${testResult.upperAbnormalRange}" />
-				<c:set var="lowerCritical"
-					value="${testResult.lowerCritical}" />	
-				<c:set var="upperCritical"
-					value="${testResult.higherCritical}" />	
+				<c:set var="lowerCritical" value="${testResult.lowerCritical}" />
+				<c:set var="upperCritical" value="${testResult.higherCritical}" />
 				<c:set var="significantDigits"
 					value="${testResult.significantDigits}" />
 				<c:set var="accessionNumber" value="${testResult.accessionNumber}" />
@@ -896,26 +887,24 @@ function /*void*/ handleEnterEvent(  ){
 				</c:if>
 
 				<%
-					if (compactHozSpace) {
+				if (compactHozSpace) {
 				%>
 				<c:if test="${testResult.showSampleDetails}">
 					<tr class='${rowColor}Head ${accessionNumber}'>
 						<td colspan="10" class='InterstitialHead'><%=MessageUtil.getContextualMessage("result.sample.id")%>
-							: &nbsp; <b><c:out value="${testResult.accessionNumber}" /> -
-								<c:out value="${testResult.sequenceNumber}" /></b> <%
- 	if (useInitialCondition) {
- %>
-							&nbsp;&nbsp;&nbsp;&nbsp;<spring:message
+							: &nbsp; <b><c:out value="${testResult.accessionNumber}" />
+								- <c:out value="${testResult.sequenceNumber}" /></b> <%
+ if (useInitialCondition) {
+ %> &nbsp;&nbsp;&nbsp;&nbsp;<spring:message
 								code="sample.entry.sample.condition" />: <b><c:out
 									value="${testResult.initialSampleCondition}" /></b> <%
- 	}
- %>
-							&nbsp;&nbsp;&nbsp;&nbsp;<spring:message
+ }
+ %> &nbsp;&nbsp;&nbsp;&nbsp;<spring:message
 								code="sample.entry.sample.type" />: <b><c:out
 									value="${testResult.sampleType}" /></b> <c:if
 								test="${not form.singlePatient}">
 								<%
-									if (!depersonalize) {
+								if (!depersonalize) {
 								%>
 								<c:if test="${testResult.showSampleDetails}">
 									<br />
@@ -924,15 +913,17 @@ function /*void*/ handleEnterEvent(  ){
 											value="${testResult.patientInfo}" /></b>
 								</c:if>
 								<%
-									}
+								}
 								%>
 							</c:if></td>
 					</tr>
 				</c:if>
 				<%
-					}
+				}
 				%>
-				<tr class='${rowColor} ${(not empty testResult.defaultResultValue) ? "hasDefaultValue" : ""}' id="row_${iter.index}">
+				<tr
+					class='${rowColor} ${(not empty testResult.defaultResultValue) ? "hasDefaultValue" : ""}'
+					id="row_${iter.index}">
 					<form:hidden path="testResult[${iter.index}].isModified"
 						id="modified_${iter.index}" />
 					<form:hidden path="testResult[${iter.index}].analysisId"
@@ -949,8 +940,8 @@ function /*void*/ handleEnterEvent(  ){
 						indexed="true" />
 					<form:hidden path="testResult[${iter.index}].resultType"
 						id="resultType_${iter.index}" />
-					 <form:hidden path="testResult[${iter.index}].testMethod"
-						id="testMethod_${iter.index}" />	 
+					<form:hidden path="testResult[${iter.index}].testMethod"
+						id="testMethod_${iter.index}" />
 					<form:hidden path="testResult[${iter.index}].valid"
 						id="valid_${iter.index}" />
 					<form:hidden path="testResult[${iter.index}].defaultResultValue"
@@ -973,7 +964,7 @@ function /*void*/ handleEnterEvent(  ){
 							value='${iter.index}' />
 					</c:if>
 					<%
-						if (!compactHozSpace) {
+					if (!compactHozSpace) {
 					%>
 					<td class='${accessionNumber}'><c:if
 							test="${testResult.showSampleDetails}">
@@ -988,7 +979,7 @@ function /*void*/ handleEnterEvent(  ){
 							</c:if></td>
 					</c:if>
 					<%
-						}
+					}
 					%>
 					<%-- date cell --%>
 					<td class="ruled"><form:input
@@ -1056,12 +1047,11 @@ function /*void*/ handleEnterEvent(  ){
 
 					<td class="ruled" style='vertical-align: middle'>
 						<%
-							if (failedValidationMarks) {
-						%> <c:if
-							test="${testResult.failedValidation}">
+						if (failedValidationMarks) {
+						%> <c:if test="${testResult.failedValidation}">
 							<img src="./images/validation-rejected.gif" />
 						</c:if> <%
- 	}
+ }
  %> <c:if test="${testResult.nonconforming}">
 							<img src="./images/nonconforming.gif" />
 						</c:if>
@@ -1072,7 +1062,7 @@ function /*void*/ handleEnterEvent(  ){
 							tabindex='-1'
 							onchange='markUpdated(${iter.index}); forceTechApproval(this, ${iter.index});' />
 					</td>
-					
+
 					<%-- result cell --%>
 					<td id="cell_${iter.index}" class="ruled"><c:if
 							test="${testResult.resultType == 'N'}">
@@ -1081,8 +1071,7 @@ function /*void*/ handleEnterEvent(  ){
 							<form:input path="testResult[${iter.index}].resultValue" size="6"
 								id="results_${iter.index}"
 								style="background: ${testResult.valid ? testResult.normal ? '#ffffff' : '#ffffa0' : '#ffa0a0' }"
-								cssClass="resultValue"
-								disabled='${testResult.readOnly}'
+								cssClass="resultValue" disabled='${testResult.readOnly}'
 								onchange="validateResults( this, ${iter.index}, ${lowerBound}, ${upperBound}, ${lowerAbnormalBound}, ${upperAbnormalBound}, 
 								 ${significantDigits}, 'XXXX' );
 								 validateCriticalResults(this, ${lowerCritical},${upperCritical});
@@ -1092,35 +1081,29 @@ function /*void*/ handleEnterEvent(  ){
 					   			 ${(testResult.displayResultAsLog) ? 'updateLogValue(this, ' += iter.index += ');' : ''}
 					   			 updateShadowResult(this, ${iter.index});" />
 							<form:hidden path="testResult[${iter.index}].significantDigits" />
-						</c:if>
-						<c:if test="${testResult.resultType == 'A'}">
+						</c:if> <c:if test="${testResult.resultType == 'A'}">
 							<form:input path="testResult[${iter.index}].resultValue"
 								size="20" disabled='${testResult.readOnly}'
-								id="results_${iter.index}"
-								cssClass="resultValue"
+								id="results_${iter.index}" cssClass="resultValue"
 								style="background: ${testResult.valid ? testResult.normal ? '#ffffff' : '#ffffa0' : '#ffa0a0' }"
 								onchange="markUpdated(${iter.index});
 					   			    ${(testResult.displayResultAsLog) ? 'updateLogValue(this, ' += iter.index += ');' : ''}
 					   				${(noteRequired && not empty testResult.resultValue) ? 'showNote(' += iter.index += ');' : ''}
 					   			 	updateShadowResult(this, ${iter.index});" />
-						</c:if>
-						<c:if test="${testResult.resultType == 'R'}">
+						</c:if> <c:if test="${testResult.resultType == 'R'}">
 							<%-- text results --%>
 							<form:textarea path="testResult[${iter.index}].resultValue"
 								rows="2" disabled='${testResult.readOnly}'
-								id="results_${iter.index}"
-								cssClass="resultValue"
+								id="results_${iter.index}" cssClass="resultValue"
 								style="background: ${testResult.valid ? testResult.normal ? '#ffffff' : '#ffffa0' : '#ffa0a0' }"
 								onkeyup="value = value.substr(0,200);
 						           markUpdated(${iter.index});
 					   			   ${(noteRequired && not (empty testResult.resultValue)) ? 'showNote(' += iter.index += ');' : ''}
 					   			   updateShadowResult(this, ${iter.index}); " />
-						</c:if>
-						<c:if test="${testResult.resultType == 'D'}">
+						</c:if> <c:if test="${testResult.resultType == 'D'}">
 							<%-- dictionary results --%>
 							<form:select path="testResult[${iter.index}].resultValue"
-								id="resultId_${iter.index}"
-								cssClass="resultValue"
+								id="resultId_${iter.index}" cssClass="resultValue"
 								onchange="markUpdated(${iter.index}, ${testResult.userChoiceReflex}, '${testResult.siblingReflexKey}');
 					   		  ${(noteRequired && not (empty testResult.resultValue)) ? 'showNote(' += iter.index += ');' : ''}
 					   		  ${(not (empty testResult.qualifiedDictionaryId)) ? 'showQuantity(this, ' += iter.index += ', ' += testResult.qualifiedDictionaryId += ', \\'D\\');' : ''}
@@ -1136,14 +1119,12 @@ function /*void*/ handleEnterEvent(  ){
 								disabled='${testResult.readOnly}'
 								style="${(not testResult.hasQualifiedResult) ? 'display:none' : ''}"
 								onchange='markUpdated(${iter.index});' />
-						</c:if>
-						<c:if test="${testResult.resultType == 'M'}">
+						</c:if> <c:if test="${testResult.resultType == 'M'}">
 							<%-- multiple results --%>
 							<form:select
 								path="testResult[${iter.index}].multiSelectResultValues"
 								id="resultId_${iter.index}_0" multiple="multiple"
-								cssClass="resultValue"
-								disabled='${testResult.readOnly}'
+								cssClass="resultValue" disabled='${testResult.readOnly}'
 								onchange="markUpdated(${iter.index});
 			        		  ${(noteRequired && not (empty testResult.multiSelectResultValues) && fn:length(testResult.multiSelectResultValues) > 2) ? 'showNewNote(' += iter.index += ');' : ''}
 			        		  ${(not (empty testResult.qualifiedDictionaryId)) ? 'showQuantity(this, ' += iter.index += ', ' += testResult.qualifiedDictionaryId += ', \\'M\\'); ' : ''}
@@ -1159,8 +1140,7 @@ function /*void*/ handleEnterEvent(  ){
 								disabled='${testResult.readOnly}'
 								style="${(not testResult.hasQualifiedResult) ? 'display:none' : ''}"
 								onchange='markUpdated(${iter.index});' />
-						</c:if>
-						<c:if test="${testResult.resultType == 'C'}">
+						</c:if> <c:if test="${testResult.resultType == 'C'}">
 							<%-- cascading multiple results --%>
 							<div id="cascadingMulti_${iter.index}_0"
 								class="cascadingMulti_${iter.index}">
@@ -1168,8 +1148,8 @@ function /*void*/ handleEnterEvent(  ){
 								<form:select
 									path="testResult[${iter.index}].multiSelectResultValues"
 									id="resultId_${iter.index}_0"
-									cssClass="resultValue ${testResult.userChoiceReflex}" multiple="multiple"
-									disabled='${testResult.readOnly}'
+									cssClass="resultValue ${testResult.userChoiceReflex}"
+									multiple="multiple" disabled='${testResult.readOnly}'
 									onchange="markUpdated(${iter.index});
 			           			 ${(noteRequired && not (empty testResult.multiSelectResultValues) && fn:length(testResult.multiSelectResultValues) > 2) ? 'showNewNote(' += iter.index += '});' : ''}
 			        		     ${(not (empty testResult.qualifiedDictionaryId)) ? 'showQuantity(this, ' += iter.index += ', ' += testResult.qualifiedDictionaryId += ', ' += '\\'M\\');' : '' }
@@ -1195,49 +1175,39 @@ function /*void*/ handleEnterEvent(  ){
 									id="multiresultId_${iter.index}" cssClass="multiSelectValues" />
 								<form:input
 									path="testResult[${iter.index}].qualifiedResultValue"
-									id="qualifiedDict_${iter.index}"
-									disabled='true'
+									id="qualifiedDict_${iter.index}" disabled='true'
 									style="${(not testResult.hasQualifiedResult) ? 'display:none' : ''}"
 									onchange='markUpdated(${iter.index});' />
 
 							</div>
-						</c:if> 
-						<c:out value="${testResult.unitsOfMeasure}" />
-						<c:if test="${testResult.displayResultAsLog}">
+						</c:if> <c:out value="${testResult.unitsOfMeasure}" /> <c:if
+							test="${testResult.displayResultAsLog}">
 							<br />
 							<input type='text' id="log_${iter.index}" disabled='disabled'
-								style="color: black" value="${testResult.resultValueLog}" size='6' /> log
-					</c:if> </td>
-					
+								style="color: black" value="${testResult.resultValueLog}"
+								size='6' /> log
+					</c:if></td>
+
 					<%-- current result cell --%>
 					<td id="currentresultcell_${iter.index}" class="ruled"><c:if
 							test="${testResult.resultType == 'N'}">
 							<form:input path="testResult[${iter.index}].resultValue" size="6"
 								id="curresults_${iter.index}"
 								style="background: ${testResult.valid ? testResult.normal ? '#ffffff' : '#ffffa0' : '#ffa0a0' }"
-								disabled='true'
-								 />
-						</c:if>
-						<c:if test="${testResult.resultType == 'A'}">
+								disabled='true' />
+						</c:if> <c:if test="${testResult.resultType == 'A'}">
 							<form:input path="testResult[${iter.index}].resultValue"
-								size="20" disabled='true'
-								id="curresults_${iter.index}"
-								style="background: ${testResult.valid ? testResult.normal ? '#ffffff' : '#ffffa0' : '#ffa0a0' }"
-								 />
-						</c:if>
-						<c:if test="${testResult.resultType == 'R'}">
+								size="20" disabled='true' id="curresults_${iter.index}"
+								style="background: ${testResult.valid ? testResult.normal ? '#ffffff' : '#ffffa0' : '#ffa0a0' }" />
+						</c:if> <c:if test="${testResult.resultType == 'R'}">
 							<%-- text results --%>
 							<form:textarea path="testResult[${iter.index}].resultValue"
-								rows="2" disabled='true'
-								id="curresults_${iter.index}"
-								style="background: ${testResult.valid ? testResult.normal ? '#ffffff' : '#ffffa0' : '#ffa0a0' }"
-								/>
-						</c:if>
-						<c:if test="${testResult.resultType == 'D'}">
+								rows="2" disabled='true' id="curresults_${iter.index}"
+								style="background: ${testResult.valid ? testResult.normal ? '#ffffff' : '#ffffa0' : '#ffa0a0' }" />
+						</c:if> <c:if test="${testResult.resultType == 'D'}">
 							<%-- dictionary results --%>
 							<form:select path="testResult[${iter.index}].resultValue"
-								id="curresultId_${iter.index}"
-								cssClass="curresult"
+								id="curresultId_${iter.index}" cssClass="curresult"
 								disabled='true'>
 								<option value="0"></option>
 								<form:options items="${testResult.dictionaryResults}"
@@ -1245,18 +1215,14 @@ function /*void*/ handleEnterEvent(  ){
 							</form:select>
 							<br />
 							<form:input path='testResult[${iter.index}].qualifiedResultValue'
-								id="qualifiedDict_${iter.index}"
-								disabled='true'
+								id="qualifiedDict_${iter.index}" disabled='true'
 								style="${(not testResult.hasQualifiedResult) ? 'display:none' : ''}" />
-						</c:if>
-						<c:if test="${testResult.resultType == 'M'}">
+						</c:if> <c:if test="${testResult.resultType == 'M'}">
 							<%-- multiple results --%>
 							<form:select
 								path="testResult[${iter.index}].multiSelectResultValues"
-								cssClass="curresult"
-								id="curresultId_${iter.index}_0" multiple="multiple"
-								disabled='true'
-								>
+								cssClass="curresult" id="curresultId_${iter.index}_0"
+								multiple="multiple" disabled='true'>
 								<form:options items="${testResult.dictionaryResults}"
 									itemValue="id" itemLabel="value" />
 							</form:select>
@@ -1264,11 +1230,9 @@ function /*void*/ handleEnterEvent(  ){
 								path="testResult[${iter.index}].multiSelectResultValues"
 								id="multiresultId_${iter.index}" cssClass="multiSelectValues" />
 							<form:input path='testResult[${iter.index}].qualifiedResultValue'
-								id="qualifiedDict_${iter.index}"
-								disabled='true'
+								id="qualifiedDict_${iter.index}" disabled='true'
 								style="${(not testResult.hasQualifiedResult) ? 'display:none' : ''}" />
-						</c:if>
-						<c:if test="${testResult.resultType == 'C'}">
+						</c:if> <c:if test="${testResult.resultType == 'C'}">
 							<%-- cascading multiple results --%>
 							<div id="cascadingMulti_${iter.index}_0"
 								class="cascadingMulti_${iter.index}">
@@ -1276,9 +1240,8 @@ function /*void*/ handleEnterEvent(  ){
 								<form:select
 									path="testResult[${iter.index}].multiSelectResultValues"
 									id="curresultId_${iter.index}_0"
-									cssClass="${testResult.userChoiceReflex} curresult" multiple="multiple"
-									disabled='true'
-									>
+									cssClass="${testResult.userChoiceReflex} curresult"
+									multiple="multiple" disabled='true'>
 									<form:options items="${testResult.dictionaryResults}"
 										itemValue="id" itemLabel="value" />
 								</form:select>
@@ -1287,20 +1250,19 @@ function /*void*/ handleEnterEvent(  ){
 									id="multiresultId_${iter.index}" cssClass="multiSelectValues" />
 								<form:input
 									path="testResult[${iter.index}].qualifiedResultValue"
-									id="qualifiedDict_${iter.index}"
-									disabled='true'
+									id="qualifiedDict_${iter.index}" disabled='true'
 									style="${(not testResult.hasQualifiedResult) ? 'display:none' : ''}" />
 
 							</div>
-						</c:if>
-						<c:out value="${testResult.unitsOfMeasure}" />
-						 <c:if test="${testResult.displayResultAsLog}">
+						</c:if> <c:out value="${testResult.unitsOfMeasure}" /> <c:if
+							test="${testResult.displayResultAsLog}">
 							<br />
 							<input type='text' id="log_${iter.index}" disabled='disabled'
-								style="color: black" value="${testResult.resultValueLog}" size='6' /> log
-					</c:if> </td>
+								style="color: black" value="${testResult.resultValueLog}"
+								size='6' /> log
+					</c:if></td>
 					<%
-						if (useTechnicianName) {
+					if (useTechnicianName) {
 					%>
 					<td style="text-align: left" class="ruled"><form:input
 							path="testResult[${iter.index}].technician"
@@ -1308,30 +1270,28 @@ function /*void*/ handleEnterEvent(  ){
 							disabled='${testResult.readOnly}' style="margin: 1px" size="10em"
 							maxlength="18" onchange='markUpdated(${iter.index});' /></td>
 					<%
-						}
+					}
 					%>
 					<%
-						if (useRejected) {
+					if (useRejected) {
 					%>
 					<td class="ruled" style='text-align: center'><form:hidden
 							path="testResult[${iter.index}].shadowRejected"
 							id="shadowRejected_${iter.index}" /> <input type="hidden"
 						id="isRejected_${iter.index}" value="${testResult.rejected}" /> <spring:message
-							code="result.delete.confirm" var="deleteMsg" /> 
-							<form:checkbox
+							code="result.delete.confirm" var="deleteMsg" /> <form:checkbox
 							path="testResult[${iter.index}].rejected"
 							id="rejected_${iter.index}" tabindex='-1'
 							onchange="addRemoveRejectedIndex(${iter.index}); markUpdated(${iter.index}); showHideRejectionReasons(${iter.index}, '${deleteMsg}' );" />
 					</td>
 					<%
-						}
+					}
 					%>
 					<td style="text-align: left" class="ruled"><img
 						src="./images/note-add.gif"
 						onclick='showHideNotes(${iter.index});'
-						id="showHideButton_${iter.index}" /> <input
-						type="hidden" name="hideShowFlag" value="hidden"
-						id="hideShow_${iter.index}"></td>
+						id="showHideButton_${iter.index}" /> <input type="hidden"
+						name="hideShowFlag" value="hidden" id="hideShow_${iter.index}"></td>
 				</tr>
 				<tr id="rejectReasonRow_${iter.index}" class='${rowColor}'
 					style="${(testResult.considerRejectReason != 'true') ? 'display: none;' : ''}">
@@ -1373,26 +1333,24 @@ function /*void*/ handleEnterEvent(  ){
 				<%
 				if (ableToRefer) {
 				%>
-				<tr >
+				<tr>
 					<td><form:checkbox id="referTest_${iter.index}"
 							path="testResult[${iter.index}].refer"
-							onchange="toggleReferral(${iter.index});markUpdated(${iter.index});" /> <spring:message
-							code="refertest" text="Refer test to a reference lab" /></td>
-							 <td width="50%"><%=MessageUtil.getMessage("workplan.method")%>&nbsp;
+							onchange="toggleReferral(${iter.index});markUpdated(${iter.index});" />
+						<spring:message code="refertest"
+							text="Refer test to a reference lab" /></td>
+					<td width="50%"><%=MessageUtil.getMessage("workplan.method")%>&nbsp;
 
-					    		<spring:message code="error.site.invalid" var="invalidSite"/>
-					    	    <spring:message code="sample.entry.project.siteMaxMsg" var="siteMaxMessage"/>
-								<form:select id="testMethod_${iter.index}"
-										class="autocomplete-combobox"
-								         path="testResult[${iter.index}].testMethod" 
-                    					 capitalize="true"
-					                     invalidlabid='${invalidSite}'
-					                     maxrepmsg='${siteMaxMessage}'
-					       				 clearNonMatching="<%=restrictNewReferringMethodEntries%>">
-										<option value=""></option>
-										<form:options items="${form.methods}" itemLabel="value"
-											itemValue="id" />
-									</form:select></td>		 
+						<spring:message code="error.site.invalid" var="invalidSite" /> <spring:message
+							code="sample.entry.project.siteMaxMsg" var="siteMaxMessage" /> <form:select
+							id="testMethod_${iter.index}" class="autocomplete-combobox"
+							path="testResult[${iter.index}].testMethod" capitalize="true"
+							invalidlabid='${invalidSite}' maxrepmsg='${siteMaxMessage}'
+							clearNonMatching="<%=restrictNewReferringMethodEntries%>">
+							<option value=""></option>
+							<form:options items="${form.methods}" itemLabel="value"
+								itemValue="id" />
+						</form:select></td>
 				</tr>
 				<tr>
 					<td colspan="${numCols}">
@@ -1403,10 +1361,10 @@ function /*void*/ handleEnterEvent(  ){
 					</td>
 				</tr>
 				<%
-					}
+				}
 				%>
 			</c:if>
-			
+
 		</c:forEach>
 	</Table>
 	<c:if test="${not (form.paging.totalPages == 0)}">
@@ -1414,22 +1372,22 @@ function /*void*/ handleEnterEvent(  ){
 		1 - ${pageSize} of ${analysisCount}
 	</c:if>
 		<%--  <c:if test="${not empty analysisCount}">--%>
-			<c:set var="total" value="${form.paging.totalPages}" />
-			<c:set var="currentPage" value="${form.paging.currentPage}" />
-			<button type="button" style="width: 100px;"
-				onclick="pager.pageBack();"
-				<c:if test="${currentPage == 1}">disabled="disabled"</c:if>>
-				<spring:message code="label.button.previous" />
-			</button>
-			<button type="button" style="width: 100px;"
-				onclick="pager.pageFoward();"
-				<c:if test="${currentPage == total}">disabled="disabled"</c:if>>
-				<spring:message code="label.button.next" />
-			</button>
+		<c:set var="total" value="${form.paging.totalPages}" />
+		<c:set var="currentPage" value="${form.paging.currentPage}" />
+		<button type="button" style="width: 100px;"
+			onclick="pager.pageBack();"
+			<c:if test="${currentPage == 1}">disabled="disabled"</c:if>>
+			<spring:message code="label.button.previous" />
+		</button>
+		<button type="button" style="width: 100px;"
+			onclick="pager.pageFoward();"
+			<c:if test="${currentPage == total}">disabled="disabled"</c:if>>
+			<spring:message code="label.button.next" />
+		</button>
 	&nbsp;
-	<c:out value="${form.paging.currentPage}" /> 
-	<spring:message code="report.pageNumberOf" />
-	<c:out value="${form.paging.totalPages}" />
+	<c:out value="${form.paging.currentPage}" />
+		<spring:message code="report.pageNumberOf" />
+		<c:out value="${form.paging.totalPages}" />
 		<%--</c:if>--%>
 	</c:if>
 </c:if>

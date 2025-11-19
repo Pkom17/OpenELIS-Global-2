@@ -119,8 +119,9 @@ public class TBColumnBuilder extends RoutineColumnBuilder {
 				+ " join clinlims.sample_item AS si on si.id = a.sampitem_id \n"
 				+ " join clinlims.sample AS s on s.id = si.samp_id  \n"
 				+ " left join clinlims.result AS r on a.id = r.analysis_id  \n"
-				+ " left join sample_projects sp on si.samp_id = sp.samp_id \n"
-				+ "\n WHERE sp.id IS NULL AND ts.name = ''TB'' AND s.entered_date >= date(''"
+				//+ " left join sample_projects sp on si.samp_id = sp.samp_id \n"
+				//+ "\n WHERE sp.id IS NULL AND ts.name = ''TB'' AND s.entered_date >= date(''"
+				+ "\n WHERE ts.name = ''TB'' AND s.entered_date >= date(''"
 				+ formatDateForDatabaseSql(lowDate) + "'')  AND s.entered_date <= date(''"
 				+ formatDateForDatabaseSql(highDate) + " '') " + "\n "
 				// sql injection safe as user cannot overwrite validStatusId in database

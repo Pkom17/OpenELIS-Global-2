@@ -14,6 +14,7 @@ import org.apache.commons.validator.GenericValidator;
 import org.openelisglobal.analysis.service.AnalysisServiceImpl;
 import org.openelisglobal.analysis.valueholder.Analysis;
 import org.openelisglobal.common.exception.LIMSDuplicateRecordException;
+import org.openelisglobal.common.log.LogEvent;
 import org.openelisglobal.common.service.BaseObjectServiceImpl;
 import org.openelisglobal.common.services.QAService;
 import org.openelisglobal.common.util.ConfigurationProperties;
@@ -418,7 +419,8 @@ public class NoteServiceImpl extends BaseObjectServiceImpl<Note, String> impleme
     @Override
     public String insert(Note note) {
         if (getBaseObjectDAO().duplicateNoteExists(note)) {
-            throw new LIMSDuplicateRecordException("Duplicate record exists for " + note.getNoteType());
+        	LogEvent.logError(this.getClass().getName(), "insert", "Duplicate record exists for " + note.getNoteType());
+            //throw new LIMSDuplicateRecordException("Duplicate record exists for " + note.getNoteType());
         }
         return super.insert(note);
     }
@@ -426,7 +428,8 @@ public class NoteServiceImpl extends BaseObjectServiceImpl<Note, String> impleme
     @Override
     public Note save(Note note) {
         if (getBaseObjectDAO().duplicateNoteExists(note)) {
-            throw new LIMSDuplicateRecordException("Duplicate record exists for " + note.getNoteType());
+        	LogEvent.logError(this.getClass().getName(), "save", "Duplicate record exists for " + note.getNoteType());
+            //throw new LIMSDuplicateRecordException("Duplicate record exists for " + note.getNoteType());
         }
         return super.save(note);
     }
@@ -434,7 +437,8 @@ public class NoteServiceImpl extends BaseObjectServiceImpl<Note, String> impleme
     @Override
     public Note update(Note note) {
         if (getBaseObjectDAO().duplicateNoteExists(note)) {
-            throw new LIMSDuplicateRecordException("Duplicate record exists for " + note.getNoteType());
+        	LogEvent.logError(this.getClass().getName(), "update", "Duplicate record exists for " + note.getNoteType());
+            //throw new LIMSDuplicateRecordException("Duplicate record exists for " + note.getNoteType());
         }
         return super.update(note);
     }

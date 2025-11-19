@@ -301,12 +301,16 @@ public class ResultValidationController extends BaseResultValidationController {
 		try {
 			resultValidationService.persistdata(deletableList, analysisUpdateList, resultUpdateList, resultItemList,
 					sampleUpdateList, noteUpdateList, resultSaveService, updaters, getSysUserId(request));
+
+/*
 			try {
 				fhirTransformService.transformPersistResultValidationFhirObjects(deletableList, analysisUpdateList,
 						resultUpdateList, resultItemList, sampleUpdateList, noteUpdateList);
 			} catch (FhirLocalPersistingException e) {
 				LogEvent.logError(e);
 			}
+*/
+
 		} catch (LIMSRuntimeException e) {
 			LogEvent.logErrorStack(e);
 			throw e;
@@ -429,17 +433,16 @@ public class ResultValidationController extends BaseResultValidationController {
 			}
 		}
 	}
-	
+
 	private void updateElectronicOrderStatus(Analysis analysis, ExternalOrderStatus status) {
 		try {
-			Sample sample =analysis.getSampleItem().getSample();
+			Sample sample = analysis.getSampleItem().getSample();
 			if (ObjectUtils.isNotEmpty(sample)) {
 				String externalOrderId = sample.getReferringId();
 				List<ElectronicOrder> eOrders = electronicOrderService.getElectronicOrdersByExternalId(externalOrderId);
 				if (eOrders.size() > 0) {
 					ElectronicOrder eOrder = eOrders.get(eOrders.size() - 1);
-					eOrder.setStatusId(
-							SpringContext.getBean(IStatusService.class).getStatusID(status));
+					eOrder.setStatusId(SpringContext.getBean(IStatusService.class).getStatusID(status));
 					eOrder.setSyncFlag(0);
 					electronicOrderService.update(eOrder);
 				}

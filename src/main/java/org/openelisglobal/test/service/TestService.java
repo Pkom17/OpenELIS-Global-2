@@ -140,5 +140,9 @@ public interface TestService extends BaseObjectService<Test, String> {
     List<Map<String,Object>> getTbGXTestCountByCategory(Date startDate, Date endDate) throws LIMSRuntimeException;
     
     List<Map<String,Object>> getTbMicroscopyTestCountByResult(Date startDate, Date endDate) throws LIMSRuntimeException;
+    
+    Integer getReceivedTbPresumedMicroscopyTestCount(Date startDate, Date endDate) throws LIMSRuntimeException;
+    
+    Integer getPositiveTbMicroscopyTestCount(Date startDate, Date endDate) throws LIMSRuntimeException;
 
 }
