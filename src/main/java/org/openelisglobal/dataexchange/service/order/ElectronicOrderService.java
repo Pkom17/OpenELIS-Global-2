@@ -7,6 +7,7 @@ import java.util.List;
 import org.openelisglobal.common.service.BaseObjectService;
 import org.openelisglobal.common.services.StatusService.ExternalOrderStatus;
 import org.openelisglobal.dataexchange.order.form.ElectronicOrderViewForm;
+import org.openelisglobal.dataexchange.order.valueholder.VlOrderDisplayItem;
 import org.openelisglobal.dataexchange.order.valueholder.ElectronicOrder;
 import org.openelisglobal.dataexchange.order.valueholder.ElectronicOrder.SortOrder;
 
@@ -35,5 +36,11 @@ public interface ElectronicOrderService extends BaseObjectService<ElectronicOrde
 	List<ElectronicOrder> searchForStudyElectronicOrders(ElectronicOrderViewForm form);
 
 	String getEnteredElectronicOrderByPatient(String patientIdentifier);
+
+	/**
+	 * Recherche optimisée CV : LEFT JOIN vl_eorder_request_flat ← electronic_order.
+	 * Retourne directement des VlOrderDisplayItem sans appel FHIR.
+	 */
+	List<VlOrderDisplayItem> searchCvOrders(ElectronicOrderViewForm form);
 
 }

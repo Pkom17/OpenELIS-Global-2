@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.openelisglobal.common.dao.BaseDAO;
 import org.openelisglobal.common.exception.LIMSRuntimeException;
+import org.openelisglobal.dataexchange.order.valueholder.VlOrderDisplayItem;
 import org.openelisglobal.dataexchange.order.valueholder.ElectronicOrder;
 import org.openelisglobal.dataexchange.order.valueholder.ElectronicOrder.SortOrder;
 
@@ -55,5 +56,20 @@ public interface ElectronicOrderDAO extends BaseDAO<ElectronicOrder, String> {
             String patientValue, SortOrder order);
     
     public ElectronicOrder getLastEnteredByPatientIdentifier(String patientIdentifier);
-    
+
+    /**
+     * Recherche des demandes CV en LEFT JOIN vl_eorder_request_flat ← electronic_order.
+     * vl_eorder_request_flat est la source prioritaire ; electronic_order complète
+     * avec le statut labo (statusId), la priorité et l'id de rejet (qaEventId).
+     *
+     * @param searchValue  identifiant libre (request_uuid, labno, patient_code, patient_subject_number)
+     * @param startTimestamp  borne début sur authored_on / order_timestamp (null = sans limite)
+     * @param endTimestamp    borne fin (null = sans limite)
+     * @param statusId        filtrer par statusId OpenELIS (null = tous)
+     */
+    List<VlOrderDisplayItem> searchCvOrders(String searchValue,
+            java.sql.Timestamp startTimestamp,
+            java.sql.Timestamp endTimestamp,
+            String statusId);
+
 }

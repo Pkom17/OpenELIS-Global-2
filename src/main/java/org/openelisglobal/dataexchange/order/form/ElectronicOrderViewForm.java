@@ -5,6 +5,7 @@ import java.util.List;
 import org.openelisglobal.common.form.BaseForm;
 import org.openelisglobal.common.util.IdValuePair;
 import org.openelisglobal.dataexchange.order.valueholder.ElectronicOrderDisplayItem;
+import org.openelisglobal.dataexchange.order.valueholder.VlOrderDisplayItem;
 import org.openelisglobal.organization.valueholder.Organization;
 
 public class ElectronicOrderViewForm extends BaseForm {
@@ -36,6 +37,9 @@ public class ElectronicOrderViewForm extends BaseForm {
     private String statusId;
 
     private List<ElectronicOrderDisplayItem> eOrders;
+
+    /** Résultats optimisés CV — LEFT JOIN vl_eorder_request_flat ← electronic_order */
+    private List<VlOrderDisplayItem> cvOrders;
 
     private List<IdValuePair> referralFacilitySelectionList;
 
@@ -217,5 +221,13 @@ public class ElectronicOrderViewForm extends BaseForm {
 
     public void setQaEventId(String qaEventId) {
         this.qaEventId = qaEventId;
+    }
+
+    public List<VlOrderDisplayItem> getCvOrders() {
+        return cvOrders;
+    }
+
+    public void setCvOrders(List<VlOrderDisplayItem> cvOrders) {
+        this.cvOrders = cvOrders;
     }
 }

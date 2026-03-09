@@ -19,10 +19,8 @@ package org.openelisglobal.scheduler.independentthreads;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.validator.GenericValidator;
 import org.openelisglobal.common.exception.LIMSRuntimeException;
 import org.openelisglobal.common.log.LogEvent;
@@ -45,10 +43,11 @@ import org.openelisglobal.reports.valueholder.DocumentType;
 import org.openelisglobal.spring.util.SpringContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+
 
 @Component
 public class ResultExporter {
@@ -73,7 +72,7 @@ public class ResultExporter {
         resultReportTypeId = reportQueueTypeService.getReportQueueTypeByName("Results").getId();
     }
 
-    @Scheduled(fixedRateString = "#{resultsResendTime}")
+    //@Scheduled(fixedRateString = "#{resultsResendTime}")
     private void exportResults() {
         if (shouldReportResults()) {
             List<ReportExternalExport> reportList = reportExternalExportService

@@ -85,8 +85,8 @@ public class FhirApiWorkFlowServiceImpl implements FhirApiWorkflowService {
 	@Value("${org.openelisglobal.remote.source.identifier:}#{T(java.util.Collections).emptyList()}")
 	private List<String> remoteStoreIdentifier;
 
-	@Scheduled(initialDelay = 60 * 1000, fixedDelay = 60 * 1000)
-	@Async
+	//@Scheduled(initialDelay = 60 * 1000, fixedDelay = 60 * 1000)
+	//@Async
 	@Override
 	public void pollForRemoteTasks() {
 		try {

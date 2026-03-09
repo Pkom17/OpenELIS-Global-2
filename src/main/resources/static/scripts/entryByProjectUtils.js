@@ -153,52 +153,72 @@ function validateReceivedAndCollectionDate(receivedDateFieldId, interviewDateFie
 	var interviewDateField = document.getElementById(interviewDateFieldId);
 	var receivedDateField = document.getElementById(receivedDateFieldId);
 
-	// Function to parse a date string in dd/mm/yyyy format to a Date object
-	function parseDate(dateStr) {
-		var parts = dateStr.split("/");
-		if (parts.length !== 3) {
-			return null; // Invalid format
+	if (!interviewDateField || !receivedDateField) {
+		return true; // rien à valider si éléments manquants
+	}
+
+	var sInterview = (interviewDateField.value || "").trim();
+	var sReceived = (receivedDateField.value || "").trim();
+
+	// si l'un des champs est vide, laisser la validation "required" gérer ça ailleurs
+	if (sInterview === "" || sReceived === "") {
+		interviewDateField.classList.remove("error");
+		receivedDateField.classList.remove("error");
+		return true;
+	}
+
+	// parser dd/mm/yyyy strictement et vérifier la cohérence (évite 31/02 -> mois suivant)
+	function parseDateStrict(dateStr) {
+		var m = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+		if (!m) return null;
+		var day = parseInt(m[1], 10);
+		var month = parseInt(m[2], 10) - 1;
+		var year = parseInt(m[3], 10);
+		var dt = new Date(year, month, day);
+		if (dt.getFullYear() !== year || dt.getMonth() !== month || dt.getDate() !== day) {
+			return null;
 		}
-		var day = parseInt(parts[0], 10);
-		var month = parseInt(parts[1], 10) - 1;
-		var year = parseInt(parts[2], 10);
-		return new Date(year, month, day);
+		return dt;
 	}
 
-	// Convert the date strings to Date objects
-	var interviewDateObj = parseDate(interviewDateField.value);
-	var receivedDateObj = parseDate(receivedDateField.value);
+	var interviewDateObj = parseDateStrict(sInterview);
+	var receivedDateObj = parseDateStrict(sReceived);
 
-	if (!interviewDateObj || isNaN(interviewDateObj.getTime())) {
+	if (!interviewDateObj) {
 		interviewDateField.classList.add("error");
 		return false;
-	}
-	else {
+	} else {
 		interviewDateField.classList.remove("error");
 	}
-	if (!receivedDateObj || isNaN(receivedDateObj.getTime())) {
+
+	if (!receivedDateObj) {
+		receivedDateField.classList.add("error");
+		return false;
+	} else {
+		receivedDateField.classList.remove("error");
+	}
+
+	// receivedDate ne doit pas être avant interviewDate
+	if (receivedDateObj < interviewDateObj) {
+		interviewDateField.classList.add("error");
+		receivedDateField.classList.add("error");
+		return false;
+	}
+
+	// receivedDate ne doit pas dépasser 1 mois après interviewDate
+	var oneMonthLater = new Date(interviewDateObj.getFullYear(), interviewDateObj.getMonth() + 1, interviewDateObj.getDate());
+	if (receivedDateObj > oneMonthLater) {
+		interviewDateField.classList.add("error");
 		receivedDateField.classList.add("error");
 		return false;
 	}
-	else {
-		receivedDateField.classList.remove("error");
-	}
-	
-	// Check if receivedDate is not more than 1 month after interviewDate
-	const interviewDateoneMonthLater = new Date(interviewDateObj);
-	interviewDateoneMonthLater.setMonth(interviewDateoneMonthLater.getMonth() + 1);
 
-	if (receivedDateObj > interviewDateoneMonthLater) {
-		interviewDateField.classList.add("error");
-		receivedDateField.classList.add("error");
-	    return false;
-	} 
-	else {
-		interviewDateField.classList.remove("error");
-		receivedDateField.classList.remove("error");
-	}
+	// tout est OK
+	interviewDateField.classList.remove("error");
+	receivedDateField.classList.remove("error");
 	return true;
 }
+
 
 
 function  /*void*/ savePage() {
@@ -1000,14 +1020,14 @@ function BaseProjectChecker() {
 			if (selectedValue === 'F') {
 				$(this.idPre + "vlPregnancyRow").show();
 				$(this.idPre + "vlSuckleRow").show();
-				fieldValidator.addRequiredField(this.idPre +"vlPregnancy");
-				fieldValidator.addRequiredField(this.idPre +"vlSuckle");
+				fieldValidator.addRequiredField(this.idPre + "vlPregnancy");
+				fieldValidator.addRequiredField(this.idPre + "vlSuckle");
 				this.checkVlPregnancy(false);
 				this.checkVlSuckle(false);
 			}
 			else {
-				fieldValidator.removeRequiredField(this.idPre +"vlPregnancy");
-				fieldValidator.removeRequiredField(this.idPre +"vlSuckle");
+				fieldValidator.removeRequiredField(this.idPre + "vlPregnancy");
+				fieldValidator.removeRequiredField(this.idPre + "vlSuckle");
 				$(this.idPre + "vlPregnancyRow").hide();
 				$(this.idPre + "vlSuckleRow").hide();
 				$(this.idPre + "vlPregnancy").clear();
@@ -1449,9 +1469,32 @@ function searchForEOrder(patientField, message) {
 			return false;
 		}
 	}
-	if (patientField.value) {
-		patientCode = encodeURIComponent(patientField.value.trim());
-		fetch('rest_eorder/external_id?patientCode=' + patientCode)
+
+	// Déterminer le code patient et la date de prélèvement depuis les champs VL
+	var patientCode = '';
+	var collectionDate = '';
+	var siteSubjectField = document.getElementById('vl.siteSubjectNumber');
+	var subjectField = document.getElementById('vl.subjectNumber');
+	var interviewDateField = document.getElementById('vl.interviewDate');
+
+	if (siteSubjectField && siteSubjectField.value.trim()) {
+		patientCode = siteSubjectField.value.trim();
+	} else if (subjectField && subjectField.value.trim()) {
+		patientCode = subjectField.value.trim();
+	} else if (patientField && patientField.value.trim()) {
+		patientCode = patientField.value.trim();
+	}
+
+	if (interviewDateField && interviewDateField.value.trim()) {
+		collectionDate = interviewDateField.value.trim();
+	}
+
+	// Ne chercher que si le code patient ET la date de prélèvement sont remplis
+	if (patientCode && collectionDate) {
+		var ctxPath = '/' + window.location.pathname.split('/')[1];
+		var url = ctxPath + '/rest_eorder/external_id?patientCode=' + encodeURIComponent(patientCode)
+			+ '&collectionDate=' + encodeURIComponent(collectionDate);
+		fetch(url)
 			.then(response => {
 				if (response.ok) {
 					const contentType = response.headers.get('content-type');
@@ -1472,7 +1515,6 @@ function searchForEOrder(patientField, message) {
 					var newUrl = new URL(window.location.href);
 					newUrl.searchParams.set('ID', externalId);
 					window.location.href = newUrl.toString();
-
 				}
 			}).catch(error => {
 				console.error('There was a problem with the fetch operation:', error);

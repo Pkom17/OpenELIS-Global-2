@@ -275,10 +275,10 @@ jQuery(document).ready( function() {
 <br>
 <hr>
 
-<c:if test="${empty form.eOrders && form.searchFinished}">
+<c:if test="${empty form.cvOrders && form.searchFinished}">
     <h2><spring:message code="referral.noreferralDisplayItem"/></h2>
 </c:if>
-<c:if test="${not empty form.eOrders}"> 
+<c:if test="${not empty form.cvOrders}">
 <spring:message code="eorder.search.result.title"/>
 <br>
 <table>
@@ -288,7 +288,7 @@ jQuery(document).ready( function() {
 </td>
 </tr>
 </table>
-<table id="eOrderTable"  class='alt-color-table' style="width:100%">
+<table id="eOrderTable" class='alt-color-table' style="width:100%">
 <thead>
 <tr>
     <th class='split-content'>
@@ -302,10 +302,6 @@ jQuery(document).ready( function() {
     <th class='split-content'>
     	<spring:message code="study.eorder.patient.code"/>
     	<span class="fa" onclick='sort(2)'><i class="fas fa-sort"></i></span>
-    </th>
-        <th class='split-content'>
-    	<spring:message code="study.eorder.patient.upid"/>
-    	<span class="fa" onclick='sort(3)'><i class="fas fa-sort"></i></span>
     </th>
     <th class='split-content'>
     	<spring:message code="study.eorder.patient.gender"/>
@@ -336,10 +332,6 @@ jQuery(document).ready( function() {
     	<span class="fa" onclick='sort(10)'><i class="fas fa-sort"></i></span>
     </th>
     <th class='split-content'>
-    	<spring:message code="study.eorder.request.test_name"/>
-    	<span class="fa" onclick='sort(11)'><i class="fas fa-sort"></i></span>
-    </th>
-    <th class='split-content'>
     	<spring:message code="study.eorder.lab_number"/>
     	<span class="fa" onclick='sort(11)'><i class="fas fa-sort"></i></span>
     </th>
@@ -349,22 +341,19 @@ jQuery(document).ready( function() {
 </tr>
 </thead>
 <tbody id="eOrderTableBody">
-	<c:forEach items="${form.eOrders}" var="eOrder" varStatus="iter">
-		<c:set var="entered" value="${not empty eOrder.labNumber}"/>
+	<c:forEach items="${form.cvOrders}" var="eOrder" varStatus="iter">
+		<c:set var="entered" value="${not empty eOrder.labno}"/>
 		<c:set var="rejected" value="${not empty eOrder.qaEventId}"/>
-		<c:set var="cancelled" value="${eOrder.status=='Cancelled'}"/>
-		<tr id='eOrderRow_${iter.index}'> 
+		<c:set var="cancelled" value="${eOrder.localStatus=='CANCELLED' or eOrder.status=='Cancelled'}"/>
+		<tr id='eOrderRow_${iter.index}'>
 	    <td>
 	       <c:out value="${iter.index + 1}"/>
 	    </td>
 	    <td>
-	       <c:out value="${eOrder.requestingFacility}"/>
+	       <c:out value="${eOrder.requestingSiteName}"/>
 	    </td>
 	    <td>
-	       <c:out value="${eOrder.patientNationalId}"/>
-	    </td>
-	    <td>
-	       <c:out value="${eOrder.patientUpid}"/>
+	       <c:out value="${eOrder.patientCode}"/>
 	    </td>
 	    <td>
 	       <c:out value="${eOrder.gender}"/>
@@ -388,10 +377,7 @@ jQuery(document).ready( function() {
 	       <c:out value="${eOrder.status}"/>
 	    </td>
 	    <td>
-	       <c:out value="${eOrder.testName}"/>
-	    </td>
-	    <td>
-	       <c:out value="${eOrder.labNumber}"/>
+	       <c:out value="${eOrder.labno}"/>
 	    </td>
     	<td>
 		    <button type="button" id="editButton_${iter.index}" onclick="editOrder('${iter.index}')" ${(entered || rejected || cancelled) ? 'disabled="disabled"' : '' }>
@@ -399,13 +385,12 @@ jQuery(document).ready( function() {
 		    </button>
 	    </td>
 	    <td>
-	    	<form:hidden id="externalOrderId_${iter.index}" path="eOrders[${iter.index}].externalOrderId" htmlEscape="true" />
+	    	<input type="hidden" id="externalOrderId_${iter.index}" value="${eOrder.requestUuid}" />
 		    <button type="button" id="rejectButton_${iter.index}" onclick="rejectOrder('${iter.index}')" ${(entered || rejected || cancelled) ? 'disabled="disabled"' : '' }>
 		    <spring:message code="study.eorder.action.reject"/>
 		    </button>
 	    </td>
 	    <td>
-	    	<form:hidden id="externalOrderId_${iter.index}" path="eOrders[${iter.index}].externalOrderId" htmlEscape="true" />
 		    <button type="button" id="cancelOrderButton_${iter.index}" onclick="cancelOrderEntry('${iter.index}')" ${(entered || rejected || cancelled) ? 'disabled="disabled"' : '' }>
 		    <spring:message code="label.button.cancel"/>
 		    </button>
@@ -417,7 +402,7 @@ jQuery(document).ready( function() {
 				<span class="hidden-text">
 				<c:forEach items="${eOrder.warnings}" var="warning">
 	       			<c:out value="${warning}"/><br>
-				</c:forEach> 
+				</c:forEach>
 				</span>
 				</span>
 			</c:if>
@@ -432,8 +417,8 @@ jQuery(document).ready( function() {
 		<th colspan="4"><spring:message code="nonconformity.note"/></th>
 	</tr>
 	<tr id="rejectRowData_${iter.index}" style="display:none;">
-		<td><form:hidden id="externalOrderI_${iter.index}" path="eOrders[${iter.index}].externalOrderId" htmlEscape="true" /></td>
-		<td colspan="2"><form:select path="qaEventId" id="qaEventId_${iter.index}"  class="eoder_select_qaEvent" htmlEscape="true">
+		<td><input type="hidden" id="externalOrderI_${iter.index}" value="${eOrder.requestUuid}" /></td>
+		<td colspan="2"><form:select path="qaEventId" id="qaEventId_${iter.index}" class="eoder_select_qaEvent" htmlEscape="true">
 			<form:option value="">&nbsp;</form:option>
 			<form:options items="${form.qaEvents}" itemLabel="value" itemValue="id" htmlEscape="true" /></form:select>
 		</td>

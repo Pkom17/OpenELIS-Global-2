@@ -22,9 +22,7 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.PostConstruct;
-
 import org.json.simple.JSONObject;
 import org.openelisglobal.analysis.service.AnalysisService;
 import org.openelisglobal.analysis.valueholder.Analysis;
@@ -39,9 +37,12 @@ import org.openelisglobal.dataexchange.service.aggregatereporting.ReportExternal
 import org.openelisglobal.dataexchange.service.aggregatereporting.ReportQueueTypeService;
 import org.openelisglobal.test.service.TestServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+
+
+
 
 @Component
 public class TestUsageBacklog {
@@ -66,7 +67,7 @@ public class TestUsageBacklog {
 
     // workaround to make this run once on startup.
     // If program is continuously running for 290,0000 millenia it will run again
-    @Scheduled(initialDelay = 1000 * 30, fixedDelay = Long.MAX_VALUE)
+    //@Scheduled(initialDelay = 1000 * 30, fixedDelay = Long.MAX_VALUE)
     @Transactional
     public void run() {
         if (ConfigurationProperties.getInstance().isPropertyValueEqual(Property.testUsageReporting, "true")) {

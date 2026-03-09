@@ -1,61 +1,28 @@
 package org.openelisglobal.dataexchange.order.controller;
 
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Period;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.ResourceType;
-import org.hl7.fhir.r4.model.ServiceRequest;
-import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.Task.ParameterComponent;
-import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.openelisglobal.common.controller.BaseController;
 import org.openelisglobal.common.log.LogEvent;
 import org.openelisglobal.common.services.DisplayListService;
 import org.openelisglobal.common.services.DisplayListService.ListType;
 import org.openelisglobal.common.services.IStatusService;
 import org.openelisglobal.common.services.StatusService.ExternalOrderStatus;
-import org.openelisglobal.common.util.DateUtil;
-import org.openelisglobal.dataexchange.fhir.FhirConfig;
-import org.openelisglobal.dataexchange.fhir.FhirUtil;
-import org.openelisglobal.dataexchange.fhir.service.FhirPersistanceService;
 import org.openelisglobal.dataexchange.order.ElectronicOrderSortOrderCategoryConvertor;
 import org.openelisglobal.dataexchange.order.form.ElectronicOrderViewForm;
 import org.openelisglobal.dataexchange.order.valueholder.ElectronicOrder;
-import org.openelisglobal.dataexchange.order.valueholder.ElectronicOrderDisplayItem;
+import org.openelisglobal.dataexchange.order.valueholder.VlOrderDisplayItem;
+import org.openelisglobal.dataexchange.service.order.EorderFlatQueryService;
 import org.openelisglobal.dataexchange.service.order.ElectronicOrderService;
-import org.openelisglobal.organization.service.OrganizationService;
 import org.openelisglobal.organization.util.OrganizationTypeList;
-import org.openelisglobal.organization.valueholder.Organization;
-import org.openelisglobal.patient.service.PatientService;
-import org.openelisglobal.patient.valueholder.Patient;
 import org.openelisglobal.qaevent.service.QaEventService;
 import org.openelisglobal.qaevent.valueholder.QaEvent;
-import org.openelisglobal.sample.service.SampleService;
-import org.openelisglobal.sample.valueholder.Sample;
 import org.openelisglobal.spring.util.SpringContext;
-import org.openelisglobal.statusofsample.service.StatusOfSampleService;
-import org.openelisglobal.test.service.TestService;
-import org.openelisglobal.test.valueholder.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
@@ -65,9 +32,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-
 @Controller
 public class StudyElectronicOrdersController extends BaseController {
 
@@ -75,30 +39,12 @@ public class StudyElectronicOrdersController extends BaseController {
 			"testIds", "statusId", "useAllInfo", "organizationId", "organizationList" };
 
 	@Autowired
-	private StatusOfSampleService statusOfSampleService;
-	@Autowired
 	private ElectronicOrderService electronicOrderService;
 	@Autowired
-	private PatientService patientService;
-	@Autowired
-	private TestService testService;
-	@Autowired
-	private OrganizationService organizationService;
-	@Autowired
-	private SampleService sampleService;
-	@Autowired
-	private FhirUtil fhirUtil;
-	@Autowired
-	private FhirConfig fhirConfig;
-	@Autowired
-	private FhirPersistanceService fhirPersistanceService;
-	@Autowired
 	private QaEventService qaEventService;
+	@Autowired
+	private EorderFlatQueryService eorderFlatQueryService;
 
-	private Task task = null;
-
-	@Value("${org.openelisglobal.fhir.subscriber}")
-	private String defaultRemoteServer;
 	private String searchParameters = "";
 
 	@InitBinder
@@ -118,13 +64,9 @@ public class StudyElectronicOrdersController extends BaseController {
 		form.setOrganizationList(OrganizationTypeList.ARV_ORGS.getList());
 		form.setQaEvents(DisplayListService.getInstance().getList(ListType.QA_EVENTS));
 		if (form.getSearchType() != null) {
-			List<ElectronicOrder> electronicOrders;
-			List<ElectronicOrderDisplayItem> eOrderDisplayItems;
-
-			electronicOrders = electronicOrderService.searchForElectronicOrders(form);
-			eOrderDisplayItems = convertToDisplayItem(electronicOrders, form.getUseAllInfo());
+			List<VlOrderDisplayItem> cvOrders = electronicOrderService.searchCvOrders(form);
 			form.setSearchFinished(true);
-			form.setEOrders(eOrderDisplayItems);
+			form.setCvOrders(cvOrders);
 		}
 
 		return findForward(FWD_SUCCESS, form);
@@ -158,29 +100,6 @@ public class StudyElectronicOrdersController extends BaseController {
 					eOrder = eOrders.get(eOrders.size() - 1);
 				if (eOrder != null) {
 
-//					IGenericClient localFhirClient = fhirUtil.getLocalFhirClient();
-//					for (String remotePath : fhirConfig.getRemoteStorePaths()) {
-//						Bundle srBundle = (Bundle) localFhirClient.search().forResource(ServiceRequest.class)
-//								.where(ServiceRequest.RES_ID.exactly().code(externalOrderNumber))
-//								.include(ServiceRequest.INCLUDE_SPECIMEN).execute();
-//						for (BundleEntryComponent bundleComponent : srBundle.getEntry()) {
-//							if (bundleComponent.hasResource() && ResourceType.ServiceRequest
-//									.equals(bundleComponent.getResource().getResourceType())) {
-//								serviceRequest = (ServiceRequest) bundleComponent.getResource();
-//							}
-//						}
-//						srBundle = (Bundle) localFhirClient
-//								.search().forResource(ServiceRequest.class).where(ServiceRequest.IDENTIFIER.exactly()
-//										.systemAndIdentifier(remotePath, externalOrderNumber))
-//								.include(ServiceRequest.INCLUDE_SPECIMEN).execute();
-//						for (BundleEntryComponent bundleComponent : srBundle.getEntry()) {
-//							if (bundleComponent.hasResource() && ResourceType.ServiceRequest
-//									.equals(bundleComponent.getResource().getResourceType())) {
-//								serviceRequest = (ServiceRequest) bundleComponent.getResource();
-//							}
-//						}
-//					}
-
 					eOrder.setStatusId(
 							SpringContext.getBean(IStatusService.class).getStatusID(ExternalOrderStatus.NonConforming));
 					eOrder.setRejectReasonId(qaEventId);
@@ -188,26 +107,25 @@ public class StudyElectronicOrdersController extends BaseController {
 					eOrder.setQaAuthorizer(qaAuthorizer);
 					eOrder.setSyncFlag(0);
 					electronicOrderService.update(eOrder);
-					// update Task
-					//task = fhirPersistanceService.getTaskBasedOnServiceRequest(externalOrderNumber).orElseThrow();
-					//task.setStatus(TaskStatus.REJECTED);
-					QaEvent event = qaEventService.get((qaEventId != null) ? qaEventId.toString() : "");
-					String rejectionReasonText = getMessageForKey(
-							ObjectUtils.isNotEmpty(event) ? event.getNameKey() : "");
-					rejectionReasonText += " " + (ObjectUtils.isNotEmpty(qaNote) ? "/ " + qaNote : "");
-					// add task rejection reason
-					CodeableConcept rejectionReasonCodeableConcept = new CodeableConcept();
-					Coding rejectionCoding = new Coding();
-					rejectionCoding.setSystem("http://terminology.hl7.org/CodeSystem/task-rejection-reason");
-					rejectionCoding.setCode("invalid-sample");
-					rejectionCoding.setDisplay(rejectionReasonText);
-					rejectionReasonCodeableConcept.addCoding(rejectionCoding);
-					rejectionReasonCodeableConcept.setText(rejectionReasonText);
-					//task.setStatusReason(rejectionReasonCodeableConcept);
-					//fhirPersistanceService.updateFhirResourceInFhirStore(task);
+
+					// Mettre à jour la table plate pour remontée vers le serveur consolidé
+					String rejectReasonText = null;
+					if (qaEventId != null) {
+						try {
+							QaEvent qaEvent = qaEventService.get(String.valueOf(qaEventId));
+							if (qaEvent != null) {
+								rejectReasonText = qaEvent.getQaEventName();
+							}
+						} catch (Exception ex) {
+							// silent
+						}
+					}
+					eorderFlatQueryService.updateLocalStatus(
+							externalOrderNumber, "REJECTED", rejectReasonText, qaNote, qaAuthorizer);
 				}
 			}
 		} catch (Exception e) {
+			LogEvent.logErrorStack(e);
 			e.printStackTrace();
 		}
 		return findForward(FWD_SUCCESS_INSERT, form);
@@ -234,38 +152,14 @@ public class StudyElectronicOrdersController extends BaseController {
 					eOrder = eOrders.get(eOrders.size() - 1);
 				if (eOrder != null) {
 
-//					IGenericClient localFhirClient = fhirUtil.getLocalFhirClient();
-//					// IGenericClient remoteFhirClient =
-//					// fhirUtil.getFhirClient(defaultRemoteServer);
-//					for (String remotePath : fhirConfig.getRemoteStorePaths()) {
-//						Bundle srBundle = (Bundle) localFhirClient.search().forResource(ServiceRequest.class)
-//								.where(ServiceRequest.RES_ID.exactly().code(externalOrderNumber))
-//								.include(ServiceRequest.INCLUDE_SPECIMEN).execute();
-//						for (BundleEntryComponent bundleComponent : srBundle.getEntry()) {
-//							if (bundleComponent.hasResource() && ResourceType.ServiceRequest
-//									.equals(bundleComponent.getResource().getResourceType())) {
-//								serviceRequest = (ServiceRequest) bundleComponent.getResource();
-//							}
-//						}
-//						srBundle = (Bundle) localFhirClient
-//								.search().forResource(ServiceRequest.class).where(ServiceRequest.IDENTIFIER.exactly()
-//										.systemAndIdentifier(remotePath, externalOrderNumber))
-//								.include(ServiceRequest.INCLUDE_SPECIMEN).execute();
-//						for (BundleEntryComponent bundleComponent : srBundle.getEntry()) {
-//							if (bundleComponent.hasResource() && ResourceType.ServiceRequest
-//									.equals(bundleComponent.getResource().getResourceType())) {
-//								serviceRequest = (ServiceRequest) bundleComponent.getResource();
-//							}
-//						}
-//					}
 					eOrder.setStatusId(
 							SpringContext.getBean(IStatusService.class).getStatusID(ExternalOrderStatus.Cancelled));
 					eOrder.setSyncFlag(0);
 					electronicOrderService.update(eOrder);
-					// update Task
-					//task = fhirPersistanceService.getTaskBasedOnServiceRequest(externalOrderNumber).orElseThrow();
-					//task.setStatus(TaskStatus.CANCELLED);
-					//fhirPersistanceService.updateFhirResourceInFhirStore(task);
+
+					// Mettre à jour la table plate pour remontée vers le serveur consolidé
+					eorderFlatQueryService.updateLocalStatus(
+							externalOrderNumber, "CANCELLED", null, null, null);
 				}
 			}
 		} catch (Exception e) {
@@ -274,137 +168,6 @@ public class StudyElectronicOrdersController extends BaseController {
 		return findForward(FWD_SUCCESS_INSERT, form);
 	}
 
-	private List<ElectronicOrderDisplayItem> convertToDisplayItem(List<ElectronicOrder> electronicOrders,
-			boolean useAllInfo) {
-		return electronicOrders.stream().map(e -> convertToDisplayItem(e, useAllInfo)).collect(Collectors.toList());
-	}
-
-	private ElectronicOrderDisplayItem convertToDisplayItem(ElectronicOrder electronicOrder, boolean useAllInfo) {
-		ElectronicOrderDisplayItem displayItem = new ElectronicOrderDisplayItem();
-
-		try {
-			displayItem.setStatus(statusOfSampleService.get(electronicOrder.getStatusId()).getDefaultLocalizedName());
-			displayItem.setElectronicOrderId(electronicOrder.getId());
-			displayItem.setExternalOrderId(electronicOrder.getExternalId());
-			displayItem.setPriority(electronicOrder.getPriority());
-			displayItem.setQaEventId(electronicOrder.getRejectReasonId());
-			displayItem.setReceivedDateDisplay(DateUtil.formatDateTimeAsText(electronicOrder.getOrderTimestamp()));
-
-			Patient patient = electronicOrder.getPatient();
-			if (patient != null) {
-				String patientSubjectNumber = ObjectUtils.isNotEmpty(patient.getNationalId()) ? patient.getNationalId()
-						: ObjectUtils.isNotEmpty(patientService.getSubjectNumber(patient))
-								? patientService.getSubjectNumber(patient)
-								: patient.getExternalId();
-				displayItem.setSubjectNumber(patientSubjectNumber); // patientService.getSubjectNumber(patient))
-				displayItem.setPatientNationalId(patientSubjectNumber);
-				displayItem.setBirthDate(patient.getBirthDateForDisplay());
-				displayItem.setGender(patient.getGender());
-				displayItem.setPatientUpid(patient.getUpidCode());
-			} else {
-				String errorMsg = "error in data collection - Patient was a null resource";
-				displayItem.setWarnings(Arrays.asList(errorMsg));
-			}
-			Task task = fhirUtil.getFhirParser().parseResource(Task.class, electronicOrder.getData());
-			displayItem.setCreationDateDisplay(DateUtil.formatDateTimeAsText(task.getAuthoredOn()));
-			for (ParameterComponent parameter : task.getInput()) {
-				// VL demand date
-				if (parameter.getType().getCodingFirstRep().getCode().equals("CI0050005AAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
-					if (ObjectUtils.isNotEmpty(parameter.getValue())) {
-						if (parameter.getValue() instanceof DateTimeType) {
-							DateTimeType dateValue = (DateTimeType) parameter.getValue();
-							if (ObjectUtils.isNotEmpty(dateValue))
-								displayItem.setRequestDateDisplay(DateUtil.formatDateAsText(dateValue.getValue()));
-						}
-					}
-				}
-			}
-
-			Organization organization = organizationService.getOrganizationByFhirId(
-					task.getRestriction().getRecipientFirstRep().getReferenceElement().getIdPart());
-			if (organization != null) {
-				organization = organizationService.getOrganizationById("" + electronicOrder.getReferringFacilityId());
-			}
-			if (organization != null) {
-				displayItem.setRequestingFacility(organization.getOrganizationName());
-			}
-
-			Sample sample = sampleService.getSampleByReferringId(electronicOrder.getExternalId());
-			if (sample != null) {
-				displayItem.setLabNumber(sample.getAccessionNumber());
-			}
-			IGenericClient fhirClient = fhirUtil.getFhirClient(fhirConfig.getLocalFhirStorePath());
-
-			ServiceRequest serviceRequest = fhirClient.read().resource(ServiceRequest.class)
-					.withId(electronicOrder.getExternalId()).execute();
-			if (serviceRequest.getRequisition() != null) {
-				displayItem.setReferringLabNumber(serviceRequest.getRequisition().getValue());
-			}
-			org.hl7.fhir.r4.model.Patient fhirPatient = fhirClient.read()//
-					.resource(org.hl7.fhir.r4.model.Patient.class)//
-					.withId(serviceRequest.getSubject().getReferenceElement().getIdPart())//
-					.execute();
-			if (fhirPatient != null) {
-				for (Identifier identifier : fhirPatient.getIdentifier()) {
-					// get patient UPID
-					if (("https://openmrs.org/UPI").equals(identifier.getSystem())) {
-						displayItem.setPatientUpid(identifier.getValue());
-						break;
-					}
-					// get location name
-					if (("http://fhir.openmrs.org/ext/patient/identifier#location")
-							.equals(identifier.getExtensionFirstRep().getUrl())) {
-						Extension extension = identifier.getExtensionFirstRep();
-						Reference locationReference = (Reference) extension.getValue();
-						String display = locationReference.getDisplay();
-						displayItem.setRequestingFacility(display);
-					}
-				}
-			}
-
-			Encounter encounter = fhirClient.read().resource(Encounter.class)
-					.withId(serviceRequest.getEncounter().getReferenceElement().getIdPart()).execute();
-			if (ObjectUtils.isNotEmpty(encounter)) { // get Collection Date
-				Period period = encounter.getPeriod();
-				if (ObjectUtils.isNotEmpty(period)) {
-					Date collectionDate = encounter.getPeriod().getStart();
-					if (ObjectUtils.isNotEmpty(collectionDate)) {
-						displayItem.setCollectionDateDisplay(DateUtil.formatDateAsText(collectionDate));
-					}
-				}
-			}
-
-			Test test = null;
-			for (Coding coding : serviceRequest.getCode().getCoding()) {
-				if (coding.hasSystem()) {
-					if (coding.getSystem().equalsIgnoreCase("http://loinc.org")) {
-						List<Test> tests = testService.getActiveTestsByLoinc(coding.getCode());
-						if (tests.size() != 0) {
-							test = tests.get(0);
-							break;
-						}
-					}
-				}
-			}
-			if (test != null) {
-				displayItem.setTestName(test.getLocalizedTestName().getLocalizedValue());
-			}
-		} catch (ResourceNotFoundException e) {
-			String errorMsg = "error in data collection - FHIR resource not found";
-			displayItem.setWarnings(Arrays.asList(errorMsg));
-			LogEvent.logErrorStack(e);
-		} catch (NullPointerException e) {
-			String errorMsg = "error in data collection - null data";
-			displayItem.setWarnings(Arrays.asList(errorMsg));
-			LogEvent.logErrorStack(e);
-		} catch (RuntimeException e) {
-			String errorMsg = "error in data collection - unknown exception";
-			displayItem.setWarnings(Arrays.asList(errorMsg));
-			LogEvent.logErrorStack(e);
-		}
-
-		return displayItem;
-	}
 
 	@Override
 	protected String findLocalForward(String forward) {

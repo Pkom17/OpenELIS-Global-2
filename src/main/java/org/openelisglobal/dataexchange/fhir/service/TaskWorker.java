@@ -170,13 +170,8 @@ public class TaskWorker {
 				Extension extension = identifier.getExtensionFirstRep();
 				Reference locationReference = (Reference) extension.getValue();
 				String reference = locationReference.getReference();
-				// the short code can be 5 ou 4 digits base code
-				String centerCode = reference.substring(reference.length() - 5);
-				try {
-					Integer.parseInt(centerCode);
-				} catch (Exception e) {
-					centerCode = reference.substring(reference.length() - 4);
-				}
+				// Normaliser le code site : format SSSS...NNNN, UUID ou code court
+				String centerCode = normalizeSiteCodeFromReference(reference);
 				String display = locationReference.getDisplay();
 
 				referringFacility = organizationService.getOrganizationByShortName(centerCode, true);
@@ -332,6 +327,40 @@ public class TaskWorker {
 			return TaskResult.MESSAGE_ERROR;
 		}
 
+	}
+
+	/**
+	 * Normalise une référence de site en un code sur 5 caractères.
+	 * - Format SSSS...NNNN (ex: "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS0538") :
+	 *     extraire les chiffres finals, padder à gauche avec des 0 jusqu'à 5 chars.
+	 * - Format UUID (ex: "9d1b819e-b74b-11eb-afef-c8f75041a8b5") :
+	 *     prendre les 5 derniers caractères sans tirets.
+	 * - Autre (code déjà court) : retourner tel quel.
+	 */
+	private String normalizeSiteCodeFromReference(String reference) {
+		if (reference == null || reference.isEmpty()) {
+			return reference;
+		}
+		// Cas 1 : commence par S (format SSSS...NNNN)
+		if (reference.startsWith("S") || reference.startsWith("s")) {
+			String digits = reference.replaceAll("^[Ss]+", "").replaceAll("[^0-9]", "");
+			if (digits.isEmpty()) {
+				return reference;
+			}
+			if (digits.length() > 5) {
+				digits = digits.substring(digits.length() - 5);
+			} else {
+				digits = String.format("%05d", Long.parseLong(digits));
+			}
+			return digits;
+		}
+		// Cas 2 : UUID (36 chars avec tirets)
+		if (reference.matches("[0-9a-fA-F\\-]{36}")) {
+			String noHyphens = reference.replace("-", "");
+			return noHyphens.substring(noHyphens.length() - 5);
+		}
+		// Cas 3 : code court ou autre format — retourner tel quel
+		return reference;
 	}
 
 	private void cancelOrder(String referringOrderNumber) {

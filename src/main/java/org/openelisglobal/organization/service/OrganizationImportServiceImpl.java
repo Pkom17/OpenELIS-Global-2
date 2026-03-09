@@ -1,5 +1,6 @@
 package org.openelisglobal.organization.service;
 
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,7 +10,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.apache.commons.validator.GenericValidator;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
@@ -29,11 +29,10 @@ import org.openelisglobal.organization.valueholder.OrganizationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
+
 
 @Service
 public class OrganizationImportServiceImpl implements OrganizationImportService {
@@ -67,7 +66,7 @@ public class OrganizationImportServiceImpl implements OrganizationImportService 
     @Override
     @Transactional
     @Async
-    @Scheduled(initialDelay = 1000, fixedRateString = "${facilitylist.schedule.fixedRate}")
+    //@Scheduled(initialDelay = 1000, fixedRateString = "${facilitylist.schedule.fixedRate}")
     public void importOrganizationList() throws FhirGeneralException, IOException {
         if (!GenericValidator.isBlankOrNull(facilityFhirStore)) {
             IGenericClient client;

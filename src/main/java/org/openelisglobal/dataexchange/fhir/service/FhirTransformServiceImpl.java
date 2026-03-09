@@ -180,7 +180,7 @@ public class FhirTransformServiceImpl implements FhirTransformService {
 	}
 
 	@Transactional
-	@Async
+	//@Async
 	@Override
 	public AsyncResult<Bundle> transformPersistPatients(List<String> patientIds) throws FhirLocalPersistingException {
 		FhirOperations fhirOperations = new FhirOperations();
@@ -210,7 +210,7 @@ public class FhirTransformServiceImpl implements FhirTransformService {
 	}
 
 	@Transactional
-	@Async
+	//@Async
 	@Override
 	public AsyncResult<Bundle> transformPersistObjectsUnderSamples(List<String> sampleIds)
 			throws FhirLocalPersistingException {
@@ -372,7 +372,7 @@ public class FhirTransformServiceImpl implements FhirTransformService {
 	}
 
 	@Override
-	@Async
+	//@Async
 	@Transactional(readOnly = true)
 	public void transformPersistPatient(PatientManagementInfo patientInfo) throws FhirLocalPersistingException {
 		CountingTempIdGenerator tempIdGenerator = new CountingTempIdGenerator();
@@ -383,7 +383,7 @@ public class FhirTransformServiceImpl implements FhirTransformService {
 	}
 
 	@Override
-	@Async
+	//@Async
 	@Transactional(readOnly = true)
 	public void transformPersistOrderEntryFhirObjects(SamplePatientUpdateData updateData,
 			PatientManagementInfo patientInfo, boolean useReferral, List<ReferralItem> referralItems)
@@ -910,7 +910,7 @@ public class FhirTransformServiceImpl implements FhirTransformService {
 	}
 
 	@Override
-	@Async
+	//@Async
 	@Transactional(readOnly = true)
 	public void transformPersistResultsEntryFhirObjects(ResultsUpdateDataSet actionDataSet)
 			throws FhirLocalPersistingException {
@@ -938,7 +938,7 @@ public class FhirTransformServiceImpl implements FhirTransformService {
 
 	}
 
-	@Async
+	//@Async
 	@Override
 	@Transactional(readOnly = true)
 	public void transformPersistResultValidationFhirObjects(List<Result> deletableList,

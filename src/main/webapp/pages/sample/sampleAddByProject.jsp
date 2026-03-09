@@ -2331,7 +2331,7 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 				</td>
 				<td><form:input path="interviewDate"
 						onkeyup="addDateSlashes(this, event);"
-						onchange="vl.checkInterviewDate(false)" cssClass="text"
+						onchange="vl.checkInterviewDate(false);searchForEOrder(this,electronicOrderAvailbaleMessage);" cssClass="text"
 						id="vl.interviewDate" maxlength="10" />
 					<div id="vl.interviewDateMessage" class="blank" /></td>
 			</tr>

@@ -6,31 +6,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.GenericValidator;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.ResourceType;
-import org.hl7.fhir.r4.model.ServiceRequest;
-import org.hl7.fhir.r4.model.Task;
 import org.openelisglobal.common.service.BaseObjectServiceImpl;
 import org.openelisglobal.common.services.IStatusService;
-import org.openelisglobal.common.services.RequesterService.Requester;
 import org.openelisglobal.common.services.StatusService.ExternalOrderStatus;
 import org.openelisglobal.common.util.DateUtil;
-import org.openelisglobal.dataexchange.fhir.FhirConfig;
-import org.openelisglobal.dataexchange.fhir.FhirUtil;
 import org.openelisglobal.dataexchange.order.dao.ElectronicOrderDAO;
 import org.openelisglobal.dataexchange.order.form.ElectronicOrderViewForm;
+import org.openelisglobal.dataexchange.order.valueholder.VlOrderDisplayItem;
 import org.openelisglobal.dataexchange.order.valueholder.ElectronicOrder;
 import org.openelisglobal.dataexchange.order.valueholder.ElectronicOrder.SortOrder;
-import org.openelisglobal.organization.service.OrganizationService;
-import org.openelisglobal.test.service.TestService;
+import org.openelisglobal.statusofsample.service.StatusOfSampleService;
+import org.openelisglobal.statusofsample.valueholder.StatusOfSample;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 @Service
 public class ElectronicOrderServiceImpl extends BaseObjectServiceImpl<ElectronicOrder, String>
@@ -40,13 +31,7 @@ public class ElectronicOrderServiceImpl extends BaseObjectServiceImpl<Electronic
 	@Autowired
 	protected IStatusService statusService;
 	@Autowired
-	protected OrganizationService organizationService;
-	@Autowired
-	protected TestService testService;
-	@Autowired
-	protected FhirUtil fhirUtil;
-	@Autowired
-	private FhirConfig fhirConfig;
+	private StatusOfSampleService statusOfSampleService;
 
 	ElectronicOrderServiceImpl() {
 		super(ElectronicOrder.class);
@@ -126,19 +111,8 @@ public class ElectronicOrderServiceImpl extends BaseObjectServiceImpl<Electronic
 	public List<ElectronicOrder> searchForElectronicOrders(ElectronicOrderViewForm form) {
 		switch (form.getSearchType()) {
 		case IDENTIFIER:
-			IGenericClient fhirClient = fhirUtil.getFhirClient(fhirConfig.getLocalFhirStorePath());
-			Bundle searchBundle = fhirClient.search().forResource(ServiceRequest.class)
-					.where(ServiceRequest.IDENTIFIER.exactly().code(form.getSearchValue())).returnBundle(Bundle.class)
-					.execute();
-
-			List<String> identifierValues = new ArrayList<>(searchBundle.getEntry().size() + 1);
+			List<String> identifierValues = new ArrayList<>();
 			identifierValues.add(form.getSearchValue());
-			for (BundleEntryComponent bundleEntry : searchBundle.getEntry()) {
-				if (bundleEntry.hasResource()
-						&& ResourceType.ServiceRequest.equals(bundleEntry.getResource().getResourceType())) {
-					identifierValues.add(bundleEntry.getResource().getIdElement().getIdPart());
-				}
-			}
 			String nameValue = form.getSearchValue();
 
 			List<ElectronicOrder> eOrders = baseObjectDAO.getAllElectronicOrdersMatchingAnyValue(identifierValues,
@@ -171,19 +145,8 @@ public class ElectronicOrderServiceImpl extends BaseObjectServiceImpl<Electronic
 	public List<ElectronicOrder> searchForStudyElectronicOrders(ElectronicOrderViewForm form) {
 		switch (form.getSearchType()) {
 		case IDENTIFIER:
-			IGenericClient fhirClient = fhirUtil.getFhirClient(fhirConfig.getLocalFhirStorePath());
-			Bundle searchBundle = fhirClient.search().forResource(ServiceRequest.class)
-					.where(ServiceRequest.IDENTIFIER.exactly().code(form.getSearchValue())).returnBundle(Bundle.class)
-					.execute();
-
-			List<String> identifierValues = new ArrayList<>(searchBundle.getEntry().size() + 1);
+			List<String> identifierValues = new ArrayList<>();
 			identifierValues.add(form.getSearchValue());
-			for (BundleEntryComponent bundleEntry : searchBundle.getEntry()) {
-				if (bundleEntry.hasResource()
-						&& ResourceType.ServiceRequest.equals(bundleEntry.getResource().getResourceType())) {
-					identifierValues.add(bundleEntry.getResource().getIdElement().getIdPart());
-				}
-			}
 			String nameValue = form.getSearchValue();
 
 			List<ElectronicOrder> eOrders = baseObjectDAO.getAllElectronicOrdersMatchingAnyValue(identifierValues,
@@ -214,6 +177,57 @@ public class ElectronicOrderServiceImpl extends BaseObjectServiceImpl<Electronic
 	public String getEnteredElectronicOrderByPatient(String patientIdentifier) {
 		ElectronicOrder eOrder = getBaseObjectDAO().getLastEnteredByPatientIdentifier(patientIdentifier);
 		return ObjectUtils.isNotEmpty(eOrder) ? eOrder.getExternalId() : null;
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<VlOrderDisplayItem> searchCvOrders(ElectronicOrderViewForm form) {
+		String searchValue = null;
+		java.sql.Timestamp startTimestamp = null;
+		java.sql.Timestamp endTimestamp = null;
+		String statusId = form.getStatusId();
+
+		switch (form.getSearchType()) {
+		case IDENTIFIER:
+			searchValue = form.getSearchValue();
+			break;
+		case DATE_STATUS:
+			String startDate = form.getStartDate();
+			String endDate = form.getEndDate();
+			if (GenericValidator.isBlankOrNull(startDate) && !GenericValidator.isBlankOrNull(endDate)) {
+				startDate = endDate;
+			}
+			if (GenericValidator.isBlankOrNull(endDate) && !GenericValidator.isBlankOrNull(startDate)) {
+				endDate = startDate;
+			}
+			startTimestamp = GenericValidator.isBlankOrNull(startDate) ? null
+					: DateUtil.convertStringDateStringTimeToTimestamp(startDate, "00:00:00.0");
+			endTimestamp = GenericValidator.isBlankOrNull(endDate) ? null
+					: DateUtil.convertStringDateStringTimeToTimestamp(endDate, "23:59:59");
+			break;
+		default:
+			return new ArrayList<>();
+		}
+
+		List<VlOrderDisplayItem> items = baseObjectDAO.searchCvOrders(
+				searchValue, startTimestamp, endTimestamp, statusId);
+
+		// Résoudre les statusId numériques en texte lisible
+		if (items != null) {
+			for (VlOrderDisplayItem item : items) {
+				if (StringUtils.isNumeric(item.getStatus())) {
+					try {
+						StatusOfSample sos = statusOfSampleService.get(item.getStatus());
+						if (sos != null) {
+							item.setStatus(sos.getDefaultLocalizedName());
+						}
+					} catch (Exception e) {
+						// laisser le statusId brut si non résolu
+					}
+				}
+			}
+		}
+		return items != null ? items : new ArrayList<>();
 	}
 
 }

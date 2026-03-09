@@ -1,11 +1,12 @@
 package org.openelisglobal.provider.service;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.validator.GenericValidator;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
@@ -25,11 +26,9 @@ import org.openelisglobal.person.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
+
 
 @Service
 public class ProviderImportServiceImpl implements ProviderImportService {
@@ -52,7 +51,7 @@ public class ProviderImportServiceImpl implements ProviderImportService {
 
     @Override
     @Async
-    @Scheduled(initialDelay = 1000, fixedRate = 60 * 60 * 1000)
+    //@Scheduled(initialDelay = 1000, fixedRate = 60 * 60 * 1000)
     public void importPractitionerList() throws FhirLocalPersistingException, FhirGeneralException, IOException {
         if (!GenericValidator.isBlankOrNull(providerFhirStore)) {
             IGenericClient client = fhirUtil.getFhirClient(providerFhirStore);

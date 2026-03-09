@@ -17,9 +17,7 @@
 package org.openelisglobal.scheduler.independentthreads;
 
 import java.util.List;
-
 import javax.annotation.PostConstruct;
-
 import org.openelisglobal.common.util.ConfigurationProperties;
 import org.openelisglobal.common.util.ConfigurationProperties.Property;
 import org.openelisglobal.dataexchange.aggregatereporting.valueholder.ReportExternalExport;
@@ -30,8 +28,9 @@ import org.openelisglobal.dataexchange.service.aggregatereporting.ReportExternal
 import org.openelisglobal.dataexchange.service.aggregatereporting.ReportQueueTypeService;
 import org.openelisglobal.spring.util.SpringContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+
 
 @Component
 public class MalariaResultExporter {
@@ -48,7 +47,7 @@ public class MalariaResultExporter {
         resultReportTypeId = reportQueueTypeService.getReportQueueTypeByName("malariaCase").getId();
     }
 
-    @Scheduled(fixedRateString = "#{resultsResendTime}")
+    //@Scheduled(fixedRateString = "#{resultsResendTime}")
     private void exportResults() {
         if (shouldReportResults()) {
             List<ReportExternalExport> reportList = reportExternalExportService
