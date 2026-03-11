@@ -2,6 +2,29 @@ function defaultFailure(xhr){
     alert(xhr.responseText);
 }
 
+function getSerologyResultForPatient(subjectNumber, siteSubjectNumber, success, failure) {
+	if (!failure) { failure = defaultFailure; }
+
+	var params = "provider=SerologyResultByPatientProvider";
+	if (subjectNumber) {
+		params += "&subjectNumber=" + encodeURIComponent(subjectNumber);
+	}
+	if (siteSubjectNumber) {
+		params += "&siteSubjectNumber=" + encodeURIComponent(siteSubjectNumber);
+	}
+
+	new Ajax.Request('ajaxQueryXML',
+		{
+			method: 'get',
+			parameters: params,
+			requestHeaders: {
+				"X-CSRF-Token": getCsrfToken()
+			},
+			onSuccess: success,
+			onFailure: failure
+		});
+}
+
 //sensitive data is being transmitted, therefore a token check should be done even on GET. 
 //Otherwise this should be moved to a POST request and rely on regular csrf functionality
 function getNotificationsForTests( testIds, success, failure){

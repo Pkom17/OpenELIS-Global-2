@@ -26,6 +26,8 @@ boolean canEditPatientSubjectNos = isAdmin
 boolean canEditAccessionNo = isAdmin || accessMap.contains(IActionConstants.MODULE_ACCESS_SAMPLE_ACCESSIONNO_EDIT);
 boolean acceptExternalOrders = ConfigurationProperties.getInstance()
 		.isPropertyValueEqual(Property.ACCEPT_EXTERNAL_ORDERS, "true");
+boolean serologyControl = ConfigurationProperties.getInstance()
+		.isPropertyValueEqual(Property.SEROLOGY_CONTROL, "true");
 %>
 
 <script type="text/javascript" src="scripts/utilities.js?"></script>
@@ -87,6 +89,7 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 
 	var canEditPatientSubjectNos =<%=canEditPatientSubjectNos%>;
 	var canEditAccessionNo =<%=canEditAccessionNo%>	;
+	var serologyControlEnabled = <%= serologyControl %>;
 
 	function /*void*/setMyCancelAction(form, action, validate, parameters) {
 		//first turn off any further validation
@@ -95,8 +98,8 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 
 	function Studies() {
 		this.validators = new Array();
-		this.studyNames = [ "InitialARV_Id", "FollowUp_ARV_Id", "RTN_Id",
-				"EID_Id", "VL_Id", "Indeterminate_Id", "Special_Request_Id","Recency_Id","HPV_Id" ];
+		this.studyNames = [ "InitialARV_Id", "FollowUp_ARV_Id",
+				"EID_Id", "VL_Id", "Recency_Id","HPV_Id" ];
 
 		this.validators["InitialARV_Id"] = new FieldValidator();
 		this.validators["InitialARV_Id"].setRequiredFields(new Array(
@@ -110,32 +113,16 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 				"farv.interviewDate", "farv.centerCode",
 				"subjectOrSiteSubject", "farv.gender", "farv.dateOfBirth"));
 
-		this.validators["RTN_Id"] = new FieldValidator();
-		this.validators["RTN_Id"].setRequiredFields(new Array("rtn.labNo",
-				"rtn.receivedDateForDisplay", "rtn.interviewDate",
-				"rtn.gender", "rtn.dateOfBirth"));
-
 		this.validators["EID_Id"] = new FieldValidator();
 		this.validators["EID_Id"].setRequiredFields(new Array(
 				"eid.receivedDateForDisplay", "eid.interviewDate",
 				"eid.gender", "eid.dateOfBirth","eid.centerCode", "eid.centerName",
 				"eid.labNo"));
 
-		this.validators["Indeterminate_Id"] = new FieldValidator();
-		this.validators["Indeterminate_Id"].setRequiredFields(new Array(
-				"ind.labNo", "ind.receivedDateForDisplay", "ind.interviewDate",
-				"subjectOrSiteSubject", "ind.centerName", "ind.dateOfBirth",
-				"ind.gender"));
-
-		this.validators["Special_Request_Id"] = new FieldValidator();
-		this.validators["Special_Request_Id"].setRequiredFields(new Array(
-				"spe.labNo", "spe.receivedDateForDisplay", "spe.interviewDate",
-				"subjectOrSiteSubject", "spe.gender"));
-
 		this.validators["VL_Id"] = new FieldValidator();
 		this.validators["VL_Id"].setRequiredFields(new Array(
 				"vl.centerCode","vl.receivedDateForDisplay", "vl.interviewDate", "vl.gender",
-				"vl.dateOfBirth", "subjectOrSiteSubject", "vl.labNo","vl.hivStatus"));
+				"vl.dateOfBirth", "subjectOrSiteSubject", "vl.labNo"));
 
 		//"vl.vlSuckle","vl.vlPregnancy"
 
@@ -156,10 +143,7 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 		this.initializeProjectChecker = function() {
 			this.projectChecker["InitialARV_Id"] = iarv;
 			this.projectChecker["FollowUpARV_Id"] = farv;
-			this.projectChecker["RTN_Id"] = rtn;
 			this.projectChecker["EID_Id"] = eid;
-			this.projectChecker["Indeterminate_Id"] = ind;
-			this.projectChecker["Special_Request_Id"] = spe;
 			this.projectChecker["VL_Id"] = vl;
 			this.projectChecker["Recency_Id"] = rt;
 			this.projectChecker["HPV_Id"] = hpv;
@@ -212,12 +196,6 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 			tests = new Array("vl.viralLoadTest");
 		}
 
-		if (div == "RTN_Id") {
-			tests = new Array("rtn.serologyHIVTest", "rtn.dryTubeTaken");
-		}
-		if (div == "Indeterminate_Id") {
-			tests = new Array("ind.serologyHIVTest", "ind.dryTubeTaken");
-		}
 		if (div == "Recency_Id") {
 			tests = new Array("rt.asanteTest");
 		}
@@ -276,22 +254,17 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 	}
 
 	function hideAllDivs() {
+		resetVLSerologySearch();
 		toggleDisabledDiv(document.getElementById("InitialARV_Id"), false);
 		toggleDisabledDiv(document.getElementById("FollowUpARV_Id"), false);
-		toggleDisabledDiv(document.getElementById("RTN_Id"), false);
 		toggleDisabledDiv(document.getElementById("EID_Id"), false);
-		toggleDisabledDiv(document.getElementById("Indeterminate_Id"), false);
-		toggleDisabledDiv(document.getElementById("Special_Request_Id"), false);
 		toggleDisabledDiv(document.getElementById("VL_Id"), false);
 		toggleDisabledDiv(document.getElementById("Recency_Id"), false);
 		toggleDisabledDiv(document.getElementById("HPV_Id"), false);
 
 		document.getElementById('InitialARV_Id').style.display = "none";
 		document.getElementById('FollowUpARV_Id').style.display = "none";
-		document.getElementById('RTN_Id').style.display = "none";
 		document.getElementById('EID_Id').style.display = "none";
-		document.getElementById('Indeterminate_Id').style.display = "none";
-		document.getElementById('Special_Request_Id').style.display = "none";
 		document.getElementById('VL_Id').style.display = "none";
 		document.getElementById('Recency_Id').style.display = "none";
 		document.getElementById('HPV_Id').style.display = "none";
@@ -318,6 +291,374 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 		$("saveButtonId").disabled = !validToSave;
 
 	}
+
+	/**
+	 * VL Serology search: search for patient and check if serology result exists.
+	 * Shows the main VL form after search completes.
+	 */
+	function searchVLPatientSerology() {
+		var subjectNo = document.getElementById("vl.searchSubjectNumber").value.trim();
+		var siteSubjectNo = document.getElementById("vl.searchSiteSubjectNumber").value.trim();
+
+		if (!subjectNo && !siteSubjectNo) {
+			document.getElementById("vl.searchPatientStatus").innerHTML =
+				'<span style="color:red;"><spring:message code="sample.entry.project.patientSearch.required" text="Veuillez saisir un Sujet No. ou Site Sujet No." /></span>';
+			return;
+		}
+
+		document.getElementById("vl.searchPatientStatus").innerHTML =
+			'<spring:message code="label.searching" text="Recherche en cours..." />';
+		document.getElementById("vl.searchPatientButton").disabled = true;
+		document.getElementById("vl.mainForm").style.display = "none";
+
+		// Clear form subject fields for new search
+		var subField = document.getElementById("vl.subjectNumber");
+		var siteSubField = document.getElementById("vl.siteSubjectNumber");
+		if (subField) subField.value = "";
+		if (siteSubField) siteSubField.value = "";
+
+		if (serologyControlEnabled) {
+			// Serology control ON: search patient + serology via dedicated provider
+			getSerologyResultForPatient(subjectNo, siteSubjectNo,
+				function(xhr) { handleVLSerologySearchResult(xhr, subjectNo, siteSubjectNo); },
+				function(xhr) { handleVLSerologySearchFailure(subjectNo, siteSubjectNo); }
+			);
+		} else {
+			// Serology control OFF: search patient only via existing patient loader
+			handleVLPatientOnlySearch(subjectNo, siteSubjectNo);
+		}
+	}
+
+	/**
+	 * When serology control is disabled: search patient by nationalID or externalID,
+	 * load demographics if found, show form with hivStatus enabled for manual selection.
+	 */
+	function handleVLPatientOnlySearch(subjectNo, siteSubjectNo) {
+		// Use the search subject number field to trigger patient lookup
+		var searchField = subjectNo
+			? document.getElementById("vl.subjectNumber")
+			: document.getElementById("vl.siteSubjectNumber");
+		var searchValue = subjectNo || siteSubjectNo;
+		var searchBy = subjectNo ? "nationalID" : "externalID";
+
+		// Temporarily set the field value for the search
+		if (searchField) searchField.value = searchValue;
+
+		patientLoader.findPatientBy(searchBy, searchField, false,
+			function() {
+				document.getElementById("vl.searchPatientButton").disabled = false;
+				var patientFound = (patientLoader.existing != null);
+
+				if (patientFound) {
+					document.getElementById("vl.searchPatientStatus").innerHTML =
+						'<span style="color:green;"><spring:message code="sample.entry.project.patientSearch.found" text="Patient trouv\u00e9" /></span>';
+
+					// Populate VL form fields from loaded patient data
+					var existing = patientLoader.existing;
+					var nationalID = patientLoader.getResponseProperty(existing, "nationalID");
+					var externalID = patientLoader.getResponseProperty(existing, "externalID");
+					var dob = patientLoader.getResponseProperty(existing, "dob");
+					var gender = patientLoader.getResponseProperty(existing, "gender");
+
+					if (nationalID) document.getElementById("vl.subjectNumber").value = nationalID;
+					if (externalID) document.getElementById("vl.siteSubjectNumber").value = externalID;
+
+					var dobField = document.getElementById("vl.dateOfBirth");
+					if (dob && dobField) {
+						dobField.value = dob;
+						handlePatientBirthDateChange(dobField, $("vl.interviewDate"), false, $("vl.age"));
+					}
+
+					var genderField = document.getElementById("vl.gender");
+					if (gender && genderField) {
+						for (var i = 0; i < genderField.options.length; i++) {
+							if (genderField.options[i].value === gender) {
+								genderField.selectedIndex = i;
+								break;
+							}
+						}
+					}
+				} else {
+					document.getElementById("vl.searchPatientStatus").innerHTML =
+						'<span style="color:orange;"><spring:message code="sample.entry.project.patientSearch.notFound" text="Patient non trouv\u00e9" /></span>';
+					// Prefill searched values
+					if (subjectNo) document.getElementById("vl.subjectNumber").value = subjectNo;
+					if (siteSubjectNo) document.getElementById("vl.siteSubjectNumber").value = siteSubjectNo;
+				}
+
+				// No serology control: hivStatus enabled for manual selection, no serology tests
+				var hivStatusSelect = document.getElementById("vl.hivStatus");
+				var hivStatusHidden = document.getElementById("vl.hivStatusHidden");
+				var hivStatusRequired = document.getElementById("vl.hivStatusRequired");
+				hivStatusSelect.disabled = false;
+				hivStatusSelect.selectedIndex = 0;
+				hivStatusHidden.disabled = true;
+				hivStatusRequired.textContent = "*";
+
+				// Hide serology-related rows
+				document.getElementById("vl.serologyHIVTestRow").style.display = "none";
+				var serologyCheckbox = document.getElementById("vl.serologyHIVTest");
+				if (serologyCheckbox) { serologyCheckbox.checked = false; serologyCheckbox.disabled = true; }
+				document.getElementById("vl.dryTubeTakenRow").style.display = "none";
+				var dryTubeCheckbox = document.getElementById("vl.dryTubeTaken");
+				if (dryTubeCheckbox) dryTubeCheckbox.checked = false;
+
+				// Always check viral load test
+				var vlTest = document.getElementById("vl.viralLoadTest");
+				if (vlTest && !vlTest.checked) vlTest.checked = true;
+
+				// Show the form and trigger validation
+				document.getElementById("vl.mainForm").style.display = "block";
+				vl.setSubjectOrSiteSubjectEntered();
+				vl.checkAllSubjectFields(true, false);
+				makeDirty();
+				setSaveButton();
+			}
+		);
+	}
+
+	function handleVLSerologySearchResult(xhr, searchSubjectNo, searchSiteSubjectNo) {
+		document.getElementById("vl.searchPatientButton").disabled = false;
+
+		var xml = xhr.responseXML;
+		var message = xml.getElementsByTagName("message").item(0);
+		var formfield = xml.getElementsByTagName("formfield").item(0);
+
+		if (!message || !formfield) {
+			document.getElementById("vl.searchPatientStatus").innerHTML =
+				'<span style="color:red;"><spring:message code="sample.entry.project.patientSearch.error" text="Erreur lors de la recherche" /></span>';
+			showVLMainForm(searchSubjectNo, searchSiteSubjectNo, null, null, false);
+			return;
+		}
+
+		var isValid = (message.firstChild.nodeValue === "valid");
+
+		if (!isValid) {
+			// Patient not found (message=invalid) — show form for new entry
+			document.getElementById("vl.searchPatientStatus").innerHTML =
+				'<span style="color:orange;"><spring:message code="sample.entry.project.patientSearch.notFound" text="Patient non trouv\u00e9" /></span>';
+			showVLMainForm(searchSubjectNo, searchSiteSubjectNo, null, null, false);
+			return;
+		}
+
+		var patientPK = getXMLValue(formfield, "patientPK");
+		var subjectNumber = getXMLValue(formfield, "subjectNumber");
+		var siteSubjectNumber = getXMLValue(formfield, "siteSubjectNumber");
+		var serologyResult = getXMLValue(formfield, "serologyResult");
+
+		// Clean up placeholder values from backend
+		if (subjectNumber === "N/A") subjectNumber = null;
+		if (siteSubjectNumber === "N/A") siteSubjectNumber = null;
+		// Only consider serology valid if result is HIV1, HIV2 or HIVD
+		var validSerologyResults = ["HIV1", "HIV2", "HIVD"];
+		var hasSerology = (serologyResult && validSerologyResults.indexOf(serologyResult) !== -1);
+		if (!hasSerology) serologyResult = null;
+
+		document.getElementById("vl.searchPatientStatus").innerHTML =
+			'<span style="color:green;"><spring:message code="sample.entry.project.patientSearch.found" text="Patient trouv\u00e9" /></span>';
+
+		showVLMainForm(
+			subjectNumber || searchSubjectNo,
+			siteSubjectNumber || searchSiteSubjectNo,
+			patientPK,
+			serologyResult,
+			hasSerology
+		);
+	}
+
+	function handleVLSerologySearchFailure(searchSubjectNo, searchSiteSubjectNo) {
+		document.getElementById("vl.searchPatientButton").disabled = false;
+		document.getElementById("vl.searchPatientStatus").innerHTML =
+			'<span style="color:orange;"><spring:message code="sample.entry.project.patientSearch.notFound" text="Patient non trouv\u00e9" /></span>';
+		// Show the form anyway so the user can fill it for a new patient
+		showVLMainForm(searchSubjectNo, searchSiteSubjectNo, null, null, false);
+	}
+
+	/**
+	 * Show VL form with serology control logic (only called when serologyControlEnabled=true).
+	 */
+	function showVLMainForm(subjectNumber, siteSubjectNumber, patientPK, serologyResult, hasSerology) {
+		// Prefill subject numbers
+		var subField = document.getElementById("vl.subjectNumber");
+		var siteSubField = document.getElementById("vl.siteSubjectNumber");
+
+		if (subjectNumber && subField) {
+			subField.value = subjectNumber;
+		}
+		if (siteSubjectNumber && siteSubField) {
+			siteSubField.value = siteSubjectNumber;
+		}
+
+		// Set patient PK if found and load demographics
+		if (patientPK) {
+			document.getElementById("patientPK").value = patientPK;
+			patientLoader.findPatientBy("personKey", document.getElementById("patientPK"), false,
+				function() {
+					populateVLFieldsFromPatientData();
+					vl.setSubjectOrSiteSubjectEntered();
+					vl.checkAllSubjectFields(true, false);
+					makeDirty();
+					setSaveButton();
+				}
+			);
+		} else {
+			vl.setSubjectOrSiteSubjectEntered();
+		}
+
+		var hivStatusSelect = document.getElementById("vl.hivStatus");
+		var hivStatusHidden = document.getElementById("vl.hivStatusHidden");
+		var hivStatusRequired = document.getElementById("vl.hivStatusRequired");
+		var serologyRow = document.getElementById("vl.serologyHIVTestRow");
+		var serologyCheckbox = document.getElementById("vl.serologyHIVTest");
+
+		// Always ensure viral load test is checked
+		var vlTest = document.getElementById("vl.viralLoadTest");
+		if (vlTest && !vlTest.checked) {
+			vlTest.checked = true;
+		}
+
+		if (hasSerology) {
+			// Serology exists: prefill hivStatus, make it readonly
+			setHivStatusFromSerologyResult(serologyResult);
+			hivStatusSelect.disabled = true;
+			hivStatusHidden.disabled = false;
+			hivStatusHidden.value = hivStatusSelect.value;
+			hivStatusRequired.textContent = "*";
+
+			// Hide serology test row - not needed
+			serologyRow.style.display = "none";
+			if (serologyCheckbox) {
+				serologyCheckbox.checked = false;
+				serologyCheckbox.disabled = true;
+			}
+		} else {
+			// No serology: hivStatus disabled, add serology tests
+			hivStatusSelect.disabled = true;
+			hivStatusSelect.selectedIndex = 0;
+			hivStatusHidden.disabled = true;
+			hivStatusRequired.textContent = "";
+
+			// Show serology test row, checked and mandatory
+			serologyRow.style.display = "";
+			if (serologyCheckbox) {
+				serologyCheckbox.checked = true;
+				serologyCheckbox.disabled = false;
+			}
+			// Show and check dry tube row (needed for serology)
+			var dryTubeRow = document.getElementById("vl.dryTubeTakenRow");
+			var dryTubeCheckbox = document.getElementById("vl.dryTubeTaken");
+			if (dryTubeRow) dryTubeRow.style.display = "";
+			if (dryTubeCheckbox) dryTubeCheckbox.checked = true;
+		}
+
+		// Show the main form
+		document.getElementById("vl.mainForm").style.display = "block";
+		makeDirty();
+		setSaveButton();
+	}
+
+	/**
+	 * Populate VL form fields from patientLoader.existing data (shared helper).
+	 */
+	function populateVLFieldsFromPatientData() {
+		var existing = patientLoader.existing;
+		if (!existing) return;
+
+		var nationalID = patientLoader.getResponseProperty(existing, "nationalID");
+		var externalID = patientLoader.getResponseProperty(existing, "externalID");
+		var dob = patientLoader.getResponseProperty(existing, "dob");
+		var gender = patientLoader.getResponseProperty(existing, "gender");
+
+		if (nationalID) document.getElementById("vl.subjectNumber").value = nationalID;
+		if (externalID) document.getElementById("vl.siteSubjectNumber").value = externalID;
+
+		var dobField = document.getElementById("vl.dateOfBirth");
+		if (dob && dobField) {
+			dobField.value = dob;
+			handlePatientBirthDateChange(dobField, $("vl.interviewDate"), false, $("vl.age"));
+		}
+
+		var genderField = document.getElementById("vl.gender");
+		if (gender && genderField) {
+			for (var i = 0; i < genderField.options.length; i++) {
+				if (genderField.options[i].value === gender) {
+					genderField.selectedIndex = i;
+					break;
+				}
+			}
+		}
+	}
+
+	function setHivStatusFromSerologyResult(serologyResult) {
+		var hivSelect = document.getElementById("vl.hivStatus");
+		if (!hivSelect || !serologyResult) return;
+
+		// Map Innolia conclusion values to VIH select option text
+		var conclusionToVIH = {
+			"HIV1": "VIH-1",
+			"HIV2": "VIH-2",
+			"HIVD": "VIH-1+2"
+		};
+
+		var targetText = conclusionToVIH[serologyResult];
+		if (targetText) {
+			for (var i = 0; i < hivSelect.options.length; i++) {
+				if (hivSelect.options[i].text.trim() === targetText) {
+					hivSelect.selectedIndex = i;
+					return;
+				}
+			}
+		}
+
+		// Fallback: try partial text match
+		for (var i = 0; i < hivSelect.options.length; i++) {
+			var optText = hivSelect.options[i].text.trim().toLowerCase();
+			if (optText.indexOf(serologyResult.toLowerCase()) !== -1) {
+				hivSelect.selectedIndex = i;
+				return;
+			}
+		}
+	}
+
+	function getXMLValue(xml, key) {
+		if (!xml) return null;
+		var nodes = xml.getElementsByTagName(key);
+		if (nodes && nodes.length > 0 && nodes[0].childNodes.length > 0) {
+			return nodes[0].childNodes[0].nodeValue;
+		}
+		return null;
+	}
+
+	/**
+	 * Reset VL form when switching away from VL study
+	 */
+	function resetVLSerologySearch() {
+		var mainForm = document.getElementById("vl.mainForm");
+		if (mainForm) mainForm.style.display = "none";
+
+		var statusSpan = document.getElementById("vl.searchPatientStatus");
+		if (statusSpan) statusSpan.innerHTML = "";
+
+		var searchSubject = document.getElementById("vl.searchSubjectNumber");
+		if (searchSubject) searchSubject.value = "";
+
+		var searchSite = document.getElementById("vl.searchSiteSubjectNumber");
+		if (searchSite) searchSite.value = "";
+
+		var hivSelect = document.getElementById("vl.hivStatus");
+		if (hivSelect) {
+			hivSelect.disabled = false;
+			hivSelect.selectedIndex = 0;
+		}
+		var hivHidden = document.getElementById("vl.hivStatusHidden");
+		if (hivHidden) hivHidden.disabled = true;
+
+		var serologyRow = document.getElementById("vl.serologyHIVTestRow");
+		if (serologyRow) serologyRow.style.display = "none";
+
+		var dryTubeRow = document.getElementById("vl.dryTubeTakenRow");
+		if (dryTubeRow) dryTubeRow.style.display = "none";
+	}
 </script>
 
 <form:hidden path="currentDate" id="currentDate" />
@@ -340,14 +681,8 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 			code="sample.entry.project.initialARV.title" /></option>
 	<option value="FollowUpARV_Id"><spring:message
 			code="sample.entry.project.followupARV.title" /></option>
-	<option value="RTN_Id"><spring:message
-			code="sample.entry.project.RTN.title" /></option>
 	<option value="EID_Id"><spring:message
 			code="sample.entry.project.EID.title" /></option>
-	<option value="Indeterminate_Id"><spring:message
-			code="sample.entry.project.indeterminate.title" /></option>
-	<option value="Special_Request_Id"><spring:message
-			code="sample.entry.project.specialRequest.title" /></option>
 	<option value="VL_Id"><spring:message
 			code="sample.entry.project.VL.title" /></option>
 	<option value="Recency_Id"><spring:message
@@ -922,160 +1257,6 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 		</table>
 	</div>
 
-	<div id="RTN_Id" style="display: none;">
-		<h2>
-			<spring:message code="sample.entry.project.RTN.title" />
-		</h2>
-		<table width="100%">
-			<tr>
-				<td class="required" width="2%">*</td>
-				<td width="28%"><spring:message
-						code="sample.entry.project.receivedDate" />&nbsp;<%=DateUtil.getDateUserPrompt()%>
-				</td>
-				<td style="width: 70%;"><form:input
-						path="receivedDateForDisplay"
-						onkeyup="addDateSlashes(this, event);"
-						onchange="rtn.checkReceivedDate(false)" cssClass="text"
-						id="rtn.receivedDateForDisplay" maxlength="10" />
-					<div id="rtn.receivedDateForDisplayMessage" class="blank" /></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.receivedTime" />&nbsp;<spring:message
-						code="sample.military.time.format" /></td>
-				<td><form:input path="receivedTimeForDisplay" cssClass="text"
-						onkeyup="filterTimeKeys(this, event);"
-						id="rtn.receivedTimeForDisplay" maxlength="5"
-						onblur="rtn.checkReceivedTime(true);" />
-					<div id="rtn.receivedTimeForDisplayMessage" class="blank" /></td>
-			</tr>
-			<tr>
-				<td class="required">*</td>
-				<td><spring:message code="sample.entry.project.dateTaken" />&nbsp;<%=DateUtil.getDateUserPrompt()%>
-				</td>
-				<td><form:input path="interviewDate"
-						onkeyup="addDateSlashes(this, event);"
-						onchange="rtn.checkInterviewDate(false)" cssClass="text"
-						id="rtn.interviewDate" maxlength="10" />
-					<div id="rtn.interviewDateMessage" class="blank" /></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.timeTaken" />&nbsp;<spring:message
-						code="sample.military.time.format" /></td>
-				<td><form:input path="interviewTime"
-						onkeyup="filterTimeKeys(this, event);" cssClass="text"
-						id="rtn.interviewTime" maxlength="5"
-						onblur="rtn.checkInterviewTime(true);" />
-					<div id="rtn.interviewTimeMessage" class="blank" /></td>
-			</tr>
-			<tr>
-				<td class="required">*</td>
-				<td><spring:message code="patient.birthDate" />&nbsp;<%=DateUtil.getDateUserPrompt()%>
-				</td>
-				<td><form:input path="birthDateForDisplay" cssClass="text"
-						size="20" onkeyup="addDateSlashes(this, event);"
-						onchange="rtn.checkDateOfBirth(true)" id="rtn.dateOfBirth"
-						maxlength="10" />
-					<div id="rtn.dateOfBirthMessage" class="blank"></div></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="patient.age" /></td>
-				<td><label for="rtn.age"><spring:message
-							code="label.year" /></label> <INPUT type='text' name='age' id="rtn.age"
-					size="3"
-					onchange="rtn.checkAge( this, true, 'year' );clearField('rtn.month');"
-					maxlength="2" /> <label for="rtn.month"><spring:message
-							code="label.month" /></label> <INPUT type='text' name='month'
-					id="rtn.month" size="3"
-					onchange="rtn.checkAge( this, true, 'month' ); clearField('rtn.age');"
-					maxlength="2" />
-					<div id="rtn.ageMessage" class="blank"></div></td>
-			</tr>
-			<tr>
-				<td class="required">*</td>
-				<td><spring:message code="patient.gender" /></td>
-				<td><form:select path="gender" id="rtn.gender"
-						onchange="rtn.checkGender(true)">
-						<form:option value="">&nbsp;</form:option>
-						<form:options items="${form.formLists['GENDERS']}"
-							itemLabel="localizedName" itemValue="id" />
-					</form:select>
-					<div id="rtn.genderMessage" class="blank"></div></td>
-			</tr>
-			<tr>
-				<td class="required">*</td>
-				<td><%=MessageUtil.getContextualMessage("quick.entry.accession.number")%>
-				</td>
-				<td>
-					<div class="blank">
-						<spring:message code="sample.entry.project.LRTN" />
-					</div> <INPUT type="text" name="rtn.labNoForDisplay"
-					id="rtn.labNoForDisplay" size="5" class="text"
-					onchange="handleLabNoChange( this, 'LRTN', false );makeDirty();"
-					maxlength="5" /> <form:input path="labNo" cssClass="text"
-						style="display:none;" id="rtn.labNo" />
-					<div id="rtn.labNoForDisplayMessage" class="blank" />
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td colspan="3" class="sectionTitle"><spring:message
-						code="sample.entry.project.title.specimen" /></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message
-						code="sample.entry.project.ARV.dryTubeTaken" /></td>
-				<td><form:checkbox path="ProjectData.dryTubeTaken"
-						id="rtn.dryTubeTaken"
-						onchange="rtn.checkSampleItem($('rtn.dryTubeTaken'))" />
-					<div id="rtn.dryTubeTakenMessage" class="blank" ></div></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td colspan="3" class="sectionTitle"><spring:message
-						code="sample.entry.project.title.dryTube" /></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.serologyHIVTest" /></td>
-				<td><form:checkbox path="ProjectData.serologyHIVTest"
-						id="rtn.serologyHIVTest"
-						onchange="rtn.checkSampleItem($('rtn.dryTubeTaken'), $('rtn.serologyHIVTest'))" />
-						<div id="rtn.serologyHIVTestMessage" class="blank" ></div>
-				</td>
-			</tr>
-			<tr>
-				<td colspan="6"><hr /></td>
-			</tr>
-			<tr id="rtn.underInvestigationRow">
-				<td class="required"></td>
-				<td><spring:message code="patient.project.underInvestigation" />
-				</td>
-				<td><form:select path="observations.underInvestigation"
-						onchange="makeDirty();compareAllObservationHistoryFields(true)"
-						id="rtn.underInvestigation">
-						<form:option value="">&nbsp;</form:option>
-						<form:options items="${form.dictionaryLists['YES_NO']}"
-							itemLabel="localizedName" itemValue="id" />
-					</form:select>
-					<div id="rtn.underInvestigationMessage" class="blank" ></div></td>
-			</tr>
-			<tr id="rtn.underInvestigationCommentRow">
-				<td class="required"></td>
-				<td><spring:message
-						code="patient.project.underInvestigationComment" /></td>
-				<td colspan="3"><form:input
-						path="ProjectData.underInvestigationNote" maxlength="1000"
-						size="80" onchange="makeDirty();"
-						id="rtn.underInvestigationComment" />
-						<div id="rtn.underInvestigationCommentMessage" class="blank" ></div></td>
-			</tr>
-		</table>
-	</div>
-
 	<div id="EID_Id" style="display: none;">
 		<h2>
 			<spring:message code="sample.entry.project.EID.title" />
@@ -1517,732 +1698,47 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 		</table>
 	</div>
 
-	<div id="Indeterminate_Id" style="display: none;">
-		<h2>
-			<spring:message code="sample.entry.project.indeterminate.title" />
-		</h2>
-		<table width="100%">
-			<tr>
-				<td class="required" width="2%">*</td>
-				<td width="28%"><spring:message
-						code="sample.entry.project.receivedDate" />&nbsp;<%=DateUtil.getDateUserPrompt()%>
-				</td>
-				<td width="70%"><form:input path="receivedDateForDisplay"
-						onkeyup="addDateSlashes(this, event);"
-						onchange="ind.checkReceivedDate(false);" cssClass="text"
-						id="ind.receivedDateForDisplay" maxlength="10" />
-					<div id="ind.receivedDateForDisplayMessage" class="blank" /></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.receivedTime" />&nbsp;<spring:message
-						code="sample.military.time.format" /></td>
-				<td><form:input path="receivedTimeForDisplay"
-						onkeyup="filterTimeKeys(this, event);" cssClass="text"
-						id="ind.receivedTimeForDisplay" maxlength="5"
-						onblur="ind.checkReceivedTime(true);" />
-					<div id="ind.receivedTimeForDisplayMessage" class="blank" /></td>
-			</tr>
-			<tr>
-				<td class="required">*</td>
-				<td><spring:message code="sample.entry.project.dateTaken" />&nbsp;<%=DateUtil.getDateUserPrompt()%>
-				</td>
-				<td><form:input path="interviewDate"
-						onkeyup="addDateSlashes(this, event);"
-						onchange="ind.checkInterviewDate(false)" cssClass="text"
-						id="ind.interviewDate" maxlength="10" />
-					<div id="ind.interviewDateMessage" class="blank" /></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.timeTaken" />&nbsp;<spring:message
-						code="sample.military.time.format" /></td>
-				<td><form:input path="interviewTime"
-						onkeyup="filterTimeKeys(this, event);" cssClass="text"
-						id="ind.interviewTime" maxlength="5"
-						onblur="ind.checkInterviewTime(true);" />
-					<div id="ind.interviewTimeMessage" class="blank" /></td>
-			</tr>
-			<tr>
-				<td class="required">*</td>
-				<td><spring:message code="sample.entry.project.siteName" /></td>
-				<td style="width: 40%;"><form:select
-						path="ProjectData.INDsiteName" cssClass="text" id="ind.centerCode"
-						onchange="ind.checkCenterCode(true)">
-						<form:option value="">&nbsp;</form:option>
-						<form:options items="${form.organizationTypeLists['EID_ORGS']}"
-							itemLabel="doubleName" itemValue="id" />
-					</form:select>
-					<div id="ind.centerCodeMessage" class="blank" /></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.address" /></td>
-				<td><form:input path="ProjectData.address" cssClass="text"
-						id="ind.address"
-						onchange="ind.checkPatientField('address', true, 'street')" />
-					<div id="ind.addressMessage" class="blank"></div></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.phoneNumber" /></td>
-				<td><form:input path="ProjectData.phoneNumber" cssClass="text"
-						id="ind.phoneNumber"
-						onchange="ind.checkPatientField('phoneNumber')" />
-					<div id="ind.phoneNumberMessage" class="blank"></div></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.faxNumber" /></td>
-				<td><form:input path="ProjectData.faxNumber" cssClass="text"
-						id="ind.faxNumber" onchange="ind.checkPatientField('faxNumber')" />
-					<div id="ind.faxNumberMessage" class="blank"></div></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.email" /></td>
-				<td><form:input path="ProjectData.email" cssClass="text"
-						id="ind.email" onchange="ind.checkPatientField('email');" />
-					<div id="ind.emailMessage" class="blank"></div></td>
-			</tr>
-			<tr>
-				<td class="required">+</td>
-				<td><spring:message code="sample.entry.project.subjectNumber" /></td>
-				<td><form:input path="subjectNumber" cssClass="text"
-						id="ind.subjectNumber" maxlength="7"
-						onchange="ind.checkSubjectNumber(true)" />
-					<div id="ind.subjectIDMessage" class="blank"></div></td>
-			</tr>
-			<tr>
-				<td class="required">+</td>
-				<td><spring:message code="patient.site.subject.number" /></td>
-				<td><form:input path="siteSubjectNumber"
-						id="ind.siteSubjectNumber" cssClass="text"
-						onchange="ind.checkSiteSubjectNumber(true)" />
-						<div id="ind.siteSubjectNumberMessage" class="blank" ></div></td>
-			</tr>
-			<tr>
-				<td class="required">*</td>
-				<td><%=MessageUtil.getContextualMessage("quick.entry.accession.number")%>
-				</td>
-				<td>
-					<div class="blank">
-						<spring:message code="sample.entry.project.LIND" />
-					</div> <INPUT type="text" name="ind.labNoForDisplay"
-					id="ind.labNoForDisplay" size="5" class="text"
-					onchange="handleLabNoChange( this, '<spring:message code="sample.entry.project.LIND"/>', false );makeDirty();"
-					maxlength="5" /> <form:input path="labNo" style="display:none;"
-						cssClass="text" id="ind.labNo" />
-					<div id="ind.labNoMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td class="required">*</td>
-				<td><spring:message code="patient.gender" /></td>
-				<td><form:select path="gender" id="ind.gender"
-						onchange="ind.checkGender(false);">
-						<form:option value="">&nbsp;</form:option>
-						<form:options items="${form.formLists['GENDERS']}"
-							itemLabel="localizedName" itemValue="id" />
-					</form:select>
-					<div id="ind.genderMessage" class="blank"></div></td>
-			</tr>
-			<tr>
-				<td class="required">*</td>
-				<td><spring:message code="patient.birthDate" />&nbsp;<%=DateUtil.getDateUserPrompt()%>
-				</td>
-				<td><form:input path="birthDateForDisplay" cssClass="text"
-						size="20" maxlength="10" id="ind.dateOfBirth"
-						onkeyup="addDateSlashes(this, event);"
-						onchange="ind.checkDateOfBirth(false)" />
-					<div id="ind.dateOfBirthMessage" class="blank"></div></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="patient.age" /></td>
-				<td><label for="ind.age"><spring:message
-							code="label.year" /></label> <INPUT type="text" name="age" id="ind.age"
-					size="3" maxlength="2"
-					onchange="ind.checkAge( this, 'ind.dateOfBirth', 'ind.interviewDate', 'year' ); makeDirty();" />
-					<div id="ind.ageMessage" class="blank"></div></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td colspan="2"><h3>
-						<spring:message code="sample.entry.project.firstTest" />
-					</h3></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.date" /></td>
-				<td><form:input path="observations.indFirstTestDate"
-						cssClass="text" id="ind.indFirstTestDate" maxlength="10"
-						onkeyup="addDateSlashes(this, event);"
-						onchange="compareAllObservationHistoryFields(true, 'ind.');checkValidDate(this);" />
-					<div id="ind.indFirstTestDateMessage" class="blank" /></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.testName" /></td>
-				<td><form:input path="observations.indFirstTestName"
-						cssClass="text" id="ind.indFirstTestName"
-						onchange="compareAllObservationHistoryFields(true)" />
-						<div id="ind.indFirstTestNameMessage" class="blank" ></div></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.result" /></td>
-				<td><form:input path="observations.indFirstTestResult"
-						cssClass="text" id="ind.indFirstTestResult"
-						onchange="compareAllObservationHistoryFields(true)" />
-						<div id="ind.indFirstTestResultMessage" class="blank" ></div></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td colspan="2"><h3>
-						<spring:message code="sample.entry.project.secondTest" />
-					</h3></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.date" /></td>
-				<td><form:input path="observations.indSecondTestDate"
-						cssClass="text" id="ind.indSecondTestDate" maxlength="10"
-						onkeyup="addDateSlashes(this, event);"
-						onchange="compareAllObservationHistoryFields(true);checkValidDate(this);" />
-					<div id="ind.indSecondTestDateMessage" class="blank" /></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.testName" /></td>
-				<td><form:input path="observations.indSecondTestName"
-						cssClass="text" id="ind.indSecondTestName"
-						onchange="compareAllObservationHistoryFields(true)" />
-						<div id="ind.indSecondTestNameMessage" class="blank" ></div></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.result" /></td>
-				<td><form:input path="observations.indSecondTestResult"
-						cssClass="text" id="ind.indSecondTestResult"
-						onchange="compareAllObservationHistoryFields(true)" />
-						<div id="ind.indSecondTestResultMessage" class="blank" ></div></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message
-						code="sample.entry.project.finalResultOfSite" /></td>
-				<td><form:input path="observations.indSiteFinalResult"
-						cssClass="text" id="ind.indSiteFinalResult"
-						onchange="compareAllObservationHistoryFields(true)" />
-						<div id="ind.indSiteFinalResultMessage" class="blank" ></div></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td colspan="2" class="sectionTitle"><spring:message
-						code="sample.entry.project.title.specimen" /></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message
-						code="sample.entry.project.ARV.dryTubeTaken" /></td>
-				<td><form:checkbox path="ProjectData.dryTubeTaken"
-						id="ind.dryTubeTaken"
-						onchange="ind.checkSampleItem($('ind.dryTubeTaken'));" />
-						<div id="ind.dryTubeTakenMessage" class="blank" ></div></td>
-			</tr>
-
-			<tr>
-				<td></td>
-				<td colspan="3" class="sectionTitle"><spring:message
-						code="sample.entry.project.title.dryTube" /></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.serologyHIVTest" /></td>
-				<td><form:checkbox path="ProjectData.serologyHIVTest"
-						id="ind.serologyHIVTest"
-						onchange="ind.checkSampleItem($('ind.dryTubeTaken'), $('ind.serologyHIVTest'));" />
-						<div id="ind.serologyHIVTestMessage" class="blank" ></div>
-				</td>
-			</tr>
-			<tr>
-				<td colspan="6"><hr /></td>
-			</tr>
-			<tr id="ind.underInvestigationRow">
-				<td class="required"></td>
-				<td><spring:message code="patient.project.underInvestigation" />
-				</td>
-				<td><form:select path="observations.underInvestigation"
-						onchange="makeDirty();compareAllObservationHistoryFields(true)"
-						id="ind.underInvestigation">
-						<form:option value="">&nbsp;</form:option>
-						<form:options items="${form.dictionaryLists['YES_NO']}"
-							itemLabel="localizedName" itemValue="id" />
-					</form:select>
-					<div id="ind.underInvestigationMessage" class="blank" ></div></td>
-			</tr>
-			<tr id="ind.underInvestigationCommentRow">
-				<td class="required"></td>
-				<td><spring:message
-						code="patient.project.underInvestigationComment" /></td>
-				<td colspan="3"><form:input
-						path="ProjectData.underInvestigationNote" maxlength="1000"
-						size="80" onchange="makeDirty();"
-						id="ind.underInvestigationComment" />
-						<div id="ind.underInvestigationCommentMessage" class="blank" ></div></td>
-			</tr>
-		</table>
-	</div>
-
-	<div id="Special_Request_Id" style="display: none;">
-		<h2>
-			<spring:message code="sample.entry.project.specialRequest.title" />
-		</h2>
-		<table width="100%">
-			<tr>
-				<td class="required" width="2%">*</td>
-				<td width="28%"><spring:message
-						code="sample.entry.project.receivedDate" />&nbsp;<%=DateUtil.getDateUserPrompt()%>
-				</td>
-				<td width="70%"><form:input path="receivedDateForDisplay"
-						cssClass="text" id="spe.receivedDateForDisplay" maxlength="10"
-						onkeyup="addDateSlashes(this, event);"
-						onchange="spe.checkReceivedDate(false);" />
-					<div id="spe.receivedDateForDisplayMessage" class="blank" /></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.receivedTime" />&nbsp;<spring:message
-						code="sample.military.time.format" /></td>
-				<td><form:input path="receivedTimeForDisplay"
-						onkeyup="filterTimeKeys(this, event);" cssClass="text"
-						id="spe.receivedTimeForDisplay" maxlength="5"
-						onblur="spe.checkReceivedTime(true);" />
-					<div id="spe.receivedTimeForDisplayMessage" class="blank" /></td>
-			</tr>
-			<tr>
-				<td class="required">*</td>
-				<td><spring:message code="sample.entry.project.dateTaken" />&nbsp;<%=DateUtil.getDateUserPrompt()%>
-				</td>
-				<td><form:input path="interviewDate" cssClass="text"
-						onkeyup="addDateSlashes(this, event);"
-						onchange="spe.checkInterviewDate(false);" id="spe.interviewDate"
-						maxlength="10" />
-					<div id="spe.interviewDateMessage" class="blank" ></div></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.timeTaken" />&nbsp;<spring:message
-						code="sample.military.time.format" /></td>
-				<td><form:input path="interviewTime"
-						onkeyup="filterTimeKeys(this, event);" cssClass="text"
-						id="spe.interviewTime" maxlength="5"
-						onblur="spe.checkInterviewTime(true);" />
-					<div id="spe.interviewTimeMessage" class="blank" /></td>
-			</tr>
-			<tr>
-				<td class="required">+</td>
-				<td><spring:message code="sample.entry.project.subjectNumber" /></td>
-				<td><form:input path="subjectNumber" cssClass="text"
-						id="spe.subjectNumber" maxlength="7"
-						onchange="spe.checkSubjectNumber(true);" />
-					<div id="spe.subjectNumberMessage" class="blank" /></td>
-			</tr>
-			<tr>
-				<td class="required">+</td>
-				<td><spring:message code="patient.site.subject.number" /></td>
-				<td><form:input path="siteSubjectNumber"
-						id="spe.siteSubjectNumber" cssClass="text"
-						onchange="spe.checkSiteSubjectNumber(true)" />
-						<div id="spe.siteSubjectNumberMessage" class="blank" ></div></td>
-			</tr>
-			<tr>
-				<td class="required">*</td>
-				<td><spring:message code="patient.birthDate" />&nbsp;<%=DateUtil.getDateUserPrompt()%>
-				</td>
-				<td><form:input path="birthDateForDisplay" cssClass="text"
-						size="20" maxlength="10" onkeyup="addDateSlashes(this, event);"
-						onchange="spe.checkDateOfBirth(false)" id="spe.dateOfBirth" />
-					<div id="spe.dateOfBirthMessage" class="blank"></div></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="patient.age" /></td>
-				<td><label for="spe.age"><spring:message
-							code="label.year" /></label> <INPUT type="text" name="age" id="spe.age"
-					size="3"
-					onchange="spe.checkAge( this, true, 'year'); updatePatientEditStatus(); makeDirty();"
-					maxlength="3" />
-					<div id="spe.ageMessage" class="blank"></div></td>
-			</tr>
-			<tr>
-				<td class="required">*</td>
-				<td><spring:message code="patient.gender" /></td>
-				<td><form:select path="gender" id="spe.gender"
-						onchange="spe.checkGender(false);">
-						<form:option value="">&nbsp;</form:option>
-						<form:options items="${form.dictionaryLists['YES_NO']}"
-							itemLabel="localizedName" itemValue="id" />
-					</form:select>
-					<div id="spe.genderMessage" class="blank"></div></td>
-			</tr>
-			<tr>
-				<td class="required">*</td>
-				<td><%=MessageUtil.getContextualMessage("quick.entry.accession.number")%>
-				</td>
-				<td>
-					<div class="blank">
-						<spring:message code="sample.entry.project.LSPE" />
-					</div> <INPUT type="text" name="spe.labNoForDisplay"
-					id="spe.labNoForDisplay" size="5" class="text"
-					onchange="handleLabNoChange( this, '<spring:message code="sample.entry.project.LSPE"/>', 'false' );makeDirty();"
-					maxlength="5" /> <form:input path="labNo" cssClass="text"
-						style="display:none;" id="spe.labNo" />
-					<div id="spe.labNoMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message
-						code="sample.entry.project.specialRequest.reason" /></td>
-				<td><form:select path="observations.reasonForRequest"
-						id="spe.reasonForRequest"
-						onchange="compareAllObservationHistoryFields(true)">
-						<form:option value="">&nbsp;</form:option>
-						<form:options
-							items="${form.dictionaryLists['SPECIAL_REQUEST_REASONS']}"
-							itemLabel="localizedName" itemValue="id" />
-					</form:select> <div id="spe.reasonForRequestMessage" class="blank"></div>
-					</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td colspan="2" class="sectionTitle"><spring:message
-						code="sample.entry.project.title.specimen" /></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message
-						code="sample.entry.project.ARV.dryTubeTaken" /></td>
-				<td><form:checkbox path="ProjectData.dryTubeTaken"
-						id="spe.dryTubeTaken"
-						onchange="spe.checkSampleItem($('spe.dryTubeTaken'));" />
-						<div id="spe.dryTubeTakenMessage" class="blank"></div></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message
-						code="sample.entry.project.ARV.edtaTubeTaken" /></td>
-				<td><form:checkbox path="ProjectData.edtaTubeTaken"
-						id="spe.edtaTubeTaken"
-						onchange="spe.checkSampleItem($('spe.edtaTubeTaken'));" />
-						<div id="spe.edtaTubeTakenMessage" class="blank"></div></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message
-						code="sample.entry.project.title.dryBloodSpot" /></td>
-				<td><form:checkbox path="ProjectData.dbsTaken"
-						id="spe.dbsTaken"
-						onchange="spe.checkSampleItem($('spe.dbsTaken'))" />
-						<div id="spe.dbsTakenMessage" class="blank"></div></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td colspan="2" class="sectionTitle"><spring:message
-						code="sample.entry.project.title.dryTube" /></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.murexTest" /></td>
-				<td><form:checkbox path="ProjectData.murexTest"
-						id="spe.murexTest"
-						onchange="spe.checkSampleItem($('spe.dryTubeTaken'), $('spe.murexTest'))" />
-						<div id="spe.murexTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.genscreenTest" /></td>
-				<td><form:checkbox path="ProjectData.genscreenTest"
-						id="spe.genscreenTest"
-						onchange="spe.checkSampleItem($('spe.dryTubeTaken'), $('spe.genscreenTest'))" />
-						<div id="spe.genscreenTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.vironostikaTest" /></td>
-				<td><form:checkbox path="ProjectData.vironostikaTest"
-						id="spe.vironostikaTest"
-						onchange="spe.checkSampleItem($('spe.dryTubeTaken'), $('spe.vironostikaTest'))" />
-						<div id="spe.vironostikaTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.innoliaTest" /></td>
-				<td><form:checkbox path="ProjectData.innoliaTest"
-						id="spe.innoliaTest"
-						onchange="spe.checkSampleItem($('spe.dryTubeTaken'), $('spe.innoliaTest'))" />
-						<div id="spe.innoliaTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message
-						code="sample.entry.project.ARV.glycemiaTest" /></td>
-				<td><form:checkbox path="ProjectData.glycemiaTest"
-						id="spe.glycemiaTest"
-						onchange="spe.checkSampleItem($('spe.dryTubeTaken'), $('spe.glycemiaTest'))" />
-						<div id="spe.glycemiaTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message
-						code="sample.entry.project.ARV.creatinineTest" /></td>
-				<td><form:checkbox path="ProjectData.creatinineTest"
-						id="spe.creatinineTest"
-						onchange="spe.checkSampleItem($('spe.dryTubeTaken'), $('spe.creatinineTest'))" />
-						<div id="spe.creatinineTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message
-						code="sample.entry.project.ARV.transaminaseTest" /></td>
-				<td><form:checkbox path="ProjectData.transaminaseTest"
-						id="spe.transaminaseTest"
-						onchange="spe.checkSampleItem($('spe.dryTubeTaken'), $('spe.transaminaseTest'))" />
-						<div id="spe.transaminaseTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message
-						code="sample.entry.project.transaminaseALTLTest" /></td>
-				<td><form:checkbox path="ProjectData.transaminaseALTLTest"
-						id="spe.transaminaseALTLTest"
-						onchange="spe.checkSampleItem($('spe.dryTubeTaken'), $('spe.transaminaseALTLTest'))" />
-						<div id="spe.transaminaseALTLTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message
-						code="sample.entry.project.transaminaseASTLTest" /></td>
-				<td><form:checkbox path="ProjectData.transaminaseASTLTest"
-						id="spe.transaminaseASTLTest"
-						onchange="spe.checkSampleItem($('spe.dryTubeTaken'), $('spe.transaminaseASTLTest'))" />
-						<div id="spe.transaminaseASTLTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td colspan="2" class="sectionTitle"><spring:message
-						code="sample.entry.project.title.edtaTube" /></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.ARV.nfsTest" /></td>
-				<td><form:checkbox path="ProjectData.nfsTest" id="spe.nfsTest"
-						onchange="spe.checkSampleItem($('spe.edtaTubeTaken'), $('spe.nfsTest'))" />
-						<div id="spe.nfsTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.gbTest" /></td>
-				<td><form:checkbox path="ProjectData.gbTest" id="spe.gbTest"
-						onchange="spe.checkSampleItem($('spe.edtaTubeTaken'), $('spe.gbTest'));" />
-						<div id="spe.gbTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.lymphTest" /></td>
-				<td><form:checkbox path="ProjectData.lymphTest"
-						id="spe.lymphTest"
-						onchange="spe.checkSampleItem($('spe.edtaTubeTaken'), $('spe.lymphTest'));" />
-						<div id="spe.lymphTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.monoTest" /></td>
-				<td><form:checkbox path="ProjectData.monoTest"
-						id="spe.monoTest"
-						onchange="spe.checkSampleItem($('spe.edtaTubeTaken'), $('spe.monoTest'));" />
-						<div id="spe.monoTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.eoTest" /></td>
-				<td><form:checkbox path="ProjectData.eoTest" id="spe.eoTest"
-						onchange="spe.checkSampleItem($('spe.edtaTubeTaken'), $('spe.eoTest'));" />
-						<div id="spe.eoTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.basoTest" /></td>
-				<td><form:checkbox path="ProjectData.basoTest"
-						id="spe.basoTest"
-						onchange="spe.checkSampleItem($('spe.edtaTubeTaken'), $('spe.basoTest'));" />
-						<div id="spe.basoTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.grTest" /></td>
-				<td><form:checkbox path="ProjectData.grTest" id="spe.grTest"
-						onchange="spe.checkSampleItem($('spe.edtaTubeTaken'), $('spe.grTest'));" />
-						<div id="spe.grTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.hbTest" /></td>
-				<td><form:checkbox path="ProjectData.hbTest" id="spe.hbTest"
-						onchange="spe.checkSampleItem($('spe.edtaTubeTaken'), $('spe.hbTest'));" />
-						<div id="spe.hbTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.hctTest" /></td>
-				<td><form:checkbox path="ProjectData.hctTest" id="spe.hctTest"
-						onchange="spe.checkSampleItem($('spe.edtaTubeTaken'), $('spe.hctTest'));" />
-						<div id="spe.hctTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.vgmTest" /></td>
-				<td><form:checkbox path="ProjectData.vgmTest" id="spe.vgmTest"
-						onchange="spe.checkSampleItem($('spe.edtaTubeTaken'), $('spe.vgmTest'));" />
-						<div id="spe.vgmTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.tcmhTest" /></td>
-				<td><form:checkbox path="ProjectData.tcmhTest"
-						id="spe.tcmhTest"
-						onchange="spe.checkSampleItem($('spe.edtaTubeTaken'), $('spe.tcmhTest'));" />
-						<div id="spe.tcmhTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.ccmhTest" /></td>
-				<td><form:checkbox path="ProjectData.ccmhTest"
-						id="spe.ccmhTest"
-						onchange="spe.checkSampleItem($('spe.edtaTubeTaken'), $('spe.ccmhTest'));" />
-						<div id="spe.ccmhTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.plqTest" /></td>
-				<td><form:checkbox path="ProjectData.plqTest" id="spe.plqTest"
-						onchange="spe.checkSampleItem($('spe.edtaTubeTaken'), $('spe.plqTest'));" />
-						<div id="spe.plqTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.ARV.cd4cd8Test" /></td>
-				<td><form:checkbox path="ProjectData.cd4cd8Test"
-						id="spe.cd4cd8Test"
-						onchange="spe.checkSampleItem($('spe.edtaTubeTaken'), $('spe.cd4cd8Test'));" />
-						<div id="spe.cd4cd8TestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.cd3CountTest" /></td>
-				<td><form:checkbox path="ProjectData.cd3CountTest"
-						id="spe.cd3CountTest"
-						onchange="spe.checkSampleItem($('spe.edtaTubeTaken'), $('spe.cd3CountTest'));" />
-						<div id="spe.cd3CountTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.cd4CountTest" /></td>
-				<td><form:checkbox path="ProjectData.cd4CountTest"
-						id="spe.cd4CountTest"
-						onchange="spe.checkSampleItem($('spe.edtaTubeTaken'), $('spe.cd4CountTest'));" />
-						<div id="spe.cd4CountTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td colspan="2" class="sectionTitle"><spring:message
-						code="sample.entry.project.title.otherTests" /></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message code="sample.entry.project.dnaPCR" /></td>
-				<td><form:checkbox path="ProjectData.dnaPCR" id="spe.dnaPCR"
-						onchange="spe.checkSampleItem($('spe.dbsTaken'), $('spe.dnaPCR'));" />
-						<div id="spe.dnaPCRMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message
-						code="sample.entry.project.ARV.viralLoadTest" /></td>
-				<td><form:checkbox path="ProjectData.viralLoadTest"
-						id="spe.viralLoadTest"
-						onchange="spe.checkSampleItem($('spe.edtaTubeTaken'), $('spe.viralLoadTest'));" />
-						<div id="spe.viralLoadTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td><spring:message
-						code="sample.entry.project.ARV.genotypingTest" /></td>
-				<td><form:checkbox path="ProjectData.genotypingTest"
-						id="spe.genotypingTest"
-						onchange="spe.checkSampleItem($('spe.edtaTubeTaken'), $('spe.genotypingTest'));" />
-						<div id="spe.genotypingTestMessage" class="blank"></div>
-				</td>
-			</tr>
-			<tr>
-				<td colspan="6"><hr /></td>
-			</tr>
-			<tr id="spe.underInvestigationRow">
-				<td class="required"></td>
-				<td><spring:message code="patient.project.underInvestigation" />
-				</td>
-				<td><form:select path="observations.underInvestigation"
-						onchange="makeDirty();compareAllObservationHistoryFields(true)"
-						id="spe.underInvestigation">
-						<form:option value="">&nbsp;</form:option>
-						<form:options items="${form.dictionaryLists['YES_NO']}"
-							itemLabel="localizedName" itemValue="id" />
-					</form:select>
-					<div id="spe.underInvestigationMessage" class="blank"></div></td>
-			</tr>
-			<tr id="spe.underInvestigationCommentRow">
-				<td class="required"></td>
-				<td><spring:message
-						code="patient.project.underInvestigationComment" /></td>
-				<td colspan="3"><form:input
-						path="ProjectData.underInvestigationNote" maxlength="1000"
-						size="80" onchange="makeDirty();"
-						id="spe.underInvestigationComment" />
-						<div id="spe.underInvestigationNoteMessage" class="blank"></div></td>
-			</tr>
-		</table>
-	</div>
-
 	<div id="VL_Id" style="display: none;">
+
+		<h2>
+			<spring:message code="sample.entry.project.VL.title" />
+		</h2>
+
+		<%-- Patient search zone - always visible --%>
+		<div id="vl.patientSearchZone">
+			<table width="100%">
+				<tr>
+					<td colspan="3" class="sectionTitle"><spring:message code="sample.entry.project.title.patientSearch" text="Recherche du patient" /></td>
+				</tr>
+				<tr>
+					<td class="required" width="2%">+</td>
+					<td width="28%"><spring:message code="sample.entry.project.subjectNumber" /></td>
+					<td width="70%"><input type="text" id="vl.searchSubjectNumber" class="text" maxlength="9" />
+						<div id="vl.searchSubjectNumberMessage" class="blank"></div></td>
+				</tr>
+				<tr>
+					<td class="required">+</td>
+					<td><spring:message code="patient.site.subject.number" /></td>
+					<td><input type="text" id="vl.searchSiteSubjectNumber" class="text" maxlength="19"
+						onkeyup="addPatientCodeSlashes(this, event);" />
+						<div id="vl.searchSiteSubjectNumberMessage" class="blank"></div></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td>
+						<input type="button" id="vl.searchPatientButton"
+							value='<%=MessageUtil.getMessage("label.button.search")%>'
+							onclick="searchVLPatientSerology();" />
+						<span id="vl.searchPatientStatus" class="blank"></span>
+					</td>
+				</tr>
+			</table>
+			<hr />
+		</div>
+
+		<%-- Main VL form - hidden until patient search is done --%>
+		<div id="vl.mainForm" style="display: none;">
 
 		<%
 		if (acceptExternalOrders) {
@@ -2259,9 +1755,6 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 		}
 		%>
 
-		<h2>
-			<spring:message code="sample.entry.project.VL.title" />
-		</h2>
 		<table width="100%">
 
 			<tr>
@@ -2443,8 +1936,8 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 					<div id="vl.vlSuckleMessage" class="blank"></div></td>
 			</tr>
 
-			<tr>
-				<td class="required">*</td>
+			<tr id="vl.hivStatusRow">
+				<td class="required" id="vl.hivStatusRequired">*</td>
 				<td><spring:message code="patient.project.hivType" /></td>
 				<td><form:select path="observations.hivStatus"
 						id="vl.hivStatus" onchange="vl.checkHivStatus(true);">
@@ -2452,6 +1945,7 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 						<form:options items="${form.dictionaryLists['HIV_TYPES']}"
 							itemLabel="localizedName" itemValue="id" />
 					</form:select>
+					<input type="hidden" id="vl.hivStatusHidden" name="observations.hivStatus" disabled="disabled" />
 					<div id="vl.hivStatusMessage" class="blank"></div></td>
 			</tr>
 			<tr>
@@ -2728,6 +2222,16 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 				<td colspan="3" class="sectionTitle"><spring:message
 						code="sample.entry.project.title.specimen" /></td>
 			</tr>
+			<tr id="vl.dryTubeTakenRow" style="display: none;">
+				<td width="2%"></td>
+				<td width="38%"><spring:message
+						code="sample.entry.project.ARV.dryTubeTaken" /></td>
+				<td width="60%"><form:checkbox path="ProjectData.dryTubeTaken"
+						id="vl.dryTubeTaken"
+						onchange="vl.checkSampleItem($('vl.dryTubeTaken'));" />
+						<div id="vl.dryTubeTakenMessage" class="blank"></div>
+				</td>
+			</tr>
 			<tr>
 				<td width="2%"></td>
 				<td width="38%"><spring:message
@@ -2764,6 +2268,15 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 				<td colspan="3" class="sectionTitle"><spring:message
 						code="sample.entry.project.title.tests" /></td>
 			</tr>
+			<tr id="vl.serologyHIVTestRow" style="display: none;">
+				<td></td>
+				<td><spring:message code="sample.entry.project.serologyHIVTest" /></td>
+				<td><form:checkbox path="ProjectData.serologyHIVTest"
+						id="vl.serologyHIVTest" disabled="true"
+						onchange="vl.checkSampleItem($('vl.dryTubeTaken'), this);" />
+						<span class="requiredlabel">*</span>
+						<div id="vl.serologyHIVTestMessage" class="blank"></div></td>
+			</tr>
 			<tr>
 				<td></td>
 				<td><spring:message
@@ -2774,6 +2287,7 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 						<div id="vl.viralLoadTestMessage" class="blank" ></div></td>
 			</tr>
 		</table>
+		</div><%-- end vl.mainForm --%>
 	</div>
 	<div id="Recency_Id" style="display: none;">
 		<table>
@@ -3205,26 +2719,6 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 	ArvFollowupProjectChecker.prototype = new BaseProjectChecker();
 	farv = new ArvFollowupProjectChecker();
 
-	function RtnProjectChecker() {
-		this.idPre = "rtn.";
-
-		this.checkAllSampleFields = function(blanksAllowed) {
-			this.checkInterviewDate(blanksAllowed);
-			this.checkReceivedDate(blanksAllowed);
-			this.checkInterviewTime(true);
-			this.checkReceivedTime(true);
-		}
-
-		this.checkAllSampleItemFields = function() {
-			this.checkSampleItem($("rtn.dryTubeTaken"));
-			this.checkSampleItem($('rtn.dryTubeTaken'),
-					$('rtn.serologyHIVTest'));
-		}
-	}
-
-	RtnProjectChecker.prototype = new BaseProjectChecker();
-	rtn = new RtnProjectChecker();
-
 	function EidProjectChecker() {
 		this.idPre = "eid.";
 		
@@ -3246,53 +2740,6 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 
 	EidProjectChecker.prototype = new BaseProjectChecker();
 	eid = new EidProjectChecker();
-
-	function IndProjectChecker() {
-		this.idPre = "ind.";
-
-		this.checkAllSampleFields = function(blanksAllowed) {
-			this.checkCenterCode(blanksAllowed);
-			this.checkInterviewDate(blanksAllowed);
-			this.checkReceivedDate(blanksAllowed);
-			this.checkInterviewTime(true);
-			this.checkReceivedTime(true);
-		}
-
-		this.checkAllSampleItemFields = function() {
-			ind.checkSampleItem($('ind.dryTubeTaken'));
-			ind
-					.checkSampleItem($('ind.dryTubeTaken'),
-							$('ind.serologyHIVTest'));
-		}
-
-		this.checkAllSubjectFields = function(blanksAllowed,
-				validateSubjectNumber) {
-			this.checkAllSubjectFieldsBasic(blanksAllowed,
-					validateSubjectNumber);
-			this.checkPatientField('address', blanksAllowed, 'street');
-			this.checkPatientField('phoneNumber', blanksAllowed);
-			this.checkPatientField('faxNumber', blanksAllowed);
-			this.checkPatientField('email', blanksAllowed);
-		}
-	}
-	IndProjectChecker.prototype = new BaseProjectChecker();
-	ind = new IndProjectChecker();
-
-	function SpeProjectChecker() {
-		this.idPre = "spe."
-
-		this.checkAllSampleFields = function(blanksAllowed) {
-			this.checkInterviewDate(blanksAllowed);
-			this.checkReceivedDate(blanksAllowed);
-			this.checkInterviewTime(true);
-			this.checkReceivedTime(true);
-		}
-
-		this.checkAllSampleItemFields = function() {
-		}
-	}
-	SpeProjectChecker.prototype = new BaseProjectChecker();
-	spe = new SpeProjectChecker();
 
 	function VLProjectChecker() {
 
