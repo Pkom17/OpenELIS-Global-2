@@ -255,6 +255,7 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 
 	function hideAllDivs() {
 		resetVLSerologySearch();
+		resetFARVSerologySearch();
 		toggleDisabledDiv(document.getElementById("InitialARV_Id"), false);
 		toggleDisabledDiv(document.getElementById("FollowUpARV_Id"), false);
 		toggleDisabledDiv(document.getElementById("EID_Id"), false);
@@ -290,6 +291,35 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 
 		$("saveButtonId").disabled = !validToSave;
 
+	}
+
+	/**
+	 * Lock a checkbox in the checked state: prevents unchecking but keeps
+	 * the value posted (unlike disabled). Adds a visual cue.
+	 */
+	function lockCheckboxChecked(checkbox) {
+		if (!checkbox) return;
+		checkbox.checked = true;
+		checkbox.setAttribute("data-locked", "true");
+		checkbox.style.opacity = "0.6";
+		checkbox.style.cursor = "not-allowed";
+		// Bind once
+		if (!checkbox._lockHandlerBound) {
+			checkbox.addEventListener("click", function(e) {
+				if (this.getAttribute("data-locked") === "true") {
+					e.preventDefault();
+					this.checked = true;
+				}
+			});
+			checkbox._lockHandlerBound = true;
+		}
+	}
+
+	function unlockCheckbox(checkbox) {
+		if (!checkbox) return;
+		checkbox.removeAttribute("data-locked");
+		checkbox.style.opacity = "";
+		checkbox.style.cursor = "";
 	}
 
 	/**
@@ -398,10 +428,17 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 				// Hide serology-related rows
 				document.getElementById("vl.serologyHIVTestRow").style.display = "none";
 				var serologyCheckbox = document.getElementById("vl.serologyHIVTest");
-				if (serologyCheckbox) { serologyCheckbox.checked = false; serologyCheckbox.disabled = true; }
+				if (serologyCheckbox) {
+					unlockCheckbox(serologyCheckbox);
+					serologyCheckbox.checked = false;
+					serologyCheckbox.disabled = true;
+				}
 				document.getElementById("vl.dryTubeTakenRow").style.display = "none";
 				var dryTubeCheckbox = document.getElementById("vl.dryTubeTaken");
-				if (dryTubeCheckbox) dryTubeCheckbox.checked = false;
+				if (dryTubeCheckbox) {
+					unlockCheckbox(dryTubeCheckbox);
+					dryTubeCheckbox.checked = false;
+				}
 
 				// Always check viral load test
 				var vlTest = document.getElementById("vl.viralLoadTest");
@@ -517,6 +554,9 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 			vlTest.checked = true;
 		}
 
+		var dryTubeRow = document.getElementById("vl.dryTubeTakenRow");
+		var dryTubeCheckbox = document.getElementById("vl.dryTubeTaken");
+
 		if (hasSerology) {
 			// Serology exists: prefill hivStatus, make it readonly
 			setHivStatusFromSerologyResult(serologyResult);
@@ -528,9 +568,11 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 			// Hide serology test row - not needed
 			serologyRow.style.display = "none";
 			if (serologyCheckbox) {
+				unlockCheckbox(serologyCheckbox);
 				serologyCheckbox.checked = false;
 				serologyCheckbox.disabled = true;
 			}
+			if (dryTubeCheckbox) unlockCheckbox(dryTubeCheckbox);
 		} else {
 			// No serology: hivStatus disabled, add serology tests
 			hivStatusSelect.disabled = true;
@@ -538,17 +580,15 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 			hivStatusHidden.disabled = true;
 			hivStatusRequired.textContent = "";
 
-			// Show serology test row, checked and mandatory
+			// Show serology test row; lock checkbox checked (cannot be unchecked)
 			serologyRow.style.display = "";
 			if (serologyCheckbox) {
-				serologyCheckbox.checked = true;
 				serologyCheckbox.disabled = false;
+				lockCheckboxChecked(serologyCheckbox);
 			}
-			// Show and check dry tube row (needed for serology)
-			var dryTubeRow = document.getElementById("vl.dryTubeTakenRow");
-			var dryTubeCheckbox = document.getElementById("vl.dryTubeTaken");
+			// Show and lock dry tube (needed for serology)
 			if (dryTubeRow) dryTubeRow.style.display = "";
-			if (dryTubeCheckbox) dryTubeCheckbox.checked = true;
+			if (dryTubeCheckbox) lockCheckboxChecked(dryTubeCheckbox);
 		}
 
 		// Show the main form
@@ -589,8 +629,8 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 		}
 	}
 
-	function setHivStatusFromSerologyResult(serologyResult) {
-		var hivSelect = document.getElementById("vl.hivStatus");
+	function setHivStatusFromSerologyResult(serologyResult, selectId) {
+		var hivSelect = document.getElementById(selectId || "vl.hivStatus");
 		if (!hivSelect || !serologyResult) return;
 
 		// Map Innolia conclusion values to VIH select option text
@@ -658,6 +698,287 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 
 		var dryTubeRow = document.getElementById("vl.dryTubeTakenRow");
 		if (dryTubeRow) dryTubeRow.style.display = "none";
+
+		unlockCheckbox(document.getElementById("vl.serologyHIVTest"));
+		unlockCheckbox(document.getElementById("vl.dryTubeTaken"));
+	}
+
+	/**
+	 * FARV (ARV Bilan de suivi) Serology search: same logic as VL.
+	 */
+	function searchFARVPatientSerology() {
+		var subjectNo = document.getElementById("farv.searchSubjectNumber").value.trim();
+		var siteSubjectNo = document.getElementById("farv.searchSiteSubjectNumber").value.trim();
+
+		if (!subjectNo && !siteSubjectNo) {
+			document.getElementById("farv.searchPatientStatus").innerHTML =
+				'<span style="color:red;"><spring:message code="sample.entry.project.patientSearch.required" text="Veuillez saisir un Sujet No. ou Site Sujet No." /></span>';
+			return;
+		}
+
+		document.getElementById("farv.searchPatientStatus").innerHTML =
+			'<spring:message code="label.searching" text="Recherche en cours..." />';
+		document.getElementById("farv.searchPatientButton").disabled = true;
+		document.getElementById("farv.mainForm").style.display = "none";
+
+		// Clear form subject fields for new search
+		var subField = document.getElementById("farv.subjectNumber");
+		var siteSubField = document.getElementById("farv.siteSubjectNumber");
+		if (subField) subField.value = "";
+		if (siteSubField) siteSubField.value = "";
+
+		if (serologyControlEnabled) {
+			getSerologyResultForPatient(subjectNo, siteSubjectNo,
+				function(xhr) { handleFARVSerologySearchResult(xhr, subjectNo, siteSubjectNo); },
+				function(xhr) { handleFARVSerologySearchFailure(subjectNo, siteSubjectNo); }
+			);
+		} else {
+			handleFARVPatientOnlySearch(subjectNo, siteSubjectNo);
+		}
+	}
+
+	/**
+	 * Serology control disabled: search patient only, hivStatus left editable.
+	 */
+	function handleFARVPatientOnlySearch(subjectNo, siteSubjectNo) {
+		var searchField = subjectNo
+			? document.getElementById("farv.subjectNumber")
+			: document.getElementById("farv.siteSubjectNumber");
+		var searchValue = subjectNo || siteSubjectNo;
+		var searchBy = subjectNo ? "nationalID" : "externalID";
+
+		if (searchField) searchField.value = searchValue;
+
+		patientLoader.findPatientBy(searchBy, searchField, false,
+			function() {
+				document.getElementById("farv.searchPatientButton").disabled = false;
+				var patientFound = (patientLoader.existing != null);
+
+				if (patientFound) {
+					document.getElementById("farv.searchPatientStatus").innerHTML =
+						'<span style="color:green;"><spring:message code="sample.entry.project.patientSearch.found" text="Patient trouvé" /></span>';
+
+					populateFARVFieldsFromPatientData();
+				} else {
+					document.getElementById("farv.searchPatientStatus").innerHTML =
+						'<span style="color:orange;"><spring:message code="sample.entry.project.patientSearch.notFound" text="Patient non trouvé" /></span>';
+					if (subjectNo) document.getElementById("farv.subjectNumber").value = subjectNo;
+					if (siteSubjectNo) document.getElementById("farv.siteSubjectNumber").value = siteSubjectNo;
+				}
+
+				// No serology control: hivStatus enabled for manual selection, no serology tests
+				var hivStatusSelect = document.getElementById("farv.hivStatus");
+				var hivStatusHidden = document.getElementById("farv.hivStatusHidden");
+				hivStatusSelect.disabled = false;
+				hivStatusSelect.selectedIndex = 0;
+				hivStatusHidden.disabled = true;
+
+				// Hide serology row
+				document.getElementById("farv.serologyHIVTestRow").style.display = "none";
+				var serologyCheckbox = document.getElementById("farv.serologyHIVTest");
+				if (serologyCheckbox) {
+					unlockCheckbox(serologyCheckbox);
+					serologyCheckbox.checked = false;
+					serologyCheckbox.disabled = true;
+				}
+				var dryTubeCheckbox = document.getElementById("farv.dryTubeTaken");
+				if (dryTubeCheckbox) unlockCheckbox(dryTubeCheckbox);
+
+				document.getElementById("farv.mainForm").style.display = "block";
+				farv.setSubjectOrSiteSubjectEntered();
+				farv.checkAllSubjectFields(true, false);
+				makeDirty();
+				setSaveButton();
+			}
+		);
+	}
+
+	function handleFARVSerologySearchResult(xhr, searchSubjectNo, searchSiteSubjectNo) {
+		document.getElementById("farv.searchPatientButton").disabled = false;
+
+		var xml = xhr.responseXML;
+		var message = xml.getElementsByTagName("message").item(0);
+		var formfield = xml.getElementsByTagName("formfield").item(0);
+
+		if (!message || !formfield) {
+			document.getElementById("farv.searchPatientStatus").innerHTML =
+				'<span style="color:red;"><spring:message code="sample.entry.project.patientSearch.error" text="Erreur lors de la recherche" /></span>';
+			showFARVMainForm(searchSubjectNo, searchSiteSubjectNo, null, null, false);
+			return;
+		}
+
+		var isValid = (message.firstChild.nodeValue === "valid");
+
+		if (!isValid) {
+			document.getElementById("farv.searchPatientStatus").innerHTML =
+				'<span style="color:orange;"><spring:message code="sample.entry.project.patientSearch.notFound" text="Patient non trouvé" /></span>';
+			showFARVMainForm(searchSubjectNo, searchSiteSubjectNo, null, null, false);
+			return;
+		}
+
+		var patientPK = getXMLValue(formfield, "patientPK");
+		var subjectNumber = getXMLValue(formfield, "subjectNumber");
+		var siteSubjectNumber = getXMLValue(formfield, "siteSubjectNumber");
+		var serologyResult = getXMLValue(formfield, "serologyResult");
+
+		if (subjectNumber === "N/A") subjectNumber = null;
+		if (siteSubjectNumber === "N/A") siteSubjectNumber = null;
+		var validSerologyResults = ["HIV1", "HIV2", "HIVD"];
+		var hasSerology = (serologyResult && validSerologyResults.indexOf(serologyResult) !== -1);
+		if (!hasSerology) serologyResult = null;
+
+		document.getElementById("farv.searchPatientStatus").innerHTML =
+			'<span style="color:green;"><spring:message code="sample.entry.project.patientSearch.found" text="Patient trouvé" /></span>';
+
+		showFARVMainForm(
+			subjectNumber || searchSubjectNo,
+			siteSubjectNumber || searchSiteSubjectNo,
+			patientPK,
+			serologyResult,
+			hasSerology
+		);
+	}
+
+	function handleFARVSerologySearchFailure(searchSubjectNo, searchSiteSubjectNo) {
+		document.getElementById("farv.searchPatientButton").disabled = false;
+		document.getElementById("farv.searchPatientStatus").innerHTML =
+			'<span style="color:orange;"><spring:message code="sample.entry.project.patientSearch.notFound" text="Patient non trouvé" /></span>';
+		showFARVMainForm(searchSubjectNo, searchSiteSubjectNo, null, null, false);
+	}
+
+	/**
+	 * Show FARV form with serology control logic (only called when serologyControlEnabled=true).
+	 */
+	function showFARVMainForm(subjectNumber, siteSubjectNumber, patientPK, serologyResult, hasSerology) {
+		var subField = document.getElementById("farv.subjectNumber");
+		var siteSubField = document.getElementById("farv.siteSubjectNumber");
+
+		if (subjectNumber && subField) subField.value = subjectNumber;
+		if (siteSubjectNumber && siteSubField) siteSubField.value = siteSubjectNumber;
+
+		if (patientPK) {
+			document.getElementById("patientPK").value = patientPK;
+			patientLoader.findPatientBy("personKey", document.getElementById("patientPK"), false,
+				function() {
+					populateFARVFieldsFromPatientData();
+					farv.setSubjectOrSiteSubjectEntered();
+					farv.checkAllSubjectFields(true, false);
+					makeDirty();
+					setSaveButton();
+				}
+			);
+		} else {
+			farv.setSubjectOrSiteSubjectEntered();
+		}
+
+		var hivStatusSelect = document.getElementById("farv.hivStatus");
+		var hivStatusHidden = document.getElementById("farv.hivStatusHidden");
+		var serologyRow = document.getElementById("farv.serologyHIVTestRow");
+		var serologyCheckbox = document.getElementById("farv.serologyHIVTest");
+
+		var dryTubeCheckbox = document.getElementById("farv.dryTubeTaken");
+
+		if (hasSerology) {
+			// Serology exists: prefill hivStatus, make readonly
+			setHivStatusFromSerologyResult(serologyResult, "farv.hivStatus");
+			hivStatusSelect.disabled = true;
+			hivStatusHidden.disabled = false;
+			hivStatusHidden.value = hivStatusSelect.value;
+
+			// Hide serology test row - not needed
+			serologyRow.style.display = "none";
+			if (serologyCheckbox) {
+				unlockCheckbox(serologyCheckbox);
+				serologyCheckbox.checked = false;
+				serologyCheckbox.disabled = true;
+			}
+			if (dryTubeCheckbox) unlockCheckbox(dryTubeCheckbox);
+		} else {
+			// No serology: hivStatus disabled, add serology test
+			hivStatusSelect.disabled = true;
+			hivStatusSelect.selectedIndex = 0;
+			hivStatusHidden.disabled = true;
+
+			// Show serology test row; lock checkbox checked (cannot be unchecked)
+			serologyRow.style.display = "";
+			if (serologyCheckbox) {
+				serologyCheckbox.disabled = false;
+				lockCheckboxChecked(serologyCheckbox);
+			}
+			// Lock dry tube as well (serology requires dry tube)
+			if (dryTubeCheckbox) lockCheckboxChecked(dryTubeCheckbox);
+		}
+
+		document.getElementById("farv.mainForm").style.display = "block";
+		makeDirty();
+		setSaveButton();
+	}
+
+	/**
+	 * Populate FARV form fields from patientLoader.existing data.
+	 */
+	function populateFARVFieldsFromPatientData() {
+		var existing = patientLoader.existing;
+		if (!existing) return;
+
+		var nationalID = patientLoader.getResponseProperty(existing, "nationalID");
+		var externalID = patientLoader.getResponseProperty(existing, "externalID");
+		var dob = patientLoader.getResponseProperty(existing, "dob");
+		var gender = patientLoader.getResponseProperty(existing, "gender");
+
+		if (nationalID) document.getElementById("farv.subjectNumber").value = nationalID;
+		if (externalID) document.getElementById("farv.siteSubjectNumber").value = externalID;
+
+		var dobField = document.getElementById("farv.dateOfBirth");
+		if (dob && dobField) {
+			dobField.value = dob;
+			handlePatientBirthDateChange(dobField, $("farv.interviewDate"), false, $("farv.age"));
+		}
+
+		var genderField = document.getElementById("farv.gender");
+		if (gender && genderField) {
+			for (var i = 0; i < genderField.options.length; i++) {
+				if (genderField.options[i].value === gender) {
+					genderField.selectedIndex = i;
+					break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Reset FARV form when switching away from FARV study
+	 */
+	function resetFARVSerologySearch() {
+		var mainForm = document.getElementById("farv.mainForm");
+		if (mainForm) mainForm.style.display = "none";
+
+		var statusSpan = document.getElementById("farv.searchPatientStatus");
+		if (statusSpan) statusSpan.innerHTML = "";
+
+		var searchSubject = document.getElementById("farv.searchSubjectNumber");
+		if (searchSubject) searchSubject.value = "";
+
+		var searchSite = document.getElementById("farv.searchSiteSubjectNumber");
+		if (searchSite) searchSite.value = "";
+
+		var hivSelect = document.getElementById("farv.hivStatus");
+		if (hivSelect) {
+			hivSelect.disabled = false;
+			hivSelect.selectedIndex = 0;
+		}
+		var hivHidden = document.getElementById("farv.hivStatusHidden");
+		if (hivHidden) hivHidden.disabled = true;
+
+		var serologyRow = document.getElementById("farv.serologyHIVTestRow");
+		if (serologyRow) serologyRow.style.display = "none";
+
+		unlockCheckbox(document.getElementById("farv.serologyHIVTest"));
+		unlockCheckbox(document.getElementById("farv.dryTubeTaken"));
+
+		// Hide the VL extra section
+		var vlExtra = document.getElementById("farv.vlExtraSection");
+		if (vlExtra) vlExtra.style.display = "none";
 	}
 </script>
 
@@ -976,6 +1297,42 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 		<h2>
 			<spring:message code="sample.entry.project.followupARV.title" />
 		</h2>
+
+		<%-- Patient search zone - always visible --%>
+		<div id="farv.patientSearchZone">
+			<table width="100%">
+				<tr>
+					<td colspan="3" class="sectionTitle"><spring:message code="sample.entry.project.title.patientSearch" text="Recherche du patient" /></td>
+				</tr>
+				<tr>
+					<td class="required" width="2%">+</td>
+					<td width="28%"><spring:message code="sample.entry.project.subjectNumber" /></td>
+					<td width="70%"><input type="text" id="farv.searchSubjectNumber" class="text" maxlength="9" />
+						<div id="farv.searchSubjectNumberMessage" class="blank"></div></td>
+				</tr>
+				<tr>
+					<td class="required">+</td>
+					<td><spring:message code="patient.site.subject.number" /></td>
+					<td><input type="text" id="farv.searchSiteSubjectNumber" class="text" maxlength="19"
+						onkeyup="addPatientCodeSlashes(this, event);" />
+						<div id="farv.searchSiteSubjectNumberMessage" class="blank"></div></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td>
+						<input type="button" id="farv.searchPatientButton"
+							value='<%=MessageUtil.getMessage("label.button.search")%>'
+							onclick="searchFARVPatientSerology();" />
+						<span id="farv.searchPatientStatus" class="blank"></span>
+					</td>
+				</tr>
+			</table>
+			<hr />
+		</div>
+
+		<%-- Main FARV form - hidden until patient search is done --%>
+		<div id="farv.mainForm" style="display: none;">
 		<table width="100%">
 			<tr>
 				<td class="required" width="2%">*</td>
@@ -1085,7 +1442,7 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 				<td class="required">*</td>
 				<td><spring:message code="patient.gender" /></td>
 				<td><form:select path="gender" id="farv.gender"
-						onchange="farv.checkGender(false)">
+						onchange="farv.checkGender(false);farv.refreshGenderForPregnancySuckle();">
 						<form:option value="">&nbsp;</form:option>
 						<form:options items="${form.formLists['GENDERS']}"
 							itemLabel="localizedName" itemValue="id" />
@@ -1112,8 +1469,8 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 					onchange="farv.checkAge( this, true, 'year' );" maxlength="2" />
 					<div id="farv.ageMessage" class="blank"></div></td>
 			</tr>
-			<tr>
-				<td></td>
+			<tr id="farv.hivStatusRow">
+				<td id="farv.hivStatusRequired"></td>
 				<td><spring:message code="patient.project.hivStatus" /></td>
 				<td><form:select path="observations.hivStatus"
 						onchange="farv.checkHivStatus(true);" id="farv.hivStatus">
@@ -1121,6 +1478,7 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 						<form:options items="${form.dictionaryLists['HIV_STATUSES']}"
 							itemLabel="localizedName" itemValue="id" />
 					</form:select>
+					<input type="hidden" id="farv.hivStatusHidden" name="observations.hivStatus" disabled="disabled" />
 					<div id="farv.hivStatusMessage" class="blank"></div></td>
 			</tr>
 			<tr>
@@ -1146,10 +1504,26 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 			</tr>
 			<tr>
 				<td></td>
+				<td><spring:message code="sample.entry.project.title.dryBloodSpot" /></td>
+				<td><form:checkbox path="ProjectData.dbsvlTaken"
+						id="farv.dbsvlTaken"
+						onchange="farv.checkSampleItem(this);" />
+					<div id="farv.dbsvlTakenMessage" class="blank"></div></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><spring:message code="sample.entry.project.title.psc" /></td>
+				<td><form:checkbox path="ProjectData.pscvlTaken"
+						id="farv.pscvlTaken"
+						onchange="farv.checkSampleItem(this);" />
+					<div id="farv.pscvlTakenMessage" class="blank"></div></td>
+			</tr>
+			<tr>
+				<td></td>
 				<td colspan="3" class="sectionTitle"><spring:message
 						code="sample.entry.project.title.dryTube" /></td>
 			</tr>
-			<tr>
+			<tr id="farv.serologyHIVTestRow" style="display: none;">
 				<td></td>
 				<td><spring:message code="sample.entry.project.serologyHIVTest" /></td>
 				<td><form:checkbox path="ProjectData.serologyHIVTest"
@@ -1215,7 +1589,7 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 						code="sample.entry.project.ARV.viralLoadTest" /></td>
 				<td><form:checkbox path="ProjectData.viralLoadTest"
 						id="farv.viralLoadTest"
-						onchange="farv.checkSampleItem($('farv.edtaTubeTaken'), $('farv.viralLoadTest'))" />
+						onchange="farv.checkSampleItem($('farv.edtaTubeTaken'), $('farv.viralLoadTest'));toggleFARVVlExtraSection(this);" />
 					<div id="farv.viralLoadTestMessage" class="blank"></div></td>
 			</tr>
 			<tr>
@@ -1227,7 +1601,228 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 						onchange="farv.checkSampleItem($('farv.edtaTubeTaken'), $('farv.genotypingTest'))" />
 					<div id="farv.genotypingTestMessage" class="blank"></div></td>
 			</tr>
+		</table>
 
+		<%-- VL extra fields: shown only when farv.viralLoadTest is checked --%>
+		<div id="farv.vlExtraSection" style="display: none; margin-top: 20px;">
+			<table width="100%">
+				<tr>
+					<td width="2%"></td>
+					<td colspan="3" class="sectionTitle">
+						<spring:message code="sample.entry.project.VL.title" /> &mdash;
+						<spring:message code="label.additionalFields" text="Champs additionnels" />
+					</td>
+				</tr>
+
+				<tr id="farv.vlPregnancyRow" style="display: none;">
+					<td class="required">*</td>
+					<td width="28%"><spring:message code="sample.project.vlPregnancy" /></td>
+					<td width="70%"><form:select path="observations.vlPregnancy"
+							id="farv.vlPregnancy"
+							onchange="farv.checkVlPregnancy(false);makeDirty();compareAllObservationHistoryFields(true)">
+							<form:option value="">&nbsp;</form:option>
+							<form:options items="${form.dictionaryLists['YES_NO']}"
+								itemLabel="localizedName" itemValue="id" />
+						</form:select>
+						<div id="farv.vlPregnancyMessage" class="blank"></div></td>
+				</tr>
+				<tr id="farv.vlSuckleRow" style="display: none;">
+					<td class="required">*</td>
+					<td><spring:message code="sample.project.vlSuckle" /></td>
+					<td><form:select path="observations.vlSuckle" id="farv.vlSuckle"
+							onchange="farv.checkVlSuckle(false);makeDirty();compareAllObservationHistoryFields(true)">
+							<form:option value="">&nbsp;</form:option>
+							<form:options items="${form.dictionaryLists['YES_NO']}"
+								itemLabel="localizedName" itemValue="id" />
+						</form:select>
+						<div id="farv.vlSuckleMessage" class="blank"></div></td>
+				</tr>
+
+				<tr>
+					<td width="2%"></td>
+					<td width="28%" class="observationsQuestion"><spring:message
+							code="sample.entry.project.arv.treatment" /></td>
+					<td width="70%"><form:select path="observations.currentARVTreatment"
+							id="farv.currentARVTreatment"
+							onchange="farv.checkInterruptedARVTreatment();compareAllObservationHistoryFields(true);">
+							<form:option value="">&nbsp;</form:option>
+							<form:options items="${form.dictionaryLists['YES_NO']}"
+								itemLabel="localizedName" itemValue="id" />
+						</form:select>
+						<div id="farv.currentARVTreatmentMessage" class="blank"></div></td>
+				</tr>
+				<tr id="farv.arvTreatmentInitDateRow" style="display: none">
+					<td></td>
+					<td class="observationsSubquestion"><spring:message
+							code="sample.entry.project.arv.treatment.initDate" /></td>
+					<td><form:input path="observations.arvTreatmentInitDate"
+							cssClass="text" onkeyup="addDateSlashes(this, event);"
+							onchange="makeDirty();compareAllObservationHistoryFields(true);"
+							id="farv.arvTreatmentInitDate" maxlength="10" />
+						<div id="farv.arvTreatmentInitDateMessage" class="blank"></div></td>
+				</tr>
+				<tr id="farv.arvTreatmentTherapRow" style="display: none">
+					<td></td>
+					<td class="observationsSubquestion"><spring:message
+							code="sample.entry.project.arv.treatment.therap.line" /></td>
+					<td><form:select path="observations.arvTreatmentRegime"
+							id="farv.arvTreatmentRegime"
+							onchange="makeDirty();compareAllObservationHistoryFields(true);">
+							<form:option value="">&nbsp;</form:option>
+							<form:options items="${form.dictionaryLists['ARV_REGIME']}"
+								itemLabel="localizedName" itemValue="id" />
+						</form:select>
+						<div id="farv.arvTreatmentRegimeMessage" class="blank"></div></td>
+				</tr>
+				<tr id="farv.onGoingARVTreatmentINNsRow" style="display: none">
+					<td></td>
+					<td class="observationsSubquestion"><spring:message
+							code="sample.entry.project.arv.treatment.regimen" /></td>
+					<td></td>
+				</tr>
+				<c:forEach items="${form.observations.currentARVTreatmentINNsList}"
+					var="ongoingARVTreatment" varStatus="iter">
+					<tr id="farv.currentARVTreatmentINNRow${iter.index}" style="display: none">
+						<td></td>
+						<td class="bulletItem">${iter.index})</td>
+						<td><form:input
+								path="observations.currentARVTreatmentINNsList[${iter.index}]"
+								cssClass="text"
+								onchange="makeDirty();compareAllObservationHistoryFields(true);"
+								id="farv.currentARVTreatmentINNs${iter.index}" maxlength="10" />
+							<div id="farv.currentARVTreatmentINNs${iter.index}Message" class="blank"></div></td>
+					</tr>
+				</c:forEach>
+
+				<tr>
+					<td></td>
+					<td><spring:message code="sample.entry.project.vl.reason" /></td>
+					<td><form:select path="observations.vlReasonForRequest"
+							id="farv.vlReasonForRequest"
+							onchange="farv.checkVLRequestReason();compareAllObservationHistoryFields(true);">
+							<form:option value="">&nbsp;</form:option>
+							<form:options items="${form.dictionaryLists['ARV_REASON_FOR_VL_DEMAND']}"
+								itemLabel="localizedName" itemValue="id" />
+						</form:select>
+						<div id="farv.vlReasonForRequestMessage" class="blank"></div></td>
+				</tr>
+				<tr id="farv.reasonOtherRow" style="display: none">
+					<td></td>
+					<td class="Subquestion"><spring:message
+							code="sample.entry.project.vl.specify" /></td>
+					<td><form:input path="observations.vlOtherReasonForRequest"
+							cssClass="text"
+							onchange="compareAllObservationHistoryFields(true);"
+							id="farv.vlOtherReasonForRequest" maxlength="50" />
+						<div id="farv.vlOtherReasonForRequestMessage" class="blank"></div></td>
+				</tr>
+
+				<tr>
+					<td></td>
+					<td colspan="3" class="sectionTitle"><spring:message code="sample.project.cd4init" /></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><spring:message code="sample.project.cd4Count" /></td>
+					<td><form:input path="observations.initcd4Count"
+							cssClass="text"
+							onchange="makeDirty();compareAllObservationHistoryFields(true);"
+							id="farv.initcd4Count" maxlength="4" />
+						<div id="farv.initcd4CountMessage" class="blank"></div></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><spring:message code="sample.project.cd4Percent" /></td>
+					<td><form:input path="observations.initcd4Percent"
+							cssClass="text"
+							onchange="makeDirty();compareAllObservationHistoryFields(true);"
+							id="farv.initcd4Percent" maxlength="10" />
+						<div id="farv.initcd4PercentMessage" class="blank"></div></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><spring:message code="sample.project.Cd4Date" /></td>
+					<td><form:input path="observations.initcd4Date" cssClass="text"
+							onkeyup="addDateSlashes(this, event);"
+							onchange="makeDirty();compareAllObservationHistoryFields(true);"
+							id="farv.initcd4Date" maxlength="10" />
+						<div id="farv.initcd4DateMessage" class="blank"></div></td>
+				</tr>
+
+				<tr>
+					<td></td>
+					<td colspan="3" class="sectionTitle"><spring:message code="sample.project.cd4demand" /></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><spring:message code="sample.project.cd4Count" /></td>
+					<td><form:input path="observations.demandcd4Count"
+							cssClass="text"
+							onchange="makeDirty();compareAllObservationHistoryFields(true);"
+							id="farv.demandcd4Count" maxlength="4" />
+						<div id="farv.demandcd4CountMessage" class="blank"></div></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><spring:message code="sample.project.cd4Percent" /></td>
+					<td><form:input path="observations.demandcd4Percent"
+							cssClass="text"
+							onchange="makeDirty();compareAllObservationHistoryFields(true);"
+							id="farv.demandcd4Percent" maxlength="10" />
+						<div id="farv.demandcd4PercentMessage" class="blank"></div></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><spring:message code="sample.project.Cd4Date" /></td>
+					<td><form:input path="observations.demandcd4Date"
+							cssClass="text" onkeyup="addDateSlashes(this, event);"
+							onchange="makeDirty();compareAllObservationHistoryFields(true);"
+							id="farv.demandcd4Date" maxlength="10" />
+						<div id="farv.demandcd4DateMessage" class="blank"></div></td>
+				</tr>
+
+				<tr>
+					<td></td>
+					<td class="observationsQuestion"><spring:message
+							code="sample.project.priorVLRequest" /></td>
+					<td><form:select path="observations.vlBenefit"
+							id="farv.vlBenefit"
+							onchange="farv.checkVLBenefit();compareAllObservationHistoryFields(true);">
+							<form:option value="">&nbsp;</form:option>
+							<form:options items="${form.dictionaryLists['YES_NO']}"
+								itemLabel="localizedName" itemValue="id" />
+						</form:select>
+						<div id="farv.vlBenefitMessage" class="blank"></div></td>
+				</tr>
+				<tr id="farv.priorVLLabRow" style="display: none">
+					<td></td>
+					<td><spring:message code="sample.project.priorVLLab" /></td>
+					<td><form:input path="observations.priorVLLab" cssClass="text"
+							onchange="makeDirty();compareAllObservationHistoryFields(true);"
+							id="farv.priorVLLab" maxlength="100" />
+						<div id="farv.priorVLLabMessage" class="blank"></div></td>
+				</tr>
+				<tr id="farv.priorVLValueRow" style="display: none">
+					<td></td>
+					<td><spring:message code="sample.project.VLValue" /></td>
+					<td><form:input path="observations.priorVLValue"
+							cssClass="text"
+							id="farv.priorVLValue" maxlength="10" />
+						<div id="farv.priorVLValueMessage" class="blank"></div></td>
+				</tr>
+				<tr id="farv.priorVLDateRow" style="display: none">
+					<td></td>
+					<td><spring:message code="sample.project.VLDate" /></td>
+					<td><form:input path="observations.priorVLDate" cssClass="text"
+							onkeyup="addDateSlashes(this, event);"
+							onchange="makeDirty();compareAllObservationHistoryFields(true);"
+							id="farv.priorVLDate" maxlength="10" />
+						<div id="farv.priorVLDateMessage" class="blank"></div></td>
+				</tr>
+			</table>
+		</div>
+
+		<table width="100%">
 			<tr>
 				<td colspan="6"><hr /></td>
 			</tr>
@@ -1255,6 +1850,7 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 						<div id="farv.underInvestigationCommentMessage" class="blank"></div></td>
 			</tr>
 		</table>
+		</div><%-- end farv.mainForm --%>
 	</div>
 
 	<div id="EID_Id" style="display: none;">
@@ -2714,6 +3310,77 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 			farv.checkSampleItem($('farv.edtaTubeTaken'),
 					$('farv.genotypingTest'));
 		}
+
+		// VL extra section: helpers ported from VLProjectChecker
+		this.checkVLBenefit = function() {
+			clearFormElements("farv.priorVLLab,farv.priorVLValue,farv.priorVLDate");
+			this.displayedByVLBenefit();
+		};
+		this.displayedByVLBenefit = function() {
+			var field = $("farv.vlBenefit");
+			if (!field) return;
+			showElements((field.selectedIndex == 1),
+					"farv.priorVLLabRow,farv.priorVLValueRow,farv.priorVLDateRow");
+		};
+
+		this.checkVLRequestReason = function() {
+			clearFormElements("farv.vlOtherReasonForRequest");
+			this.displayedByReasonOther();
+		};
+		this.displayedByReasonOther = function() {
+			var field = $("farv.vlReasonForRequest");
+			if (!field) return;
+			showElements((field.selectedIndex == 5), "farv.reasonOtherRow");
+		};
+
+		this.checkInterruptedARVTreatment = function() {
+			clearFormElements("farv.arvTreatmentInitDate,farv.arvTreatmentRegime,farv.currentARVTreatmentINNs0,farv.currentARVTreatmentINNs1,farv.currentARVTreatmentINNs2,farv.currentARVTreatmentINNs3");
+			this.displayedByInterruptedARVTreatment();
+		};
+		this.displayedByInterruptedARVTreatment = function() {
+			var field = $("farv.currentARVTreatment");
+			if (!field) return;
+			showElements(
+					(field.selectedIndex == 1),
+					"farv.arvTreatmentInitDateRow,farv.arvTreatmentTherapRow,farv.onGoingARVTreatmentINNsRow,farv.currentARVTreatmentINNRow0,farv.currentARVTreatmentINNRow1,farv.currentARVTreatmentINNRow2,farv.currentARVTreatmentINNRow3");
+		};
+
+		this.checkVlPregnancy = function(blanksAllowed) {
+			checkRequiredField($("farv.vlPregnancy"), blanksAllowed);
+		};
+		this.checkVlSuckle = function(blanksAllowed) {
+			checkRequiredField($("farv.vlSuckle"), blanksAllowed);
+		};
+
+		// Show pregnancy/suckle rows only for female patients
+		this.refreshGenderForPregnancySuckle = function() {
+			var genderField = $("farv.gender");
+			var isFemale = false;
+			if (genderField && genderField.selectedIndex >= 0) {
+				var optText = (genderField.options[genderField.selectedIndex].text || "").trim().toLowerCase();
+				isFemale = (optText.indexOf("f") === 0);
+			}
+			showElements(isFemale, "farv.vlPregnancyRow,farv.vlSuckleRow");
+		};
+	}
+
+	/**
+	 * Show/hide the VL extra section based on the viral load test checkbox.
+	 */
+	function toggleFARVVlExtraSection(checkbox) {
+		var section = document.getElementById("farv.vlExtraSection");
+		if (!section) return;
+		if (checkbox && checkbox.checked) {
+			section.style.display = "block";
+			farv.refreshGenderForPregnancySuckle();
+			farv.displayedByVLBenefit();
+			farv.displayedByReasonOther();
+			farv.displayedByInterruptedARVTreatment();
+		} else {
+			section.style.display = "none";
+			// Reset all VL extra fields so nothing is silently submitted
+			clearFormElements("farv.vlPregnancy,farv.vlSuckle,farv.currentARVTreatment,farv.arvTreatmentInitDate,farv.arvTreatmentRegime,farv.currentARVTreatmentINNs0,farv.currentARVTreatmentINNs1,farv.currentARVTreatmentINNs2,farv.currentARVTreatmentINNs3,farv.vlReasonForRequest,farv.vlOtherReasonForRequest,farv.initcd4Count,farv.initcd4Percent,farv.initcd4Date,farv.demandcd4Count,farv.demandcd4Percent,farv.demandcd4Date,farv.vlBenefit,farv.priorVLLab,farv.priorVLValue,farv.priorVLDate");
+		}
 	}
 
 	ArvFollowupProjectChecker.prototype = new BaseProjectChecker();
@@ -2829,6 +3496,161 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 		//vl.checkGenderForVlPregnancyOrSuckle();
 		//rt.checkGenderForVlPregnancyOrSuckle();
 		jQuery('.centerCodeClass').select2();
+
+		// Auto-handle VL form when loaded from electronic order
+		handleVLEorderOnLoad();
+	}
+
+	/**
+	 * When page loads from an electronic order (?ID=xxx) and VL study is selected,
+	 * auto-show the VL form and trigger serology search if enabled.
+	 */
+	function handleVLEorderOnLoad() {
+		var eorderField = document.getElementById("externalOrderNumber");
+		if (!eorderField || !eorderField.value || eorderField.value.trim() === "") return;
+
+		var selectedStudy = sessionStorage.getItem("selectedDivId");
+		// Auto-select VL study if eorder is present but no study selected
+		if (!selectedStudy || selectedStudy === "" || selectedStudy === "0") {
+			selectStudy("VL_Id");
+			selectedStudy = "VL_Id";
+		}
+		if (selectedStudy !== "VL_Id") return;
+
+		// Electronic order data is present - bypass search panel and show main form directly
+		var subjectNo = document.getElementById("vl.subjectNumber").value.trim();
+		var siteSubjectNo = document.getElementById("vl.siteSubjectNumber").value.trim();
+
+		if (!subjectNo && !siteSubjectNo) return; // no patient identifiers from eorder
+
+		// Pre-fill search fields from eorder data
+		var searchSubject = document.getElementById("vl.searchSubjectNumber");
+		var searchSite = document.getElementById("vl.searchSiteSubjectNumber");
+		if (searchSubject && subjectNo) searchSubject.value = subjectNo;
+		if (searchSite && siteSubjectNo) searchSite.value = siteSubjectNo;
+
+		if (serologyControlEnabled) {
+			// Serology control ON: search serology first, then show form with serology rules
+			document.getElementById("vl.searchPatientStatus").innerHTML =
+				'<spring:message code="label.searching" text="Recherche en cours..." />';
+			getSerologyResultForPatient(subjectNo, siteSubjectNo,
+				function(xhr) { handleVLEorderSerologyResult(xhr, subjectNo, siteSubjectNo); },
+				function(xhr) { handleVLEorderSerologyFailure(subjectNo, siteSubjectNo); }
+			);
+		} else {
+			// Serology control OFF: show form directly with eorder data, hivStatus editable
+			showVLFormForEorder(false, null);
+		}
+	}
+
+	/**
+	 * Handle serology search result when loaded from eorder.
+	 * Apply same serology rules as manual search but preserve eorder-populated fields.
+	 */
+	function handleVLEorderSerologyResult(xhr, subjectNo, siteSubjectNo) {
+		var xml = xhr.responseXML;
+		var message = xml.getElementsByTagName("message").item(0);
+		var formfield = xml.getElementsByTagName("formfield").item(0);
+
+		if (!message || !formfield) {
+			showVLFormForEorder(false, null);
+			return;
+		}
+
+		var isValid = (message.firstChild.nodeValue === "valid");
+		if (!isValid) {
+			showVLFormForEorder(false, null);
+			return;
+		}
+
+		var serologyResult = getXMLValue(formfield, "serologyResult");
+		var validSerologyResults = ["HIV1", "HIV2", "HIVD"];
+		var hasSerology = (serologyResult && validSerologyResults.indexOf(serologyResult) !== -1);
+
+		showVLFormForEorder(hasSerology, hasSerology ? serologyResult : null);
+	}
+
+	/**
+	 * Handle serology search failure when loaded from eorder.
+	 */
+	function handleVLEorderSerologyFailure(subjectNo, siteSubjectNo) {
+		showVLFormForEorder(false, null);
+	}
+
+	/**
+	 * Show VL form with eorder data, applying serology rules for HIV status field.
+	 * Preserves all eorder-populated fields (dates, ARV treatment, sample types, etc.).
+	 */
+	function showVLFormForEorder(hasSerology, serologyResult) {
+		var hivStatusSelect = document.getElementById("vl.hivStatus");
+		var hivStatusHidden = document.getElementById("vl.hivStatusHidden");
+		var hivStatusRequired = document.getElementById("vl.hivStatusRequired");
+		var serologyRow = document.getElementById("vl.serologyHIVTestRow");
+		var serologyCheckbox = document.getElementById("vl.serologyHIVTest");
+
+		// Always ensure viral load test is checked
+		var vlTest = document.getElementById("vl.viralLoadTest");
+		if (vlTest && !vlTest.checked) vlTest.checked = true;
+
+		document.getElementById("vl.searchPatientStatus").innerHTML = "";
+
+		var dryTubeRow = document.getElementById("vl.dryTubeTakenRow");
+		var dryTubeCheckbox = document.getElementById("vl.dryTubeTaken");
+
+		if (serologyControlEnabled && hasSerology) {
+			// Serology found: set HIV type from serology, make readonly
+			setHivStatusFromSerologyResult(serologyResult);
+			hivStatusSelect.disabled = true;
+			hivStatusHidden.disabled = false;
+			hivStatusHidden.value = hivStatusSelect.value;
+			hivStatusRequired.textContent = "*";
+
+			serologyRow.style.display = "none";
+			if (serologyCheckbox) {
+				unlockCheckbox(serologyCheckbox);
+				serologyCheckbox.checked = false;
+				serologyCheckbox.disabled = true;
+			}
+			if (dryTubeCheckbox) unlockCheckbox(dryTubeCheckbox);
+		} else if (serologyControlEnabled && !hasSerology) {
+			// Serology control ON but no serology found: add serology tests
+			hivStatusSelect.disabled = true;
+			hivStatusSelect.selectedIndex = 0;
+			hivStatusHidden.disabled = true;
+			hivStatusRequired.textContent = "";
+
+			serologyRow.style.display = "";
+			if (serologyCheckbox) {
+				serologyCheckbox.disabled = false;
+				lockCheckboxChecked(serologyCheckbox);
+			}
+			if (dryTubeRow) dryTubeRow.style.display = "";
+			if (dryTubeCheckbox) lockCheckboxChecked(dryTubeCheckbox);
+		} else {
+			// Serology control OFF: hivStatus editable (value may already be set from eorder)
+			hivStatusSelect.disabled = false;
+			hivStatusRequired.textContent = "*";
+			hivStatusHidden.disabled = true;
+
+			serologyRow.style.display = "none";
+			if (serologyCheckbox) {
+				unlockCheckbox(serologyCheckbox);
+				serologyCheckbox.checked = false;
+				serologyCheckbox.disabled = true;
+			}
+			if (dryTubeRow) dryTubeRow.style.display = "none";
+			if (dryTubeCheckbox) {
+				unlockCheckbox(dryTubeCheckbox);
+				dryTubeCheckbox.checked = false;
+			}
+		}
+
+		// Show the main form
+		document.getElementById("vl.mainForm").style.display = "block";
+		vl.setSubjectOrSiteSubjectEntered();
+		vl.checkAllSubjectFields(true, false);
+		makeDirty();
+		setSaveButton();
 	}
 
 </script>
