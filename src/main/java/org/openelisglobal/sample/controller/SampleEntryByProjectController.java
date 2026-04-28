@@ -15,6 +15,8 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openelisglobal.common.action.IActionConstants;
 import org.openelisglobal.common.log.LogEvent;
+import org.openelisglobal.common.util.ConfigurationProperties;
+import org.openelisglobal.common.util.ConfigurationProperties.Property;
 import org.openelisglobal.common.services.DisplayListService;
 import org.openelisglobal.common.services.DisplayListService.ListType;
 import org.openelisglobal.common.services.IStatusService;
@@ -307,19 +309,23 @@ public class SampleEntryByProjectController extends BaseSampleEntryController {
 			observationData.setVlOtherReasonForRequest(otherReason);
 		}
 
-		// HIV status
-		String hivStatus = (String) flat.get("hiv_status");
-		if (StringUtils.isNotBlank(hivStatus)) {
-			Dictionary dict = null;
-			if (hivStatus.equalsIgnoreCase("VIH-1")) {
-				dict = dictionaryService.getDictionaryByDictEntry("HIV Status HIV-1 infection");
-			} else if (hivStatus.equalsIgnoreCase("VIH-1+2")) {
-				dict = dictionaryService.getDictionaryByDictEntry("HIV Status HIV-1 and HIV-2");
-			} else if (hivStatus.equalsIgnoreCase("VIH-2")) {
-				dict = dictionaryService.getDictionaryByDictEntry("HIV Status HIV-2 infection");
-			}
-			if (ObjectUtils.isNotEmpty(dict)) {
-				observationData.setHivStatus(dict.getId());
+		// HIV status - skip when serology control is enabled (serology result takes precedence)
+		boolean serologyControl = ConfigurationProperties.getInstance()
+				.isPropertyValueEqual(Property.SEROLOGY_CONTROL, "true");
+		if (!serologyControl) {
+			String hivStatus = (String) flat.get("hiv_status");
+			if (StringUtils.isNotBlank(hivStatus)) {
+				Dictionary dict = null;
+				if (hivStatus.equalsIgnoreCase("VIH-1")) {
+					dict = dictionaryService.getDictionaryByDictEntry("HIV Status HIV-1 infection");
+				} else if (hivStatus.equalsIgnoreCase("VIH-1+2")) {
+					dict = dictionaryService.getDictionaryByDictEntry("HIV Status HIV-1 and HIV-2");
+				} else if (hivStatus.equalsIgnoreCase("VIH-2")) {
+					dict = dictionaryService.getDictionaryByDictEntry("HIV Status HIV-2 infection");
+				}
+				if (ObjectUtils.isNotEmpty(dict)) {
+					observationData.setHivStatus(dict.getId());
+				}
 			}
 		}
 

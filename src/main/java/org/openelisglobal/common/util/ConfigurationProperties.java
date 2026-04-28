@@ -122,6 +122,7 @@ public abstract class ConfigurationProperties {
         NEXT_VISIT_DATE_ON_WORKPLAN("next visit on workplan"), // If true the next visit date will be on workplan
         RESULTS_ON_WORKPLAN("results on workplan"), // If true a space will be left for results on the workplan
         ACCEPT_EXTERNAL_ORDERS("external orders"), // If true EMR's can make electronic orders to lab
+        SEROLOGY_CONTROL("serology control"), // If true serology check is enforced on VL sample entry
         SIGNATURES_ON_NONCONFORMITY_REPORTS("non-conformity signature"), // If true a space should be left for
                                                                          // signatures on non-conformity reports
         NONCONFORMITY_RECEPTION_AS_UNIT("Reception as unit"), // If true then reception will be an option for where a

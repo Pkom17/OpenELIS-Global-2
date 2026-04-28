@@ -131,6 +131,7 @@ public class DefaultConfigurationProperties extends ConfigurationProperties {
                 Property.NEXT_VISIT_DATE_ON_WORKPLAN.getName(), "false");
         setDBPropertyMappingAndDefault(Property.ACCEPT_EXTERNAL_ORDERS, Property.ACCEPT_EXTERNAL_ORDERS.getName(),
                 "false");
+        setDBPropertyMappingAndDefault(Property.SEROLOGY_CONTROL, Property.SEROLOGY_CONTROL.getName(), "false");
         setDBPropertyMappingAndDefault(Property.SIGNATURES_ON_NONCONFORMITY_REPORTS,
                 Property.SIGNATURES_ON_NONCONFORMITY_REPORTS.getName(), "false");
         setDBPropertyMappingAndDefault(Property.AUTOFILL_COLLECTION_DATE, Property.AUTOFILL_COLLECTION_DATE.getName(),
