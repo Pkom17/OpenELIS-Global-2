@@ -341,11 +341,10 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 		document.getElementById("vl.searchPatientButton").disabled = true;
 		document.getElementById("vl.mainForm").style.display = "none";
 
-		// Clear form subject fields for new search
-		var subField = document.getElementById("vl.subjectNumber");
-		var siteSubField = document.getElementById("vl.siteSubjectNumber");
-		if (subField) subField.value = "";
-		if (siteSubField) siteSubField.value = "";
+		// Reset previous patient data (keep subject codes — they were just typed in the search)
+		resetVLFormFields();
+		document.getElementById("vl.subjectNumber").value = subjectNo;
+		document.getElementById("vl.siteSubjectNumber").value = siteSubjectNo;
 
 		if (serologyControlEnabled) {
 			// Serology control ON: search patient + serology via dedicated provider
@@ -357,6 +356,24 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 			// Serology control OFF: search patient only via existing patient loader
 			handleVLPatientOnlySearch(subjectNo, siteSubjectNo);
 		}
+	}
+
+	/**
+	 * Clear VL demographic / HIV / VL-specific fields from a previous patient
+	 * lookup. Subject codes are intentionally NOT cleared here: they are reset
+	 * by the caller and immediately re-populated with the values typed in the
+	 * search box.
+	 */
+	function resetVLFormFields() {
+		clearFormElements("vl.dateOfBirth,vl.age,vl.month,vl.gender,vl.hivStatus,vl.hivStatusHidden,vl.vlPregnancy,vl.vlSuckle");
+		var patientPK = document.getElementById("patientPK");
+		if (patientPK) patientPK.value = "";
+		var hivSelect = document.getElementById("vl.hivStatus");
+		if (hivSelect) { hivSelect.disabled = false; hivSelect.selectedIndex = 0; }
+		var hivHidden = document.getElementById("vl.hivStatusHidden");
+		if (hivHidden) { hivHidden.disabled = true; hivHidden.value = ""; }
+		var hivRequired = document.getElementById("vl.hivStatusRequired");
+		if (hivRequired) hivRequired.textContent = "*";
 	}
 
 	/**
@@ -721,11 +738,10 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 		document.getElementById("farv.searchPatientButton").disabled = true;
 		document.getElementById("farv.mainForm").style.display = "none";
 
-		// Clear form subject fields for new search
-		var subField = document.getElementById("farv.subjectNumber");
-		var siteSubField = document.getElementById("farv.siteSubjectNumber");
-		if (subField) subField.value = "";
-		if (siteSubField) siteSubField.value = "";
+		// Reset previous patient data (keep subject codes — they were just typed in the search)
+		resetFARVFormFields();
+		document.getElementById("farv.subjectNumber").value = subjectNo;
+		document.getElementById("farv.siteSubjectNumber").value = siteSubjectNo;
 
 		if (serologyControlEnabled) {
 			getSerologyResultForPatient(subjectNo, siteSubjectNo,
@@ -735,6 +751,25 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 		} else {
 			handleFARVPatientOnlySearch(subjectNo, siteSubjectNo);
 		}
+	}
+
+	/**
+	 * Clear FARV demographic / HIV / VL-extra fields from a previous patient
+	 * lookup. Subject codes are intentionally NOT cleared here: they are reset
+	 * by the caller and immediately re-populated with the values typed in the
+	 * search box.
+	 */
+	function resetFARVFormFields() {
+		clearFormElements("farv.dateOfBirth,farv.age,farv.gender,farv.hivStatus,farv.hivStatusHidden,farv.vlPregnancy,farv.vlSuckle,farv.currentARVTreatment,farv.arvTreatmentInitDate,farv.arvTreatmentRegime,farv.currentARVTreatmentINNs0,farv.currentARVTreatmentINNs1,farv.currentARVTreatmentINNs2,farv.currentARVTreatmentINNs3,farv.vlReasonForRequest,farv.vlOtherReasonForRequest,farv.initcd4Count,farv.initcd4Percent,farv.initcd4Date,farv.demandcd4Count,farv.demandcd4Percent,farv.demandcd4Date,farv.vlBenefit,farv.priorVLLab,farv.priorVLValue,farv.priorVLDate");
+		var patientPK = document.getElementById("patientPK");
+		if (patientPK) patientPK.value = "";
+		var hivSelect = document.getElementById("farv.hivStatus");
+		if (hivSelect) { hivSelect.disabled = false; hivSelect.selectedIndex = 0; }
+		var hivHidden = document.getElementById("farv.hivStatusHidden");
+		if (hivHidden) { hivHidden.disabled = true; hivHidden.value = ""; }
+		// Hide VL extra section in case the previous patient had VL test checked
+		var vlExtra = document.getElementById("farv.vlExtraSection");
+		if (vlExtra) vlExtra.style.display = "none";
 	}
 
 	/**
