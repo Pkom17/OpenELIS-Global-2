@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+	  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+	<changeSet author="CIV developer Group" id="20261018-01">
+		<preConditions onFail="MARK_RAN">
+			<tableExists schemaName="clinlims" tableName="note" />
+			<not>
+				<indexExists schemaName="clinlims" tableName="note" indexName="index_note_reference" />
+			</not>
+		</preConditions>
+		<comment>Index notes by referenced object: they are looked up per analysis/result
+			(e.g. on the biological validation pages), which was a full table scan</comment>
+		<createIndex indexName="index_note_reference"
+			tableName="note" schemaName="clinlims">
+			<column name="reference_id" />
+			<column name="reference_table" />
+		</createIndex>
+	</changeSet>
+</databaseChangeLog>

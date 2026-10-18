@@ -35,5 +35,6 @@
 	<include relativeToChangelogFile="true" file="add_eid_trends_report_menu.xml"/> 
 	<include relativeToChangelogFile="true" file="add_tb_patient_identity_type.xml"/>
 	<include relativeToChangelogFile="true" file="add_serology_control_site_info.xml"/>
+	<include relativeToChangelogFile="true" file="add_note_reference_index.xml"/>
 
 </databaseChangeLog>
