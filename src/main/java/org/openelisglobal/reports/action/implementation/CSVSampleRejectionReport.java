@@ -5,7 +5,7 @@ import org.openelisglobal.reports.action.implementation.reportBeans.CSVSampleRej
 import org.openelisglobal.reports.form.ReportForm;
 
 import java.sql.SQLException;
-import org.jfree.util.Log;
+import org.openelisglobal.common.log.LogEvent;
 
 public class CSVSampleRejectionReport extends CSVSampleExportReport implements IReportParameterSetter, IReportCreator {
 
@@ -16,7 +16,7 @@ public class CSVSampleRejectionReport extends CSVSampleExportReport implements I
             form.setUseLowerDateRange(Boolean.TRUE);
             form.setUseUpperDateRange(Boolean.TRUE);
         } catch (RuntimeException e) {
-            Log.error("Error in ExportProjectByDate.setRequestParemeters: ", e);
+            LogEvent.logErrorStack(e);
         }
     }
 
@@ -60,7 +60,7 @@ public class CSVSampleRejectionReport extends CSVSampleExportReport implements I
             csvColumnBuilder = new CSVSampleRejectionColumnBuilder(dateRange);
             csvColumnBuilder.buildDataSource();
         } catch (SQLException e) {
-            Log.error("Error in " + this.getClass().getSimpleName() + ".createReportItems: ", e);
+            LogEvent.logErrorStack(e);
             add1LineErrorMessage("report.error.message.general.error");
         }
     }

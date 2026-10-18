@@ -29,7 +29,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.validator.GenericValidator;
-import org.jfree.util.Log;
+import org.openelisglobal.common.log.LogEvent;
 import org.openelisglobal.internationalization.MessageUtil;
 import org.openelisglobal.project.dao.ProjectDAO;
 import org.openelisglobal.project.daoimpl.ProjectDAOImpl;
@@ -131,7 +131,7 @@ public class ExportEIDTrendsByDate extends CSVSampleExportReport implements IRep
 			csvColumnBuilder = getColumnBuilder(projectStr);
 			csvColumnBuilder.buildDataSource();
 		} catch (Exception e) {
-			Log.error("Error in " + this.getClass().getSimpleName() + ".createReportItems: ", e);
+			LogEvent.logErrorStack(e);
 			add1LineErrorMessage("report.error.message.general.error");
 		}
 	}
@@ -162,7 +162,7 @@ public class ExportEIDTrendsByDate extends CSVSampleExportReport implements IRep
 				}
 			}
 		} catch (IOException | SQLException | ParseException e) {
-			Log.error("Error in " + this.getClass().getSimpleName() + " writeResultsToBuffer: ", e);
+			LogEvent.logErrorStack(e);
 		}
 	}
 

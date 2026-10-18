@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.validator.GenericValidator;
-import org.jfree.util.Log;
+import org.openelisglobal.common.log.LogEvent;
 import org.openelisglobal.internationalization.MessageUtil;
 import org.openelisglobal.project.service.ProjectService;
 import org.openelisglobal.project.valueholder.Project;
@@ -134,7 +134,7 @@ public class ExportStudyProjectByDate extends CSVSampleExportReport implements I
 			csvColumnBuilder = getColumnBuilder(projectStr);
 			csvColumnBuilder.buildDataSource();
 		} catch (Exception e) {
-			Log.error("Error in " + this.getClass().getSimpleName() + ".createReportItems: ", e);
+			LogEvent.logErrorStack(e);
 			add1LineErrorMessage("report.error.message.general.error");
 		}
 	}
@@ -161,7 +161,7 @@ public class ExportStudyProjectByDate extends CSVSampleExportReport implements I
 
 			writeConsolidatedBaseToBuffer(buffer, splitBase);
 		} catch (IOException | SQLException | ParseException e) {
-			Log.error("Error in " + this.getClass().getSimpleName() + " writeResultsToBuffer: ", e);
+			LogEvent.logErrorStack(e);
 		}
 	}
 
@@ -199,9 +199,9 @@ public class ExportStudyProjectByDate extends CSVSampleExportReport implements I
 		} else if (projectTag.equalsIgnoreCase("VLS")) {
 			return new StudyVLColumnBuilder(dateRange, projectStr, dateType);
 		} else if (projectTag.equalsIgnoreCase("RTN")) {
-			return new RTNColumnBuilder(dateRange, projectStr);
+			return new RTNColumnBuilder(dateRange, projectStr, dateType);
 		} else if (projectTag.equalsIgnoreCase("IND")) {
-			return new RTNColumnBuilder(dateRange, projectStr);
+			return new RTNColumnBuilder(dateRange, projectStr, dateType);
 		} else if (projectTag.equalsIgnoreCase("RTRI")) {
 			return new RTRIColumnBuilder(dateRange, projectStr, dateType);
 		} else if (projectTag.equalsIgnoreCase("HPV")) {

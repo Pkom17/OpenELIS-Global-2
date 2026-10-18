@@ -23,7 +23,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 
 import org.apache.commons.validator.GenericValidator;
-import org.jfree.util.Log;
+import org.openelisglobal.common.log.LogEvent;
 import org.openelisglobal.common.util.StringUtil;
 import org.openelisglobal.internationalization.MessageUtil;
 import org.openelisglobal.project.service.ProjectService;
@@ -55,7 +55,7 @@ public class ExportRoutineByDate extends CSVRoutineSampleExportReport
             // form.setUseProjectCode(Boolean.TRUE);
             // form.setProjectCodeList(getProjectList());
         } catch (RuntimeException e) {
-            Log.error("Error in ExportRoutineByDate.setRequestParemeters: ", e);
+            LogEvent.logErrorStack(e);
         }
     }
 
@@ -122,7 +122,7 @@ public class ExportRoutineByDate extends CSVRoutineSampleExportReport
             csvRoutineColumnBuilder = getColumnBuilder();
             csvRoutineColumnBuilder.buildDataSource();
         } catch (SQLException e) {
-            Log.error("Error in " + this.getClass().getSimpleName() + ".createReportItems: ", e);
+            LogEvent.logErrorStack(e);
             add1LineErrorMessage("report.error.message.general.error");
         }
     }

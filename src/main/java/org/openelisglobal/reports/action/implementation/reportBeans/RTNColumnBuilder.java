@@ -42,7 +42,13 @@ public class RTNColumnBuilder extends CIColumnBuilder {
 	 * @param projectStr
 	 */
 	public RTNColumnBuilder(DateRange dateRange, String projectStr) {
+		// dateType was never set, so makeSQL() threw a NullPointerException
+		this(dateRange, projectStr, DateType.ORDER_DATE);
+	}
+
+	public RTNColumnBuilder(DateRange dateRange, String projectStr, DateType dateType) {
 		super(dateRange, projectStr);
+		this.dateType = dateType;
 	}
 
 	/**

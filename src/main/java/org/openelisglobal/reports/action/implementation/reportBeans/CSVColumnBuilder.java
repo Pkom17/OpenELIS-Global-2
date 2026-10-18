@@ -607,13 +607,17 @@ abstract public class CSVColumnBuilder {
         // conclusion.
         // String excludeAnalytes = getExcludedAnalytesSet();
         SQLConstant listName = SQLConstant.RESULT;
+        // the print date column (dt.report_generation_time) needs document_track in this sub query too
+        boolean byPrintDate = byDate.trim().startsWith("dt.");
         query.append(", \n\n ( SELECT si.samp_id, si.id AS sampleItem_id, si.sort_order AS sampleItemNo, " + listName
                 + ".* " + " FROM sample_item AS si LEFT JOIN \n ");
 
         // Begin cross tab / pivot table
         query.append(" crosstab( " + "\n 'SELECT si.id, t.description, r.value "
                 + "\n FROM clinlims.result AS r, clinlims.analysis AS a, clinlims.sample_item AS si, clinlims.sample AS s, clinlims.test AS t, clinlims.test_result AS tr "
-                + "\n WHERE " + "\n s.id = si.samp_id" + " AND "+ byDate +" >= date(''"
+                + (byPrintDate ? ", clinlims.document_track AS dt" : "")
+                + "\n WHERE " + "\n s.id = si.samp_id" + (byPrintDate ? " AND dt.row_id = s.id" : "")
+                + " AND "+ byDate +" >= date(''"
                 + formatDateForDatabaseSql(lowDate) + "'')  AND "+ byDate +" <= date(''"
                 + formatDateForDatabaseSql(highDate) + " '') " + "\n AND s.id = si.samp_id "
                 + "\n AND si.id = a.sampitem_id "
@@ -661,10 +665,14 @@ abstract public class CSVColumnBuilder {
     protected void appendObservationHistoryCrosstab( Date lowDate, Date highDate, String byDate) {
         SQLConstant listName = SQLConstant.DEMO;
         appendCrosstabPreamble(listName);
+        // the print date column (dt.report_generation_time) needs document_track in this sub query too
+        boolean byPrintDate = byDate.trim().startsWith("dt.");
         query.append( // any Observation History items
                 "\n crosstab( " + "\n 'SELECT DISTINCT oh.sample_id as samp_id, oht.type_name, value "
                         + "\n FROM observation_history AS oh, sample AS s, sample_item AS si, analysis AS a, observation_history_type AS oht "
+                        + (byPrintDate ? ", document_track AS dt" : "")
                         + "\n WHERE "+byDate+" >= date(''" + formatDateForDatabaseSql(lowDate) + "'') "
+                        + (byPrintDate ? "\n AND dt.row_id = s.id" : "")
                         + "\n AND "+byDate+"  <= date(''" + formatDateForDatabaseSql(highDate) + "'')"
                         + "\n AND s.id = oh.sample_id AND oh.observation_history_type_id = oht.id "
                         + " AND s.id = si.samp_id AND si.id = a.sampitem_id order by 1;' "
