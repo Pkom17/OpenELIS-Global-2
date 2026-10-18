@@ -32,8 +32,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.apache.commons.validator.GenericValidator;
-import org.hibernate.FlushMode;
-import org.hibernate.Session;
 import org.openelisglobal.analysis.service.AnalysisService;
 import org.openelisglobal.analysis.valueholder.Analysis;
 import org.openelisglobal.analyte.service.AnalyteService;
@@ -53,6 +51,7 @@ import org.openelisglobal.common.tools.StopWatch;
 import org.openelisglobal.common.util.ConfigurationProperties;
 import org.openelisglobal.common.util.ConfigurationProperties.Property;
 import org.openelisglobal.common.util.IdValuePair;
+import org.openelisglobal.common.util.ReadOnlySessionUtil;
 import org.openelisglobal.common.util.StringUtil;
 import org.openelisglobal.dictionary.service.DictionaryService;
 import org.openelisglobal.dictionary.valueholder.Dictionary;
@@ -169,11 +168,7 @@ public class ResultsValidationRetroCIUtility {
 	@Transactional(readOnly = true)
 	public List<AnalysisItem> getResultValidationList(String testSectionName, String testName,
 			List<Integer> statusList) {
-		// readOnly alone does not reach Hibernate with this JPA setup: without this,
-		// every query dirty-checks all the entities already loaded in the session
-		Session session = entityManager.unwrap(Session.class);
-		session.setHibernateFlushMode(FlushMode.MANUAL);
-		session.setDefaultReadOnly(true);
+		ReadOnlySessionUtil.disableDirtyChecking(entityManager);
 
 		accessionToValidMap = new HashMap<>();
 		sw = new StopWatch();

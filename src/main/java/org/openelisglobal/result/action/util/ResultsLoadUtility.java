@@ -28,6 +28,8 @@ import java.util.Random;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 import org.apache.commons.validator.GenericValidator;
 import org.openelisglobal.analysis.service.AnalysisService;
@@ -48,6 +50,7 @@ import org.openelisglobal.common.util.ConfigurationProperties;
 import org.openelisglobal.common.util.ConfigurationProperties.Property;
 import org.openelisglobal.common.util.DateUtil;
 import org.openelisglobal.common.util.IdValuePair;
+import org.openelisglobal.common.util.ReadOnlySessionUtil;
 import org.openelisglobal.dictionary.service.DictionaryService;
 import org.openelisglobal.dictionary.valueholder.Dictionary;
 import org.openelisglobal.internationalization.MessageUtil;
@@ -101,6 +104,7 @@ import org.openelisglobal.typeoftestresult.service.TypeOfTestResultServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Scope("prototype")
@@ -125,6 +129,8 @@ public class ResultsLoadUtility {
 
 	private Patient currentPatient;
 
+	@PersistenceContext
+	private EntityManager entityManager;
 	@Autowired
 	private PatientService patientService;
 	@Autowired
@@ -202,7 +208,9 @@ public class ResultsLoadUtility {
 	 * N.B. The patient info is used to determine the limits for the results, not
 	 * for including patient information
 	 */
+	@Transactional(readOnly = true)
 	public List<TestResultItem> getGroupedTestsForSample(Sample sample, Patient patient) {
+		ReadOnlySessionUtil.disableDirtyChecking(entityManager);
 
 		reflexGroup = 1;
 		activeKits = null;
@@ -219,7 +227,9 @@ public class ResultsLoadUtility {
 		return getGroupedTestsForSamples();
 	}
 
+	@Transactional(readOnly = true)
 	public List<TestResultItem> getGroupedTestsForPatient(Patient patient) {
+		ReadOnlySessionUtil.disableDirtyChecking(entityManager);
 		reflexGroup = 1;
 		activeKits = null;
 		inventoryNeeded = false;
@@ -255,7 +265,9 @@ public class ResultsLoadUtility {
 		form.setSubjectNumber(patientService.getSubjectNumber(patient));
 	}
 
+	@Transactional(readOnly = true)
 	public List<TestResultItem> getUnfinishedTestResultItemsInTestSection(String testSectionId) {
+		ReadOnlySessionUtil.disableDirtyChecking(entityManager);
 
 		List<Analysis> fullAnalysisList = analysisService.getAllAnalysisByTestSectionAndStatus(testSectionId,
 				analysisStatusList, sampleStatusList);
@@ -272,8 +284,10 @@ public class ResultsLoadUtility {
 
 	}
 
+	@Transactional(readOnly = true)
 	public List<TestResultItem> getGroupedTestsForAnalysisList(List<Analysis> filteredAnalysisList, boolean forwardSort)
 			throws LIMSRuntimeException {
+		ReadOnlySessionUtil.disableDirtyChecking(entityManager);
 
 		activeKits = null;
 		inventoryNeeded = false;
@@ -1032,7 +1046,9 @@ public class ResultsLoadUtility {
 		return sampleQaEventService.getSampleQaEventsBySample(sample);
 	}
 
+	@Transactional(readOnly = true)
 	public List<TestResultItem> getUnfinishedTestResultItemsByAccession(String accessionNumber) {
+		ReadOnlySessionUtil.disableDirtyChecking(entityManager);
 		List<Analysis> analysisList = analysisService.getPageAnalysisByStatusFromAccession(analysisStatusList,
 				sampleStatusList, accessionNumber);
 
