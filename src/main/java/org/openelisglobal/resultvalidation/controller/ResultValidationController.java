@@ -253,7 +253,7 @@ public class ResultValidationController extends BaseResultValidationController {
 
 				if (true) {
 					StringBuilder augmentedAccession = new StringBuilder(item.getAccessionNumber());
-					String errorMsg = "errors.resultValidated";
+					String errorMsg = "errors.validation.stalePage";
 					staleErrors.reject(errorMsg, new String[] { augmentedAccession.toString() }, errorMsg);
 					staleErrors.addAllErrors(staleErrorList);
 				}
@@ -325,7 +325,8 @@ public class ResultValidationController extends BaseResultValidationController {
 		// if
 		// (ConfigurationProperties.getInstance().isPropertyValueEqual(Property.configurationName,
 		// "CI RetroCI"))
-		if (url.contains("RetroC")) {
+		// The RetroCI pages post to /ResultValidation, so they flag themselves with retroC=true
+		if (url.contains("RetroC") || "true".equals(request.getParameter("retroC"))) {
 			forward = "successRetroC";
 		}
 

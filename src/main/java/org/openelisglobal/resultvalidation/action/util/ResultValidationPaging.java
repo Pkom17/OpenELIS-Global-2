@@ -118,8 +118,14 @@ public class ResultValidationPaging {
         @Override
         public void updateCache(List<AnalysisItem> cacheItems, List<AnalysisItem> clientItems) {
 
+            // the cached page can be shorter than the submitted one when the list was
+            // reloaded (and shrank) after the client page was displayed
             for (int i = 0; i < clientItems.size(); i++) {
-                cacheItems.set(i, clientItems.get(i));
+                if (i < cacheItems.size()) {
+                    cacheItems.set(i, clientItems.get(i));
+                } else {
+                    cacheItems.add(clientItems.get(i));
+                }
             }
 
         }

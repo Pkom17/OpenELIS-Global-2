@@ -47,6 +47,7 @@ public class ResultValidationRetroCController extends BaseResultValidationRetroC
         String testSectionName = (request.getParameter("type"));
         String testName = (request.getParameter("test"));
         form.setTestSection(testSectionName);
+        form.setTestName(testName);
 
         ResultValidationPaging paging = new ResultValidationPaging();
         String newPage = request.getParameter("page");

@@ -163,7 +163,11 @@ function savePage() {
 
     window.onbeforeunload = null; // Added to flag that formWarning alert isn't needed.
 	var form = document.getElementById("mainForm");
-	form.action = "ResultValidation" + '?type=<spring:escapeBody javaScriptEscape="true">${testSection}</spring:escapeBody>&test=<spring:escapeBody javaScriptEscape="true">${testName}</spring:escapeBody>&';
+	form.action = "ResultValidation" + '?type=<spring:escapeBody javaScriptEscape="true">${testSection}</spring:escapeBody>&test=<spring:escapeBody javaScriptEscape="true">${form.testName}</spring:escapeBody>&';
+	// RetroCI study pages: ask the save to return to this list rather than the routine validation page
+	if (window.location.pathname.indexOf("ResultValidationRetroC") !== -1) {
+		form.action += "retroC=true";
+	}
 	form.submit();
 }
 
