@@ -37,7 +37,9 @@ import org.openelisglobal.userrole.service.UserRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -74,11 +76,7 @@ public class AccessionResultsController extends BaseController {
 		AccessionResultsForm form = new AccessionResultsForm();
 
 		request.getSession().setAttribute(SAVE_DISABLED, TRUE);
-		form.setReferralReasons(DisplayListService.getInstance().getList(DisplayListService.ListType.REFERRAL_REASONS));
-		form.setRejectReasons(DisplayListService.getInstance()
-				.getNumberedListWithLeadingBlank(DisplayListService.ListType.REJECTION_REASONS));
-		form.setReferralOrganizations(DisplayListService.getInstance().getList(ListType.REFERRAL_ORGANIZATIONS));
-		form.setMethods(DisplayListService.getInstance().getList(ListType.METHODS));
+		initForm(form);
 
 		ResultsPaging paging = new ResultsPaging();
 		String newPage = request.getParameter("page");
@@ -142,6 +140,40 @@ public class AccessionResultsController extends BaseController {
 		}
 
 		return findForward(FWD_SUCCESS, form);
+	}
+
+	// Pager next/previous: the page posts its rows so edits are kept in the paging cache
+	@RequestMapping(value = "/AccessionResults", method = RequestMethod.POST, params = "pageResults=true")
+	public ModelAndView showAccessionResultsPage(HttpServletRequest request,
+			@ModelAttribute("form") AccessionResultsForm form, BindingResult result)
+			throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		initForm(form);
+		form.setDisplayTestKit(false);
+
+		String accessionNumber = request.getParameter("accessionNumber");
+		addEmptyInventoryList(form, accessionNumber);
+		if (!GenericValidator.isBlankOrNull(accessionNumber)) {
+			Sample sample = getSample(accessionNumber);
+			if (ObjectUtils.isEmpty(sample)) {
+				sample = getSampleByObservationHistoryType(accessionNumber);
+			}
+			if (sample != null && !GenericValidator.isBlankOrNull(sample.getId())) {
+				SpringContext.getBean(ResultsLoadUtility.class).addIdentifingPatientInfo(getPatient(sample), form);
+			}
+		}
+
+		new ResultsPaging().page(request, form, Integer.parseInt(request.getParameter("page")));
+		form.setSearchFinished(Boolean.TRUE);
+
+		return findForward(FWD_SUCCESS, form);
+	}
+
+	private void initForm(AccessionResultsForm form) {
+		form.setReferralReasons(DisplayListService.getInstance().getList(DisplayListService.ListType.REFERRAL_REASONS));
+		form.setRejectReasons(DisplayListService.getInstance()
+				.getNumberedListWithLeadingBlank(DisplayListService.ListType.REJECTION_REASONS));
+		form.setReferralOrganizations(DisplayListService.getInstance().getList(ListType.REFERRAL_ORGANIZATIONS));
+		form.setMethods(DisplayListService.getInstance().getList(ListType.METHODS));
 	}
 
 	private boolean modifyResultsRoleBased() {

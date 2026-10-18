@@ -28,8 +28,10 @@ import org.openelisglobal.systemuser.service.UserService;
 import org.openelisglobal.test.beanItems.TestResultItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -53,21 +55,11 @@ public class PatientResultsController extends BaseController {
     public ModelAndView showPatientResults(HttpServletRequest request)
             throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         PatientResultsForm form = new PatientResultsForm();
-        form.setReferralOrganizations(DisplayListService.getInstance().getList(ListType.REFERRAL_ORGANIZATIONS));
+        initForm(form);
 
         ResultsLoadUtility resultsUtility = SpringContext.getBean(ResultsLoadUtility.class);
         resultsUtility.setSysUser(getSysUserId(request));
         request.getSession().setAttribute(SAVE_DISABLED, TRUE);
-
-        form.setDisplayTestKit(Boolean.FALSE);
-        form.setReferralReasons(DisplayListService.getInstance().getList(DisplayListService.ListType.REFERRAL_REASONS));
-        form.setRejectReasons(DisplayListService.getInstance()
-                .getNumberedListWithLeadingBlank(DisplayListService.ListType.REJECTION_REASONS));
-        form.setMethods(DisplayListService.getInstance().getList(ListType.METHODS));
-        PatientSearch patientSearch = new PatientSearch();
-        patientSearch.setLoadFromServerWithPatient(true);
-        patientSearch.setSelectedPatientActionButtonText(MessageUtil.getMessage("resultsentry.patient.search"));
-        form.setPatientSearch(patientSearch);
 
         ResultsPaging paging = new ResultsPaging();
         String newPage = request.getParameter("page");
@@ -119,6 +111,38 @@ public class PatientResultsController extends BaseController {
 
         addFlashMsgsToRequest(request);
         return findForward(FWD_SUCCESS, form);
+    }
+
+    // Pager next/previous: the page posts its rows so edits are kept in the paging cache
+    @RequestMapping(value = "/PatientResults", method = RequestMethod.POST, params = "pageResults=true")
+    public ModelAndView showPatientResultsPage(HttpServletRequest request,
+            @ModelAttribute("form") PatientResultsForm form, BindingResult result)
+            throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        initForm(form);
+        addEmptyInventoryList(form);
+
+        String patientID = request.getParameter("patientID");
+        if (!GenericValidator.isBlankOrNull(patientID)) {
+            SpringContext.getBean(ResultsLoadUtility.class).addIdentifingPatientInfo(getPatient(patientID), form);
+        }
+
+        new ResultsPaging().page(request, form, Integer.parseInt(request.getParameter("page")));
+        form.setSearchFinished(Boolean.TRUE);
+
+        return findForward(FWD_SUCCESS, form);
+    }
+
+    private void initForm(PatientResultsForm form) {
+        form.setReferralOrganizations(DisplayListService.getInstance().getList(ListType.REFERRAL_ORGANIZATIONS));
+        form.setDisplayTestKit(Boolean.FALSE);
+        form.setReferralReasons(DisplayListService.getInstance().getList(DisplayListService.ListType.REFERRAL_REASONS));
+        form.setRejectReasons(DisplayListService.getInstance()
+                .getNumberedListWithLeadingBlank(DisplayListService.ListType.REJECTION_REASONS));
+        form.setMethods(DisplayListService.getInstance().getList(ListType.METHODS));
+        PatientSearch patientSearch = new PatientSearch();
+        patientSearch.setLoadFromServerWithPatient(true);
+        patientSearch.setSelectedPatientActionButtonText(MessageUtil.getMessage("resultsentry.patient.search"));
+        form.setPatientSearch(patientSearch);
     }
 
     private void addInventory(PatientResultsForm form)

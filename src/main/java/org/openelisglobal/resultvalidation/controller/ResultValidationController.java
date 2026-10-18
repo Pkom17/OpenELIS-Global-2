@@ -200,6 +200,8 @@ public class ResultValidationController extends BaseResultValidationController {
 			paging.setDatabaseResults(request, form, filteredresultList);
 		} else {
 			paging.page(request, form, Integer.parseInt(newPage));
+			// resultsBySearch.jsp only shows the results panel once a search is done
+			form.setSearchFinished(true);
 		}
 
 		addFlashMsgsToRequest(request);

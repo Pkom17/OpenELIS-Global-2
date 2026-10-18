@@ -292,7 +292,6 @@ function /*boolean*/ handleEnterEvent(){
 			<form:hidden path="resultList[${iter.index}].sampleGroupingNumber" />
 			<form:hidden path="resultList[${iter.index}].accessionNumber" />
 			<form:hidden path="resultList[${iter.index}].analysisId" />
-			<form:hidden path="resultList" />
 			<c:set var="accessionNumber" value="${resultList.accessionNumber}"/>
      		<tr id='row_${iter.index}' class='${(rowColorIndex % 2 == 0) ? "evenRow" : "oddRow" }' >
      		<c:set var="rowColorIndex" value="${rowColorIndex + 1}"/>

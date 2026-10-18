@@ -40,6 +40,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -47,8 +48,9 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class StatusResultsController extends BaseController {
 
-    private static final String[] ALLOWED_FIELDS = new String[] { "collectionDate", "recievedDate", "selectedTest",
-            "selectedAnalysisStatus", "selectedSampleStatus" };
+    // search criteria plus the result rows posted when paging: the same fields as the
+    // results save (LogbookResultsController), which includes the search criteria
+    private static final String[] ALLOWED_FIELDS = LogbookResultsController.ALLOWED_FIELDS;
 
     private static final boolean REVERSE_SORT_ORDER = false;
     @Autowired
@@ -96,11 +98,7 @@ public class StatusResultsController extends BaseController {
 
         String newRequest = request.getParameter("blank");
 
-        form.setReferralReasons(DisplayListService.getInstance().getList(DisplayListService.ListType.REFERRAL_REASONS));
-        form.setRejectReasons(DisplayListService.getInstance()
-                .getNumberedListWithLeadingBlank(DisplayListService.ListType.REJECTION_REASONS));
-        form.setReferralOrganizations(DisplayListService.getInstance().getList(ListType.REFERRAL_ORGANIZATIONS));
-        form.setMethods(DisplayListService.getInstance().getList(ListType.METHODS));
+        initForm(form);
 
         ResultsPaging paging = new ResultsPaging();
 
@@ -131,6 +129,30 @@ public class StatusResultsController extends BaseController {
         }
         addFlashMsgsToRequest(request);
         return findForward(FWD_SUCCESS, form);
+    }
+
+    // Pager next/previous: the page posts its rows so edits are kept in the paging cache
+    @RequestMapping(value = "/StatusResults", method = RequestMethod.POST, params = "pageResults=true")
+    public ModelAndView showStatusResultsPage(HttpServletRequest request,
+            @ModelAttribute("form") StatusResultsForm form, BindingResult result)
+            throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        initForm(form);
+        setSelectionLists(form, request);
+        addEmptyInventoryList(form);
+        form.setDisplayTestKit(false);
+
+        new ResultsPaging().page(request, form, Integer.parseInt(request.getParameter("page")));
+        form.setSearchFinished(Boolean.TRUE);
+
+        return findForward(FWD_SUCCESS, form);
+    }
+
+    private void initForm(StatusResultsForm form) {
+        form.setReferralReasons(DisplayListService.getInstance().getList(DisplayListService.ListType.REFERRAL_REASONS));
+        form.setRejectReasons(DisplayListService.getInstance()
+                .getNumberedListWithLeadingBlank(DisplayListService.ListType.REJECTION_REASONS));
+        form.setReferralOrganizations(DisplayListService.getInstance().getList(ListType.REFERRAL_ORGANIZATIONS));
+        form.setMethods(DisplayListService.getInstance().getList(ListType.METHODS));
     }
 
     private List<TestResultItem> setSearchResults(StatusResultsForm form, ResultsLoadUtility resultsUtility)

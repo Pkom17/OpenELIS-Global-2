@@ -193,6 +193,8 @@ public class AccessionValidationRangeController extends BaseResultValidationCont
 			paging.setDatabaseResults(request, form, filteredresultList);
 		} else {
 			paging.page(request, form, Integer.parseInt(newPage));
+			// resultsBySearch.jsp only shows the results panel once a search is done
+			form.setSearchFinished(true);
 		}
 
 		addFlashMsgsToRequest(request);
@@ -210,6 +212,14 @@ public class AccessionValidationRangeController extends BaseResultValidationCont
 		}
 
 		return validationStatus;
+	}
+
+	// Pager next/previous of the validation by test date, which only had a GET mapping
+	@RequestMapping(value = "/ResultValidationByTestDate", method = RequestMethod.POST, params = "pageResults=true")
+	public ModelAndView showResultValidationByTestDatePage(HttpServletRequest request,
+			@ModelAttribute("form") ResultValidationForm form, BindingResult result)
+			throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		return getResultValidation(request, form);
 	}
 
 	@RequestMapping(value = "/AccessionValidationRange", method = RequestMethod.POST)

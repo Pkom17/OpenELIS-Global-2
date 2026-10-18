@@ -124,11 +124,20 @@ public class AccessionValidationController extends BaseController {
             }
         } else {
             paging.page(request, form, Integer.parseInt(newPage));
+            // resultsBySearch.jsp only shows the results panel once a search is done
+            form.setSearchFinished(Boolean.TRUE);
         }
         request.setAttribute("analysisCount", count);
         request.setAttribute("pageSize", count);
 
         return findForward(FWD_SUCCESS, form);
+    }
+
+    // Pager next/previous: the page posts its rows, paged by the GET handler logic
+    @RequestMapping(value = "/AccessionValidation", method = RequestMethod.POST, params = "pageResults=true")
+    public ModelAndView showAccessionValidationPage(HttpServletRequest request, AccessionValidationForm form)
+            throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        return showAccessionValidation(request, form);
     }
 
     private boolean modifyResultsRoleBased() {

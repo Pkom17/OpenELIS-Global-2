@@ -101,7 +101,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class LogbookResultsController extends LogbookResultsBaseController {
 
-	private final String[] ALLOWED_FIELDS = new String[] { "accessionNumber", "collectionDate", "recievedDate",
+	// also used by StatusResultsController, whose results are saved here
+	static final String[] ALLOWED_FIELDS = new String[] { "accessionNumber", "collectionDate", "recievedDate",
 			"selectedTest", "selectedAnalysisStatus", "selectedSampleStatus", "testSectionId", "methodId", "type",
 			"currentPageID", "testResult*.accessionNumber", "testResult*.isModified", "testResult*.analysisId",
 			"testResult*.resultId", "testResult*.testId", "testResult*.technicianSignatureId", "testResult*.testKitId",
