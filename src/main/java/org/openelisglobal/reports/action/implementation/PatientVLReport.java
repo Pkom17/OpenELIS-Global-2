@@ -11,8 +11,10 @@ import org.openelisglobal.analysis.valueholder.Analysis;
 import org.openelisglobal.common.services.IReportTrackingService;
 import org.openelisglobal.common.services.IStatusService;
 import org.openelisglobal.common.services.ReportTrackingService;
+import org.openelisglobal.common.services.SerologyHivTypeResolver;
 import org.openelisglobal.common.services.StatusService.AnalysisStatus;
 import org.openelisglobal.common.util.DateUtil;
+import org.openelisglobal.dictionary.valueholder.Dictionary;
 import org.openelisglobal.internationalization.MessageUtil;
 import org.openelisglobal.observationhistory.service.ObservationHistoryService;
 import org.openelisglobal.observationhistory.service.ObservationHistoryServiceImpl.ObservationType;
@@ -40,6 +42,7 @@ public abstract class PatientVLReport extends RetroCIPatientReport {
     private SampleOrganizationService orgService = SpringContext.getBean(SampleOrganizationService.class);
     private OrganizationService oService = SpringContext.getBean(OrganizationService.class);
     private ObservationHistoryService ohService = SpringContext.getBean(ObservationHistoryService.class);
+    private SerologyHivTypeResolver serologyResolver = new SerologyHivTypeResolver();
 
     protected List<VLReportData> reportItems;
     private String invalidValue = MessageUtil.getMessage("report.test.status.inProgress");
@@ -168,7 +171,7 @@ public abstract class PatientVLReport extends RetroCIPatientReport {
 
         data.setVlSuckle(ohService.getMostRecentValueForPatient(ObservationType.VL_SUCKLE, reportPatient.getId()));
         data.setVlPregnancy(ohService.getMostRecentValueForPatient(ObservationType.VL_PREGNANCY, reportPatient.getId()));
-        data.setvih(ohService.getMostRecentValueForPatient(ObservationType.HIV_STATUS, reportPatient.getId()));
+        data.setvih(resolveHivType());
         data.setSubjectno(reportPatient.getNationalId());
         data.setSitesubjectno(reportPatient.getExternalId());
         data.setBirth_date(reportPatient.getBirthDateForDisplay());
@@ -196,6 +199,27 @@ public abstract class PatientVLReport extends RetroCIPatientReport {
 
         }
         data.getSampleQaEventItems(reportSample);
+    }
+
+    /**
+     * HIV type shown under "Virologie": the type resolved by the patient's
+     * finalized HIV serology (same rule as the serology control at sample entry),
+     * falling back to the HIV type entered on this order, then to the patient's
+     * most recent recorded HIV status.
+     */
+    private String resolveHivType() {
+        Dictionary serologyHivType = serologyResolver
+                .findSerologyHivType(serologyResolver.findRelatedPatients(reportPatient));
+        if (serologyHivType != null) {
+            return serologyHivType.getLocalizedName();
+        }
+
+        String orderHivType = ohService.getValueForSample(ObservationType.HIV_STATUS, reportSample.getId());
+        if (!GenericValidator.isBlankOrNull(orderHivType)) {
+            return orderHivType;
+        }
+
+        return ohService.getMostRecentValueForPatient(ObservationType.HIV_STATUS, reportPatient.getId());
     }
 
     @Override
