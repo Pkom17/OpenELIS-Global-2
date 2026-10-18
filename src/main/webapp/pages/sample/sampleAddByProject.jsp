@@ -978,6 +978,8 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 					break;
 				}
 			}
+			// Re-evaluate so vlPregnancy/vlSuckle show up if female + VL test checked
+			farv.checkGender(true);
 		}
 	}
 
@@ -1477,7 +1479,7 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 				<td class="required">*</td>
 				<td><spring:message code="patient.gender" /></td>
 				<td><form:select path="gender" id="farv.gender"
-						onchange="farv.checkGender(false);farv.refreshGenderForPregnancySuckle();">
+						onchange="farv.checkGender(false);">
 						<form:option value="">&nbsp;</form:option>
 						<form:options items="${form.formLists['GENDERS']}"
 							itemLabel="localizedName" itemValue="id" />
@@ -3380,23 +3382,10 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 					"farv.arvTreatmentInitDateRow,farv.arvTreatmentTherapRow,farv.onGoingARVTreatmentINNsRow,farv.currentARVTreatmentINNRow0,farv.currentARVTreatmentINNRow1,farv.currentARVTreatmentINNRow2,farv.currentARVTreatmentINNRow3");
 		};
 
-		this.checkVlPregnancy = function(blanksAllowed) {
-			checkRequiredField($("farv.vlPregnancy"), blanksAllowed);
-		};
-		this.checkVlSuckle = function(blanksAllowed) {
-			checkRequiredField($("farv.vlSuckle"), blanksAllowed);
-		};
-
-		// Show pregnancy/suckle rows only for female patients
-		this.refreshGenderForPregnancySuckle = function() {
-			var genderField = $("farv.gender");
-			var isFemale = false;
-			if (genderField && genderField.selectedIndex >= 0) {
-				var optText = (genderField.options[genderField.selectedIndex].text || "").trim().toLowerCase();
-				isFemale = (optText.indexOf("f") === 0);
-			}
-			showElements(isFemale, "farv.vlPregnancyRow,farv.vlSuckleRow");
-		};
+		// checkGender / checkVlPregnancy / checkVlSuckle are inherited from
+		// BaseProjectChecker (entryByProjectUtils.js). For FARV, checkGender
+		// shows/hides vlPregnancyRow/vlSuckleRow and add/remove required
+		// validation only when farv.viralLoadTest is checked.
 	}
 
 	/**
@@ -3407,7 +3396,8 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 		if (!section) return;
 		if (checkbox && checkbox.checked) {
 			section.style.display = "block";
-			farv.refreshGenderForPregnancySuckle();
+			// Re-evaluate gender to show/require pregnancy/suckle if female
+			farv.checkGender(true);
 			farv.displayedByVLBenefit();
 			farv.displayedByReasonOther();
 			farv.displayedByInterruptedARVTreatment();
@@ -3415,7 +3405,10 @@ var requestType = '<%=Encode.forJavaScript(requestType)%>';
 			section.style.display = "none";
 			// Reset all VL extra fields so nothing is silently submitted
 			clearFormElements("farv.vlPregnancy,farv.vlSuckle,farv.currentARVTreatment,farv.arvTreatmentInitDate,farv.arvTreatmentRegime,farv.currentARVTreatmentINNs0,farv.currentARVTreatmentINNs1,farv.currentARVTreatmentINNs2,farv.currentARVTreatmentINNs3,farv.vlReasonForRequest,farv.vlOtherReasonForRequest,farv.initcd4Count,farv.initcd4Percent,farv.initcd4Date,farv.demandcd4Count,farv.demandcd4Percent,farv.demandcd4Date,farv.vlBenefit,farv.priorVLLab,farv.priorVLValue,farv.priorVLDate");
+			// Re-evaluate gender so that required validation is removed
+			farv.checkGender(true);
 		}
+		setSaveButton();
 	}
 
 	ArvFollowupProjectChecker.prototype = new BaseProjectChecker();

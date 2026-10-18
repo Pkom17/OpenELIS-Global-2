@@ -1010,7 +1010,14 @@ function BaseProjectChecker() {
 		checkRequiredField($(this.idPre + "gender"), blanksAllowed);
 		comparePatientField(this.idPre + "gender", false, blanksAllowed);
 		var selectedValue = $(this.idPre + "gender").value;
-		if (this.idPre === 'vl.' || this.idPre === 'rt.') {// do it only for viral load form
+		// Pregnancy/suckle apply on viral load form (vl.) and recency (rt.) unconditionally,
+		// and on follow-up ARV (farv.) only when the viral load test is checked.
+		var applies = (this.idPre === 'vl.' || this.idPre === 'rt.');
+		if (this.idPre === 'farv.') {
+			var vlTest = $('farv.viralLoadTest');
+			applies = (vlTest && vlTest.checked);
+		}
+		if (applies) {
 			if (selectedValue === 'F') {
 				$(this.idPre + "vlPregnancyRow").show();
 				$(this.idPre + "vlSuckleRow").show();
@@ -1029,6 +1036,12 @@ function BaseProjectChecker() {
 				this.checkVlPregnancy(true);
 				this.checkVlSuckle(true);
 			}
+		} else if (this.idPre === 'farv.') {
+			// VL test not checked on FARV: ensure rows are hidden and not required
+			fieldValidator.removeRequiredField(this.idPre + "vlPregnancy");
+			fieldValidator.removeRequiredField(this.idPre + "vlSuckle");
+			$(this.idPre + "vlPregnancyRow").hide();
+			$(this.idPre + "vlSuckleRow").hide();
 		}
 	}
 
