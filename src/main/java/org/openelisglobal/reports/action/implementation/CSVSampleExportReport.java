@@ -25,7 +25,7 @@ import java.util.List;
 
 import javax.xml.ws.Response;
 
-import org.jfree.util.Log;
+import org.openelisglobal.common.log.LogEvent;
 import org.openelisglobal.reports.action.implementation.reportBeans.CSVColumnBuilder;
 
 import net.sf.jasperreports.engine.JRException;
@@ -69,7 +69,7 @@ public abstract class CSVSampleExportReport extends CSVExportReport {
 			try {
 				return super.runReport();
 			} catch (IllegalStateException | IOException | SQLException | JRException | ParseException e) {
-				Log.error("Error in " + this.getClass().getSimpleName() + " runReport: ", e);
+				LogEvent.logErrorStack(e);
 			}
 		}
 
@@ -77,9 +77,15 @@ public abstract class CSVSampleExportReport extends CSVExportReport {
 		try {
 			buffer.write(csvColumnBuilder.getColumnNamesLine().getBytes("utf-8"));
 			writeResultsToBuffer(buffer);
-			csvColumnBuilder.closeResultSet();
-		} catch (IOException | SQLException e) {
-			Log.error("Error in " + this.getClass().getSimpleName() + " runReport: ", e);
+		} catch (IOException e) {
+			LogEvent.logErrorStack(e);
+		} finally {
+			// always give the database connection back
+			try {
+				csvColumnBuilder.closeResultSet();
+			} catch (SQLException e) {
+				LogEvent.logErrorStack(e);
+			}
 		}
 
 		return buffer.toByteArray();
@@ -92,7 +98,7 @@ public abstract class CSVSampleExportReport extends CSVExportReport {
 				buffer.write(csvColumnBuilder.nextLine().getBytes("utf-8"));
 			}
 		} catch (SQLException | IOException | ParseException e) {
-			Log.error("Error in " + this.getClass().getSimpleName() + " writeResultsToBuffer: ", e);
+			LogEvent.logErrorStack(e);
 		}
 	}
 

@@ -70,10 +70,13 @@ public abstract class CSVRoutineSampleExportReport extends CSVRoutineExportRepor
         }
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream(100000);
-        buffer.write(csvRoutineColumnBuilder.getColumnNamesLine().getBytes("utf-8"));
-
-        writeResultsToBuffer(buffer);
-        csvRoutineColumnBuilder.closeResultSet();
+        try {
+            buffer.write(csvRoutineColumnBuilder.getColumnNamesLine().getBytes("utf-8"));
+            writeResultsToBuffer(buffer);
+        } finally {
+            // always give the database connection back
+            csvRoutineColumnBuilder.closeResultSet();
+        }
 
         return buffer.toByteArray();
     }

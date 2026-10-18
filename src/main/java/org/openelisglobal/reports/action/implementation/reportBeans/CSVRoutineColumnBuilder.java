@@ -24,6 +24,7 @@ import static org.openelisglobal.reports.action.implementation.reportBeans.CSVRo
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -128,6 +129,8 @@ abstract public class CSVRoutineColumnBuilder {
     private static final SimpleDateFormat postgresDateTime = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
     protected ResultSet resultSet;
+    // session owning the connection of resultSet, closed with it by closeResultSet()
+    private Session resultSetSession;
 
     protected String eol = System.getProperty("line.separator");
 
@@ -225,17 +228,27 @@ abstract public class CSVRoutineColumnBuilder {
 //		PreparedStatement stmt = session.connection().prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE,
 //				ResultSet.CONCUR_READ_ONLY);
 //		resultSet = stmt.executeQuery();
-        Session session = SpringContext.getBean(SessionFactory.class).openSession();
-        resultSet = session.doReturningWork(new ReturningWork<ResultSet>() {
+        closeResultSet();
+        // a session of our own, closed with the result set by closeResultSet(): the
+        // thread-bound current session used before was left with an open transaction,
+        // so the next export on the same Tomcat thread failed ("Transaction already
+        // active") and its connection was never given back to the pool
+        resultSetSession = SpringContext.getBean(SessionFactory.class).openSession();
+        try {
+            resultSet = resultSetSession.doReturningWork(new ReturningWork<ResultSet>() {
 
-            @Override
-            public ResultSet execute(Connection connection) throws SQLException {
+                @Override
+                public ResultSet execute(Connection connection) throws SQLException {
+                    return connection
+                            .prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY)
+                            .executeQuery();
+                }
 
-            	return connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY)
-                        .executeQuery();
-            }
-
-        });
+            });
+        } catch (RuntimeException e) {
+            closeResultSet();
+            throw e;
+        }
     }
 
     protected synchronized String formatDateForDatabaseSql(Date date) {
@@ -715,8 +728,21 @@ abstract public class CSVRoutineColumnBuilder {
      *
      */
     public void closeResultSet() throws SQLException {
-        resultSet.close();
-        resultSet = null;
+        try {
+            if (resultSet != null) {
+                Statement statement = resultSet.getStatement();
+                resultSet.close();
+                if (statement != null) {
+                    statement.close();
+                }
+            }
+        } finally {
+            resultSet = null;
+            if (resultSetSession != null) {
+                resultSetSession.close();
+                resultSetSession = null;
+            }
+        }
     }
 
     protected String getGendCD4CountAnalyteId() {
