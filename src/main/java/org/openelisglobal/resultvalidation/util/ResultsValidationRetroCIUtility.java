@@ -21,13 +21,19 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 import org.apache.commons.validator.GenericValidator;
+import org.hibernate.FlushMode;
+import org.hibernate.Session;
 import org.openelisglobal.analysis.service.AnalysisService;
 import org.openelisglobal.analysis.valueholder.Analysis;
 import org.openelisglobal.analyte.service.AnalyteService;
@@ -80,6 +86,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 @Service
@@ -113,6 +120,8 @@ public class ResultsValidationRetroCIUtility {
 	private ObservationHistoryTypeService ohTypeService;
 	@Autowired
 	private AnalyteService analyteService;
+	@PersistenceContext
+	private EntityManager entityManager;
 
 	private static String SAMPLE_STATUS_OBSERVATION_HISTORY_TYPE_ID;
 	private static String CD4_COUNT_SORT_NUMBER;
@@ -120,6 +129,9 @@ public class ResultsValidationRetroCIUtility {
 	private ResultsLoadUtility resultsLoadUtility = SpringContext.getBean(ResultsLoadUtility.class);
 	private static List<Integer> notValidStatus = new ArrayList<>();
 	private Map<String, String> testIdToUnits = new HashMap<>();
+	// request scoped bean: these only live for the list being built
+	private Map<String, List<Result>> analysisIdToResults = new HashMap<>();
+	private Map<String, List<TestResult>> testIdToPossibleResults = new HashMap<>();
 	private Map<String, Boolean> accessionToValidMap;
 	private String totalTestName = "";
 
@@ -151,8 +163,18 @@ public class ResultsValidationRetroCIUtility {
 		}
 	}
 
+	// One read-only transaction for the whole list: the session cache then serves the
+	// samples, tests, dictionaries... shared by many analyses instead of reloading
+	// them on every service call
+	@Transactional(readOnly = true)
 	public List<AnalysisItem> getResultValidationList(String testSectionName, String testName,
 			List<Integer> statusList) {
+		// readOnly alone does not reach Hibernate with this JPA setup: without this,
+		// every query dirty-checks all the entities already loaded in the session
+		Session session = entityManager.unwrap(Session.class);
+		session.setHibernateFlushMode(FlushMode.MANUAL);
+		session.setDefaultReadOnly(true);
+
 		accessionToValidMap = new HashMap<>();
 		sw = new StopWatch();
 		sw.disable(true);
@@ -167,7 +189,7 @@ public class ResultsValidationRetroCIUtility {
 			// unique serology department format for RetroCI
 			if (testSectionName.equals("Serology")) {
 				testSectionId = getTestSectionId(testSectionName);
-				testList = getUnValidatedElisaResultItemsInTestSection(testSectionId);
+				testList = getUnValidatedElisaResultItemsInTestSection(testSectionId, statusList);
 
 				Collections.sort(testList, new Comparator<ResultValidationItem>() {
 					@Override
@@ -337,7 +359,8 @@ public class ResultsValidationRetroCIUtility {
 		}
 	}
 
-	public List<ResultValidationItem> getUnValidatedElisaResultItemsInTestSection(String id) {
+	public List<ResultValidationItem> getUnValidatedElisaResultItemsInTestSection(String id,
+			List<Integer> statusList) {
 
 		List<Analysis> analysisList = new ArrayList<>();
 
@@ -349,7 +372,46 @@ public class ResultsValidationRetroCIUtility {
 			analysisList.addAll(analysisTestList);
 		}
 
-		return getGroupedTestsForAnalysisList(analysisList, false);
+		return getGroupedTestsForAnalysisList(keepSamplesReadyForElisaValidation(analysisList, statusList), false);
+	}
+
+	/*
+	 * Keeps the analyses of the samples testResultListToELISAAnalysisList will
+	 * display: every analysis with results has a validation status and one of them
+	 * holds the conclusion. Building the result items is costly (notes, QA
+	 * events...) and most samples are dropped (e.g. screening test waiting for its
+	 * confirmation), so they are filtered out first, from their results only.
+	 */
+	private List<Analysis> keepSamplesReadyForElisaValidation(List<Analysis> analysisList,
+			List<Integer> statusList) {
+		Map<String, Boolean> sampleIdToReady = new HashMap<>();
+		Set<String> samplesWithConclusion = new HashSet<>();
+
+		for (Analysis analysis : analysisList) {
+			if (getResultsByAnalysis(analysis).isEmpty()) {
+				continue; // no result item: does not take part in the display decision
+			}
+			String sampleId = analysis.getSampleItem().getSample().getId();
+			boolean statusReady = statusList.contains(Integer.parseInt(analysis.getStatusId()));
+			sampleIdToReady.merge(sampleId, statusReady, Boolean::logicalAnd);
+			if (!GenericValidator.isBlankOrNull(checkIfFinalResult(analysis.getId()))) {
+				samplesWithConclusion.add(sampleId);
+			}
+		}
+
+		List<Analysis> keptAnalysisList = new ArrayList<>();
+		for (Analysis analysis : analysisList) {
+			String sampleId = analysis.getSampleItem().getSample().getId();
+			if (Boolean.TRUE.equals(sampleIdToReady.get(sampleId)) && samplesWithConclusion.contains(sampleId)) {
+				keptAnalysisList.add(analysis);
+			}
+		}
+		return keptAnalysisList;
+	}
+
+	private List<Result> getResultsByAnalysis(Analysis analysis) {
+		return analysisIdToResults.computeIfAbsent(analysis.getId(),
+				analysisId -> resultService.getResultsByAnalysis(analysis));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -437,7 +499,7 @@ public class ResultsValidationRetroCIUtility {
 	public List<ResultValidationItem> getResultItemFromAnalysis(Analysis analysis) throws LIMSRuntimeException {
 		List<ResultValidationItem> testResultList = new ArrayList<>();
 
-		List<Result> resultList = resultService.getResultsByAnalysis(analysis);
+		List<Result> resultList = getResultsByAnalysis(analysis);
 		NoteType[] noteTypes = { NoteType.EXTERNAL, NoteType.INTERNAL, NoteType.REJECTION_REASON,
 				NoteType.NON_CONFORMITY };
 		NoteService noteService = SpringContext.getBean(NoteService.class);
@@ -536,7 +598,7 @@ public class ResultsValidationRetroCIUtility {
 	}
 
 	private boolean isConclusion(Result testResult, Analysis analysis) {
-		List<Result> results = resultService.getResultsByAnalysis(analysis);
+		List<Result> results = getResultsByAnalysis(analysis);
 		if (results.size() == 1) {
 			return false;
 		}
@@ -556,7 +618,8 @@ public class ResultsValidationRetroCIUtility {
 
 	@SuppressWarnings("unchecked")
 	private List<TestResult> getPossibleResultsForTest(Test test) {
-		return testResultService.getAllActiveTestResultsPerTest(test);
+		return testIdToPossibleResults.computeIfAbsent(test.getId(),
+				testId -> testResultService.getAllActiveTestResultsPerTest(test));
 	}
 
 	private List<IdValuePair> getAnyDictonaryValues(List<TestResult> testResults) {
@@ -662,7 +725,7 @@ public class ResultsValidationRetroCIUtility {
 		Analysis analysis = new Analysis();
 		analysis.setId(analysisId);
 
-		List<Result> resultList = resultService.getResultsByAnalysis(analysis);
+		List<Result> resultList = getResultsByAnalysis(analysis);
 		String conclusion = null;
 
 		if (resultList.size() > 1) {
