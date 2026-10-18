@@ -1,10 +1,12 @@
 ##
 # Build Stage
 #
-FROM maven:3-jdk-11 AS build
+# maven:3-jdk-11 is Debian 11 (bullseye), end of life: its security packages are no
+# longer served and apt-get install fails with 404
+FROM maven:3.9-eclipse-temurin-11 AS build
 
-RUN apt-get -y update
-RUN apt-get -y install git apache2-utils
+# update and install in one layer, so a cached package index is never stale
+RUN apt-get -y update && apt-get -y install git apache2-utils && rm -rf /var/lib/apt/lists/*
 
 ##
 # Copy Source Code
